@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Leaf, Sparkles } from "lucide-react";
-import heroImage from "@assets/generated_images/Hero_garden_scene_c1a60c82.png";
+import heroImage from "@assets/generated_images/Indoor_living_space_with_plants_70e292ac.png";
 
 interface HeroProps {
   onShopNow?: () => void;
@@ -14,7 +14,7 @@ export default function Hero({ onShopNow, onLearnMore }: HeroProps) {
       <div className="absolute inset-0">
         <img
           src={heroImage}
-          alt="Lush garden with beautiful plants and tools"
+          alt="Beautiful living room with indoor plants and greenery"
           className="w-full h-full object-cover"
         />
         {/* Stronger dark wash gradient for better text readability */}
