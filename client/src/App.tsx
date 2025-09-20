@@ -3,7 +3,8 @@ import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import NotFound from "@/pages/not-found";
 import Header from "@/components/Header";
 import Hero from "@/components/Hero";
@@ -12,9 +13,7 @@ import FeaturedProducts from "@/components/FeaturedProducts";
 import GuidesSection from "@/components/GuidesSection";
 import Footer from "@/components/Footer";
 import CartDrawer from "@/components/CartDrawer";
-import floweringPlantsImage from "@assets/generated_images/Flowering_plants_collection_5d058eb7.png";
-import gardeningToolsImage from "@assets/generated_images/Gardening_tools_collection_9c82fa3c.png";
-import seedsImage from "@assets/generated_images/Seeds_and_seedlings_9e473d23.png";
+import { fetchCartItems, addToCart, updateCartItemQuantity, removeFromCart, clearCart, getSessionId, getImageUrl } from "@/lib/api";
 
 interface CartItem {
   id: string;
@@ -27,90 +26,81 @@ interface CartItem {
 
 function Home() {
   const [isCartOpen, setIsCartOpen] = useState(false);
-  const [cartItems, setCartItems] = useState<CartItem[]>([
-    //todo: remove mock functionality
-    {
-      id: "1",
-      name: "Premium Rose Bush Collection",
-      price: 49.99,
-      image: floweringPlantsImage,
-      quantity: 2,
-      category: "Flowering Plants"
+  const sessionId = getSessionId();
+
+  // Fetch cart items
+  const { data: cartData = [], refetch: refetchCart } = useQuery({
+    queryKey: ['cart', sessionId],
+    queryFn: () => fetchCartItems(sessionId),
+  });
+
+  // Transform cart data for UI
+  const cartItems: CartItem[] = cartData.map(item => ({
+    id: item.productId,
+    name: item.product.name,
+    price: parseFloat(item.product.price),
+    image: getImageUrl(item.product.image),
+    quantity: item.quantity,
+    category: item.product.category,
+  }));
+
+  // Add to cart mutation
+  const addToCartMutation = useMutation({
+    mutationFn: ({ productId }: { productId: string }) => 
+      addToCart(sessionId, productId, 1),
+    onSuccess: () => {
+      refetchCart();
     },
-    {
-      id: "2",
-      name: "Professional Tool Set",
-      price: 89.99,
-      image: gardeningToolsImage,
-      quantity: 1,
-      category: "Tools"
-    }
-  ]);
+    onError: (error) => {
+      console.error('Failed to add to cart:', error);
+    },
+  });
+
+  // Update quantity mutation
+  const updateQuantityMutation = useMutation({
+    mutationFn: ({ productId, quantity }: { productId: string; quantity: number }) =>
+      updateCartItemQuantity(sessionId, productId, quantity),
+    onSuccess: () => {
+      refetchCart();
+    },
+  });
+
+  // Remove item mutation
+  const removeItemMutation = useMutation({
+    mutationFn: ({ productId }: { productId: string }) =>
+      removeFromCart(sessionId, productId),
+    onSuccess: () => {
+      refetchCart();
+    },
+  });
+
+  // Clear cart mutation
+  const clearCartMutation = useMutation({
+    mutationFn: () => clearCart(sessionId),
+    onSuccess: () => {
+      refetchCart();
+    },
+  });
 
   const handleAddToCart = (productId: string) => {
-    console.log(`Add to cart: ${productId}`); //todo: remove mock functionality
-    
-    // Mock product data - in real app this would come from product API
-    const mockProducts: Record<string, Omit<CartItem, 'quantity'>> = {
-      "premium-rose-bush": {
-        id: "premium-rose-bush",
-        name: "Premium Rose Bush Collection",
-        price: 49.99,
-        image: floweringPlantsImage,
-        category: "Flowering Plants"
-      },
-      "professional-tool-set": {
-        id: "professional-tool-set",
-        name: "Professional Tool Set",
-        price: 89.99,
-        image: gardeningToolsImage,
-        category: "Tools"
-      },
-      "herb-starter-kit": {
-        id: "herb-starter-kit",
-        name: "Organic Herb Starter Kit",
-        price: 24.99,
-        image: seedsImage,
-        category: "Seeds"
-      }
-    };
-
-    const product = mockProducts[productId];
-    if (!product) return;
-
-    setCartItems(prevItems => {
-      const existingItem = prevItems.find(item => item.id === productId);
-      if (existingItem) {
-        return prevItems.map(item =>
-          item.id === productId
-            ? { ...item, quantity: item.quantity + 1 }
-            : item
-        );
-      } else {
-        return [...prevItems, { ...product, quantity: 1 }];
-      }
-    });
+    addToCartMutation.mutate({ productId });
   };
 
-  const handleUpdateQuantity = (id: string, quantity: number) => {
+  const handleUpdateQuantity = (productId: string, quantity: number) => {
     if (quantity <= 0) {
-      handleRemoveItem(id);
-      return;
+      removeItemMutation.mutate({ productId });
+    } else {
+      updateQuantityMutation.mutate({ productId, quantity });
     }
-    setCartItems(prevItems =>
-      prevItems.map(item =>
-        item.id === id ? { ...item, quantity } : item
-      )
-    );
   };
 
-  const handleRemoveItem = (id: string) => {
-    setCartItems(prevItems => prevItems.filter(item => item.id !== id));
+  const handleRemoveItem = (productId: string) => {
+    removeItemMutation.mutate({ productId });
   };
 
   const handleCheckout = () => {
-    console.log('Checkout completed'); //todo: remove mock functionality
-    setCartItems([]);
+    console.log('Checkout completed');
+    clearCartMutation.mutate();
     setIsCartOpen(false);
   };
 

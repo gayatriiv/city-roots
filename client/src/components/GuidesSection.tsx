@@ -2,9 +2,9 @@ import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Clock, User, ArrowRight, BookOpen, Leaf } from "lucide-react";
-import heroImage from "@assets/generated_images/Hero_garden_scene_c1a60c82.png";
-import seedsImage from "@assets/generated_images/Seeds_and_seedlings_9e473d23.png";
-import toolsImage from "@assets/generated_images/Gardening_tools_collection_9c82fa3c.png";
+import { useQuery } from "@tanstack/react-query";
+import { fetchGuides } from "@/lib/api";
+import { getImageUrl } from "@/lib/api";
 
 interface Guide {
   id: string;
@@ -24,62 +24,12 @@ interface GuidesSectionProps {
 }
 
 export default function GuidesSection({ onGuideClick, onViewAllGuides }: GuidesSectionProps) {
-  //todo: remove mock functionality
-  const guides: Guide[] = [
-    {
-      id: "starting-your-first-garden",
-      title: "Starting Your First Garden: A Complete Beginner's Guide",
-      description: "Everything you need to know to start your gardening journey, from choosing the right location to planting your first seeds.",
-      image: heroImage,
-      difficulty: "Beginner",
-      readTime: "8 min read",
-      author: "Sarah Johnson",
-      category: "Getting Started",
-      featured: true
-    },
-    {
-      id: "seed-starting-indoors",
-      title: "Master the Art of Starting Seeds Indoors",
-      description: "Learn professional techniques for starting seeds indoors to get a head start on the growing season.",
-      image: seedsImage,
-      difficulty: "Intermediate",
-      readTime: "12 min read",
-      author: "Mike Chen",
-      category: "Seed Starting",
-      featured: true
-    },
-    {
-      id: "essential-gardening-tools",
-      title: "Essential Tools Every Gardener Should Own",
-      description: "Discover the must-have tools that will make your gardening tasks easier and more efficient.",
-      image: toolsImage,
-      difficulty: "Beginner",
-      readTime: "6 min read",
-      author: "Emma Davis",
-      category: "Tools & Equipment",
-      featured: true
-    },
-    {
-      id: "companion-planting",
-      title: "Advanced Companion Planting Strategies",
-      description: "Maximize your garden's potential with strategic plant partnerships and natural pest control.",
-      image: heroImage, // Reusing for demo
-      difficulty: "Advanced",
-      readTime: "15 min read",
-      author: "Dr. James Wilson",
-      category: "Advanced Techniques"
-    },
-    {
-      id: "seasonal-care",
-      title: "Seasonal Garden Care Calendar",
-      description: "Month-by-month guide to keeping your garden healthy and productive throughout the year.",
-      image: seedsImage, // Reusing for demo
-      difficulty: "Intermediate",
-      readTime: "10 min read",
-      author: "Lisa Rodriguez",
-      category: "Plant Care"
-    }
-  ];
+  const { data: allGuides = [], isLoading } = useQuery({
+    queryKey: ['guides'],
+    queryFn: () => fetchGuides(),
+  });
+
+  const guides = allGuides;
 
   const handleGuideClick = (guideId: string) => {
     console.log(`Open guide: ${guideId}`); //todo: remove mock functionality
@@ -113,8 +63,22 @@ export default function GuidesSection({ onGuideClick, onViewAllGuides }: GuidesS
 
         {/* Featured Guides */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-          {guides.filter(guide => guide.featured).map((guide) => (
-            <Card
+          {isLoading ? (
+            // Loading skeleton
+            Array.from({ length: 3 }).map((_, index) => (
+              <div key={index} className="bg-card rounded-lg overflow-hidden animate-pulse">
+                <div className="bg-muted h-48"></div>
+                <div className="p-4 space-y-2">
+                  <div className="bg-muted h-4 rounded w-1/4"></div>
+                  <div className="bg-muted h-6 rounded w-3/4"></div>
+                  <div className="bg-muted h-4 rounded w-full"></div>
+                  <div className="bg-muted h-4 rounded w-2/3"></div>
+                </div>
+              </div>
+            ))
+          ) : (
+            guides.filter(guide => guide.featured).map((guide) => (
+              <Card
               key={guide.id}
               className="group hover-elevate cursor-pointer overflow-hidden"
               onClick={() => handleGuideClick(guide.id)}
@@ -122,7 +86,7 @@ export default function GuidesSection({ onGuideClick, onViewAllGuides }: GuidesS
             >
               <div className="relative h-48">
                 <img
-                  src={guide.image}
+                  src={getImageUrl(guide.image)}
                   alt={guide.title}
                   className="w-full h-full object-cover transition-transform group-hover:scale-105"
                 />
@@ -162,7 +126,8 @@ export default function GuidesSection({ onGuideClick, onViewAllGuides }: GuidesS
                 </div>
               </CardContent>
             </Card>
-          ))}
+            ))
+          )}
         </div>
 
         {/* Other Guides */}
@@ -177,7 +142,7 @@ export default function GuidesSection({ onGuideClick, onViewAllGuides }: GuidesS
               <CardContent className="p-4">
                 <div className="flex gap-4">
                   <img
-                    src={guide.image}
+                    src={getImageUrl(guide.image)}
                     alt={guide.title}
                     className="w-20 h-20 object-cover rounded-md flex-shrink-0"
                   />
