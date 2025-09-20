@@ -1,7 +1,13 @@
-import { ShoppingCart, Search, Menu, Leaf } from "lucide-react";
+import { ShoppingCart, Search, Menu, Leaf, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { useState } from "react";
 
 interface HeaderProps {
@@ -20,14 +26,23 @@ export default function Header({ cartItems = 0, onCartClick, onSearchChange }: H
     console.log('Search query:', value); //todo: remove mock functionality
   };
 
-  const categories = [
-    "Flowering Plants",
-    "Decorative Plants", 
-    "Fruit Plants",
-    "Gardening Tools",
-    "Seeds",
-    "Gift Kits",
-    "Guides"
+  const mainCategories = [
+    {
+      name: "Plants",
+      items: ["Flowering Plants", "Decorative Plants", "Fruit Plants", "Indoor Plants", "Outdoor Plants"]
+    },
+    {
+      name: "Tools",
+      items: ["Hand Tools", "Power Tools", "Watering Equipment", "Pruning Tools", "Soil Tools"]
+    },
+    {
+      name: "Seeds",
+      items: ["Vegetable Seeds", "Flower Seeds", "Herb Seeds", "Fruit Seeds", "Starter Kits"]
+    },
+    {
+      name: "Guides",
+      items: ["Beginner Guides", "Advanced Techniques", "Plant Care", "Seasonal Tips", "Problem Solving"]
+    }
   ];
 
   return (
@@ -43,16 +58,31 @@ export default function Header({ cartItems = 0, onCartClick, onSearchChange }: H
           </div>
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center space-x-6" data-testid="desktop-nav">
-            {categories.map((category) => (
-              <button
-                key={category}
-                className="text-sm text-muted-foreground hover:text-foreground transition-colors hover-elevate px-2 py-1 rounded-md"
-                onClick={() => console.log(`Navigate to ${category}`)} //todo: remove mock functionality
-                data-testid={`nav-${category.toLowerCase().replace(/\s+/g, '-')}`}
-              >
-                {category}
-              </button>
+          <nav className="hidden md:flex items-center space-x-2" data-testid="desktop-nav">
+            {mainCategories.map((category) => (
+              <DropdownMenu key={category.name}>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    className="text-sm text-muted-foreground hover:text-foreground transition-colors px-3 py-2"
+                    data-testid={`nav-${category.name.toLowerCase()}`}
+                  >
+                    {category.name}
+                    <ChevronDown className="ml-1 h-3 w-3" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start" className="w-48">
+                  {category.items.map((item) => (
+                    <DropdownMenuItem
+                      key={item}
+                      onClick={() => console.log(`Navigate to ${item}`)} //todo: remove mock functionality
+                      data-testid={`nav-item-${item.toLowerCase().replace(/\s+/g, '-')}`}
+                    >
+                      {item}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
             ))}
           </nav>
 
@@ -123,19 +153,28 @@ export default function Header({ cartItems = 0, onCartClick, onSearchChange }: H
             </div>
             
             {/* Mobile Navigation */}
-            <nav className="space-y-2">
-              {categories.map((category) => (
-                <button
-                  key={category}
-                  className="block w-full text-left py-2 px-2 text-sm text-muted-foreground hover:text-foreground hover:bg-accent rounded-md transition-colors"
-                  onClick={() => {
-                    console.log(`Navigate to ${category}`); //todo: remove mock functionality
-                    setIsMobileMenuOpen(false);
-                  }}
-                  data-testid={`mobile-nav-${category.toLowerCase().replace(/\s+/g, '-')}`}
-                >
-                  {category}
-                </button>
+            <nav className="space-y-3">
+              {mainCategories.map((category) => (
+                <div key={category.name} className="space-y-1">
+                  <h4 className="font-medium text-sm text-foreground px-2 py-1" data-testid={`mobile-nav-${category.name.toLowerCase()}`}>
+                    {category.name}
+                  </h4>
+                  <div className="space-y-1 pl-4">
+                    {category.items.map((item) => (
+                      <button
+                        key={item}
+                        className="block w-full text-left py-1 px-2 text-sm text-muted-foreground hover:text-foreground hover:bg-accent rounded-md transition-colors"
+                        onClick={() => {
+                          console.log(`Navigate to ${item}`); //todo: remove mock functionality
+                          setIsMobileMenuOpen(false);
+                        }}
+                        data-testid={`mobile-nav-item-${item.toLowerCase().replace(/\s+/g, '-')}`}
+                      >
+                        {item}
+                      </button>
+                    ))}
+                  </div>
+                </div>
               ))}
             </nav>
           </div>

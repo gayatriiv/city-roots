@@ -17,27 +17,20 @@ export default function Hero({ onShopNow, onLearnMore }: HeroProps) {
           alt="Lush garden with beautiful plants and tools"
           className="w-full h-full object-cover"
         />
-        {/* Dark wash gradient for text readability */}
-        <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/30 to-black/50" />
+        {/* Stronger dark wash gradient for better text readability */}
+        <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/50 to-black/70" />
       </div>
 
       {/* Content */}
       <div className="relative z-10 text-center max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-center mb-6">
-          <Sparkles className="h-6 w-6 text-yellow-400 mr-2" />
-          <span className="text-yellow-400 text-sm font-medium tracking-wide uppercase">
-            Premium Quality Guaranteed
-          </span>
-        </div>
-
         <h1 className="text-4xl sm:text-5xl lg:text-6xl font-serif font-bold text-white mb-6 leading-tight">
           Transform Your Space with
-          <span className="block text-green-400">Nature's Beauty</span>
+          <span className="block text-green-300">Nature's Beauty</span>
         </h1>
 
-        <p className="text-lg sm:text-xl text-gray-200 mb-8 max-w-2xl mx-auto leading-relaxed">
-          Discover premium plants, expert gardening tools, and comprehensive guides 
-          to create your perfect garden sanctuary. From beginners to experts, we have everything you need.
+        <p className="text-xl text-white/90 mb-8 max-w-2xl mx-auto leading-relaxed font-medium">
+          Premium plants, expert tools, and comprehensive guides 
+          for every gardener's journey
         </p>
 
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-12">
