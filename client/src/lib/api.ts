@@ -150,10 +150,19 @@ export function getSessionId(): string {
 export function getImageUrl(imagePath: string): string {
   // For our generated images, we need to convert the API path to the actual import path
   const imageMap: { [key: string]: string } = {
-    '/api/images/flowering-plants.jpg': '/src/assets/generated_images/Flowering_plants_collection_5d058eb7.png',
-    '/api/images/gardening-tools.jpg': '/src/assets/generated_images/Gardening_tools_collection_9c82fa3c.png',
-    '/api/images/seeds.jpg': '/src/assets/generated_images/Seeds_and_seedlings_9e473d23.png',
-    '/api/images/hero.jpg': '/src/assets/generated_images/Indoor_living_space_with_plants_70e292ac.png'
+    '/api/images/flowering-plants.jpg': '/api/images/flowering-plants.jpg',
+    '/api/images/gardening-tools.jpg': '/api/images/gardening-tools.jpg',
+    '/api/images/seeds.jpg': '/api/images/seeds.jpg',
+    '/api/images/hero.jpg': '/api/images/hero.jpg',
+    // Plant images - using API routes
+    'monstera-deliciosa.jpg': '/api/images/monstera-deliciosa.jpg',
+    'peace-lily.jpg': '/api/images/peace-lily.jpg',
+    'snake-plant.jpg': '/api/images/snake-plant.jpg',
+    'rose-plant.jpg': '/api/images/rose-plant.jpg',
+    'aloe-vera.jpg': '/api/images/aloe-vera.jpg',
+    'lemon-tree.jpg': '/api/images/lemon-tree.jpg',
+    'spider-plant.jpg': '/api/images/spider-plant.jpg',
+    'jasmine-plant.jpg': '/api/images/jasmine-plant.jpg'
   };
   
   return imageMap[imagePath] || imagePath;

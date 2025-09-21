@@ -1,4 +1,4 @@
-import { Switch, Route } from "wouter";
+import { Switch, Route, useLocation } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
@@ -6,6 +6,11 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import NotFound from "@/pages/not-found";
+import PlantsPage from "@/pages/PlantsPage";
+import AboutPage from "@/pages/AboutPage";
+import ToolsPage from "@/pages/ToolsPage";
+import SeedsPage from "@/pages/SeedsPage";
+import GuidesPage from "@/pages/GuidesPage";
 import Header from "@/components/Header";
 import Hero from "@/components/Hero";
 import CategoriesSection from "@/components/CategoriesSection";
@@ -26,6 +31,7 @@ interface CartItem {
 
 function Home() {
   const [isCartOpen, setIsCartOpen] = useState(false);
+  const [, setLocation] = useLocation();
   const sessionId = getSessionId();
 
   // Fetch cart items
@@ -116,8 +122,8 @@ function Home() {
       
       <main>
         <Hero 
-          onShopNow={() => console.log('Shop now clicked')} //todo: remove mock functionality
-          onLearnMore={() => console.log('Learn more clicked')} //todo: remove mock functionality
+          onShopNow={() => setLocation('/plants')}
+          onLearnMore={() => setLocation('/about')}
         />
         
         <CategoriesSection 
@@ -127,7 +133,7 @@ function Home() {
         <FeaturedProducts
           onProductClick={(productId) => console.log('Product:', productId)} //todo: remove mock functionality
           onAddToCart={handleAddToCart}
-          onViewAll={() => console.log('View all products')} //todo: remove mock functionality
+          onViewAll={() => setLocation('/plants')}
         />
         
         <GuidesSection
@@ -153,10 +159,135 @@ function Home() {
   );
 }
 
+function PlantsPageWrapper() {
+  const sessionId = getSessionId();
+  
+  const addToCartMutation = useMutation({
+    mutationFn: ({ productId }: { productId: string }) => 
+      addToCart(sessionId, productId, 1),
+    onSuccess: () => {
+      console.log('Added to cart successfully');
+    },
+    onError: (error) => {
+      console.error('Failed to add to cart:', error);
+    },
+  });
+
+  const handleAddToCart = (productId: string) => {
+    addToCartMutation.mutate({ productId });
+  };
+
+  return (
+    <div className="min-h-screen bg-background">
+      <Header 
+        cartItems={0}
+        onCartClick={() => console.log('Cart clicked')}
+        onSearchChange={(query) => console.log('Search:', query)}
+      />
+      <PlantsPage onAddToCart={handleAddToCart} />
+    </div>
+  );
+}
+
+function ToolsPageWrapper() {
+  const sessionId = getSessionId();
+  
+  const addToCartMutation = useMutation({
+    mutationFn: ({ productId }: { productId: string }) => 
+      addToCart(sessionId, productId, 1),
+    onSuccess: () => {
+      console.log('Added to cart successfully');
+    },
+    onError: (error) => {
+      console.error('Failed to add to cart:', error);
+    },
+  });
+
+  const handleAddToCart = (productId: string) => {
+    addToCartMutation.mutate({ productId });
+  };
+
+  return (
+    <div className="min-h-screen bg-background">
+      <Header 
+        cartItems={0}
+        onCartClick={() => console.log('Cart clicked')}
+        onSearchChange={(query) => console.log('Search:', query)}
+      />
+      <ToolsPage onAddToCart={handleAddToCart} />
+    </div>
+  );
+}
+
+function SeedsPageWrapper() {
+  const sessionId = getSessionId();
+  
+  const addToCartMutation = useMutation({
+    mutationFn: ({ productId }: { productId: string }) => 
+      addToCart(sessionId, productId, 1),
+    onSuccess: () => {
+      console.log('Added to cart successfully');
+    },
+    onError: (error) => {
+      console.error('Failed to add to cart:', error);
+    },
+  });
+
+  const handleAddToCart = (productId: string) => {
+    addToCartMutation.mutate({ productId });
+  };
+
+  return (
+    <div className="min-h-screen bg-background">
+      <Header 
+        cartItems={0}
+        onCartClick={() => console.log('Cart clicked')}
+        onSearchChange={(query) => console.log('Search:', query)}
+      />
+      <SeedsPage onAddToCart={handleAddToCart} />
+    </div>
+  );
+}
+
+function AboutPageWrapper() {
+  return (
+    <div className="min-h-screen bg-background">
+      <Header 
+        cartItems={0}
+        onCartClick={() => console.log('Cart clicked')}
+        onSearchChange={(query) => console.log('Search:', query)}
+      />
+      <AboutPage />
+    </div>
+  );
+}
+
+function GuidesPageWrapper() {
+  const handleGuideClick = (guideId: string) => {
+    console.log('Guide clicked:', guideId);
+  };
+
+  return (
+    <div className="min-h-screen bg-background">
+      <Header 
+        cartItems={0}
+        onCartClick={() => console.log('Cart clicked')}
+        onSearchChange={(query) => console.log('Search:', query)}
+      />
+      <GuidesPage onGuideClick={handleGuideClick} />
+    </div>
+  );
+}
+
 function Router() {
   return (
     <Switch>
       <Route path="/" component={Home} />
+      <Route path="/plants" component={PlantsPageWrapper} />
+      <Route path="/about" component={AboutPageWrapper} />
+      <Route path="/tools" component={ToolsPageWrapper} />
+      <Route path="/seeds" component={SeedsPageWrapper} />
+      <Route path="/guides" component={GuidesPageWrapper} />
       <Route component={NotFound} />
     </Switch>
   );

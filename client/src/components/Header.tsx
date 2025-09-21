@@ -9,6 +9,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useState } from "react";
+import { useLocation, Link } from "wouter";
 
 interface HeaderProps {
   cartItems?: number;
@@ -19,6 +20,7 @@ interface HeaderProps {
 export default function Header({ cartItems = 0, onCartClick, onSearchChange }: HeaderProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [location] = useLocation();
 
   const handleSearchChange = (value: string) => {
     setSearchQuery(value);
@@ -50,12 +52,12 @@ export default function Header({ cartItems = 0, onCartClick, onSearchChange }: H
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <div className="flex items-center space-x-2">
+          <Link href="/" className="flex items-center space-x-2">
             <Leaf className="h-8 w-8 text-primary" data-testid="logo-icon" />
             <h1 className="text-xl font-serif font-bold text-foreground" data-testid="logo-text">
-              Earthly Gardens
+              City Roots
             </h1>
-          </div>
+          </Link>
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-2" data-testid="desktop-nav">
@@ -63,7 +65,7 @@ export default function Header({ cartItems = 0, onCartClick, onSearchChange }: H
               <DropdownMenu key={category.name}>
                 <DropdownMenuTrigger asChild>
                   <Button
-                    variant="ghost"
+                    variant={location === "/plants" && category.name === "Plants" ? "default" : "ghost"}
                     className="text-sm text-muted-foreground hover:text-foreground transition-colors px-3 py-2"
                     data-testid={`nav-${category.name.toLowerCase()}`}
                   >
@@ -72,6 +74,13 @@ export default function Header({ cartItems = 0, onCartClick, onSearchChange }: H
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="start" className="w-48">
+                  {category.name === "Plants" && (
+                    <DropdownMenuItem asChild>
+                      <Link href="/plants" className="block w-full">
+                        All Plants
+                      </Link>
+                    </DropdownMenuItem>
+                  )}
                   {category.items.map((item) => (
                     <DropdownMenuItem
                       key={item}
@@ -160,6 +169,15 @@ export default function Header({ cartItems = 0, onCartClick, onSearchChange }: H
                     {category.name}
                   </h4>
                   <div className="space-y-1 pl-4">
+                    {category.name === "Plants" && (
+                      <Link
+                        href="/plants"
+                        className="block w-full text-left py-1 px-2 text-sm text-muted-foreground hover:text-foreground hover:bg-accent rounded-md transition-colors"
+                        onClick={() => setIsMobileMenuOpen(false)}
+                      >
+                        All Plants
+                      </Link>
+                    )}
                     {category.items.map((item) => (
                       <button
                         key={item}

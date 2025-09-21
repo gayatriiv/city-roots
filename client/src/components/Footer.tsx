@@ -68,7 +68,7 @@ export default function Footer({ onNewsletterSignup, onNavigate }: FooterProps) 
       ]
     },
     company: {
-      title: "About Earthly Gardens",
+      title: "About City Roots",
       links: [
         { label: "Our Story", href: "about" },
         { label: "Sustainability", href: "sustainability" },
@@ -90,7 +90,7 @@ export default function Footer({ onNewsletterSignup, onNavigate }: FooterProps) 
             <div className="flex items-center space-x-2">
               <Leaf className="h-6 w-6 text-primary" />
               <span className="text-lg font-serif font-bold text-foreground">
-                Earthly Gardens
+                City Roots
               </span>
             </div>
             
@@ -202,7 +202,7 @@ export default function Footer({ onNewsletterSignup, onNavigate }: FooterProps) 
         {/* Bottom Footer */}
         <div className="flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0" data-testid="footer-bottom">
           <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
-            <span>© 2024 Earthly Gardens. All rights reserved.</span>
+            <span>© 2024 City Roots. All rights reserved.</span>
             <button 
               onClick={() => handleNavigation('privacy')}
               className="hover:text-primary transition-colors"

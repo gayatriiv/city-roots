@@ -29,8 +29,8 @@ export default function Hero({ onShopNow, onLearnMore }: HeroProps) {
         </h1>
 
         <p className="text-xl text-white/90 mb-8 max-w-2xl mx-auto leading-relaxed font-medium">
-          Premium plants, expert tools, and comprehensive guides 
-          for every gardener's journey
+          Fresh plants, quality tools, and helpful guides 
+          for your urban gardening adventure
         </p>
 
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-12">
@@ -65,16 +65,16 @@ export default function Hero({ onShopNow, onLearnMore }: HeroProps) {
         {/* Stats */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 text-white">
           <div className="text-center" data-testid="stat-products">
-            <div className="text-3xl font-bold mb-1">500+</div>
-            <div className="text-sm text-gray-300">Premium Plants</div>
+            <div className="text-3xl font-bold mb-1">10+</div>
+            <div className="text-sm text-gray-300">Plant Varieties</div>
           </div>
           <div className="text-center" data-testid="stat-customers">
-            <div className="text-3xl font-bold mb-1">10K+</div>
-            <div className="text-sm text-gray-300">Happy Customers</div>
+            <div className="text-3xl font-bold mb-1">New</div>
+            <div className="text-sm text-gray-300">Fresh Start</div>
           </div>
           <div className="text-center" data-testid="stat-guides">
-            <div className="text-3xl font-bold mb-1">100+</div>
-            <div className="text-sm text-gray-300">Expert Guides</div>
+            <div className="text-3xl font-bold mb-1">Growing</div>
+            <div className="text-sm text-gray-300">With You</div>
           </div>
         </div>
       </div>

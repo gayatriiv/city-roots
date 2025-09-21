@@ -184,22 +184,44 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Image serving routes (for development - in production these would be served by CDN)
-  app.get("/api/images/:imageName", (req, res) => {
+  app.get("/api/images/:imageName", async (req, res) => {
     // For demo purposes, redirect to placeholder images
     const { imageName } = req.params;
+    console.log('Image request for:', imageName);
     
     // Map to our generated images
     const imageMap: { [key: string]: string } = {
       'flowering-plants.jpg': '/src/assets/generated_images/Flowering_plants_collection_5d058eb7.png',
       'gardening-tools.jpg': '/src/assets/generated_images/Gardening_tools_collection_9c82fa3c.png',
       'seeds.jpg': '/src/assets/generated_images/Seeds_and_seedlings_9e473d23.png',
-      'hero.jpg': '/src/assets/generated_images/Indoor_living_space_with_plants_70e292ac.png'
+      'hero.jpg': '/src/assets/generated_images/Indoor_living_space_with_plants_70e292ac.png',
+      // Plant images
+      'monstera-deliciosa.jpg': '/src/assets/generated_images/monstera.jpeg',
+      'peace-lily.jpg': '/src/assets/generated_images/Peace Lily.jpeg',
+      'snake-plant.jpg': '/src/assets/generated_images/Snake Plant.jpeg',
+      'rose-plant.jpg': '/src/assets/generated_images/rose plant.jpeg',
+      'aloe-vera.jpg': '/src/assets/generated_images/aloe vera.jpeg',
+      'lemon-tree.jpg': '/src/assets/generated_images/lemon tree.jpeg',
+      'spider-plant.jpg': '/src/assets/generated_images/Spider Plant.jpeg',
+      'jasmine-plant.jpg': '/src/assets/generated_images/jasmine plant.jpeg'
     };
 
     const imagePath = imageMap[imageName];
     if (imagePath) {
-      // For development, we'll return a JSON with the path for the frontend to use
-      res.json({ imagePath });
+      // For development, serve the actual file
+      const fs = await import('fs');
+      const path = await import('path');
+      
+      try {
+        const fullPath = path.resolve(process.cwd(), 'attached_assets', imagePath.replace('/src/assets/generated_images/', ''));
+        if (fs.existsSync(fullPath)) {
+          res.sendFile(fullPath);
+        } else {
+          res.status(404).json({ error: 'Image file not found' });
+        }
+      } catch (error) {
+        res.status(500).json({ error: 'Error serving image' });
+      }
     } else {
       res.status(404).json({ error: 'Image not found' });
     }
