@@ -1,4 +1,5 @@
 import { useState, useMemo } from "react";
+import { useLocation } from "wouter";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -7,126 +8,164 @@ import { Input } from "@/components/ui/input";
 import { Search, Filter, Grid, List, ShoppingCart, Eye, Heart, Star, Sprout, Flower, Apple } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
-interface Seed {
+interface Plant {
   id: string;
   name: string;
   price: number;
   originalPrice?: number;
   image: string;
   category: string;
+  subcategory: string;
   description: string;
-  growingSeason: string;
-  germinationTime: string;
-  plantHeight: string;
+  careInstructions: string;
+  lightRequirements: string;
+  wateringSchedule: string;
+  soilType: string;
+  size: string;
   rating: number;
   reviews: number;
   inStock: boolean;
   tags: string[];
 }
 
-// Sample seeds data with INR prices
-const sampleSeeds: Seed[] = [
+// Helper function to get plant image URL
+const getPlantImageUrl = (filename: string) => {
+  return `/images/${filename}`;
+};
+
+// Flowering plants data with INR prices
+const sampleSeeds: Plant[] = [
   {
     id: "1",
-    name: "Tomato Seeds - Cherry",
-    price: 299,
-    originalPrice: 399,
-    image: "/images/seeds.jpg",
-    category: "Vegetable Seeds",
-    description: "High-yielding cherry tomato seeds perfect for home gardens. Produces sweet, bite-sized tomatoes.",
-    growingSeason: "Year Round",
-    germinationTime: "7-14 days",
-    plantHeight: "1.5-2m",
-    rating: 4.8,
-    reviews: 127,
+    name: "Hibiscus Plant",
+    price: 1299,
+    image: getPlantImageUrl("hibiscus-plant.jpeg"),
+    category: "Flowering Plants",
+    subcategory: "Outdoor Plants",
+    description: "Beautiful tropical flowering plant with large, colorful blooms. Perfect for gardens and outdoor spaces.",
+    careInstructions: "Plant in well-draining soil. Water regularly during blooming season. Provide full sun for best flowering.",
+    lightRequirements: "Full sun (6+ hours)",
+    wateringSchedule: "Twice a week",
+    soilType: "Well-draining garden soil",
+    size: "Medium (40-60cm)",
+    rating: 4.7,
+    reviews: 89,
     inStock: true,
-    tags: ["High Yield", "Sweet", "Easy to Grow"]
+    tags: ["Flowering", "Tropical", "Colorful Blooms", "Outdoor"]
   },
   {
     id: "2",
-    name: "Sunflower Seeds - Giant",
-    price: 199,
-    image: "/images/seeds.jpg",
-    category: "Flower Seeds",
-    description: "Giant sunflower seeds that grow up to 3 meters tall with beautiful yellow flowers.",
-    growingSeason: "Spring to Summer",
-    germinationTime: "10-21 days",
-    plantHeight: "2-3m",
-    rating: 4.6,
-    reviews: 89,
+    name: "Rose Plant",
+    price: 1599,
+    image: getPlantImageUrl("rose plant.jpeg"),
+    category: "Flowering Plants",
+    subcategory: "Outdoor Plants",
+    description: "Classic red roses that bloom beautifully in your garden. Perfect for gifting and romantic occasions.",
+    careInstructions: "Plant in well-draining soil. Water deeply once a week. Provide 6+ hours of direct sunlight.",
+    lightRequirements: "Full sun (6+ hours)",
+    wateringSchedule: "Once a week",
+    soilType: "Well-draining garden soil",
+    size: "Large (40-50cm)",
+    rating: 4.8,
+    reviews: 127,
     inStock: true,
-    tags: ["Giant", "Yellow", "Tall"]
+    tags: ["Flowering", "Garden", "Gift", "Classic"]
   },
   {
     id: "3",
-    name: "Basil Seeds - Sweet",
-    price: 149,
-    originalPrice: 199,
-    image: "/images/seeds.jpg",
-    category: "Herb Seeds",
-    description: "Aromatic sweet basil seeds perfect for cooking and pesto making. Easy to grow indoors or outdoors.",
-    growingSeason: "Year Round",
-    germinationTime: "7-14 days",
-    plantHeight: "30-60cm",
-    rating: 4.7,
-    reviews: 156,
+    name: "Marigold Plant",
+    price: 599,
+    image: getPlantImageUrl("marigold plant.jpeg"),
+    category: "Flowering Plants",
+    subcategory: "Outdoor Plants",
+    description: "Bright orange and yellow marigold flowers. Great for borders, pest control, and adding color to your garden.",
+    careInstructions: "Plant in well-draining soil. Water regularly. Deadhead spent flowers to encourage more blooms.",
+    lightRequirements: "Full sun to partial shade",
+    wateringSchedule: "Twice a week",
+    soilType: "Well-draining garden soil",
+    size: "Small (20-30cm)",
+    rating: 4.6,
+    reviews: 95,
     inStock: true,
-    tags: ["Aromatic", "Culinary", "Indoor Friendly"]
+    tags: ["Flowering", "Pest Control", "Bright Colors", "Easy Care"]
   },
   {
     id: "4",
-    name: "Carrot Seeds - Rainbow",
-    price: 249,
-    image: "/images/seeds.jpg",
-    category: "Vegetable Seeds",
-    description: "Colorful rainbow carrot seeds that produce carrots in purple, yellow, and orange colors.",
-    growingSeason: "Cool Season",
-    germinationTime: "14-21 days",
-    plantHeight: "15-30cm",
-    rating: 4.5,
-    reviews: 74,
+    name: "Bougainvillea Plant",
+    price: 1899,
+    image: getPlantImageUrl("bougainvillea-plant.jpeg"),
+    category: "Flowering Plants",
+    subcategory: "Outdoor Plants",
+    description: "Vibrant climbing plant with colorful bracts. Perfect for trellises, walls, and creating stunning garden displays.",
+    careInstructions: "Plant in well-draining soil. Water regularly during growing season. Prune after flowering to maintain shape.",
+    lightRequirements: "Full sun",
+    wateringSchedule: "Twice a week",
+    soilType: "Well-draining garden soil",
+    size: "Large (60-100cm)",
+    rating: 4.9,
+    reviews: 156,
     inStock: true,
-    tags: ["Colorful", "Nutritious", "Unique"]
+    tags: ["Climbing", "Colorful", "Vibrant", "Trellis"]
   },
   {
     id: "5",
-    name: "Marigold Seeds - French",
-    price: 179,
-    image: "/images/seeds.jpg",
-    category: "Flower Seeds",
-    description: "Bright orange and yellow French marigold seeds. Great for borders and pest control.",
-    growingSeason: "Spring to Fall",
-    germinationTime: "7-14 days",
-    plantHeight: "20-30cm",
-    rating: 4.9,
-    reviews: 93,
+    name: "Sunflower Plant",
+    price: 799,
+    image: getPlantImageUrl("sunflower-plant.jpeg"),
+    category: "Flowering Plants",
+    subcategory: "Outdoor Plants",
+    description: "Tall, cheerful sunflowers that follow the sun. Perfect for creating a dramatic garden focal point.",
+    careInstructions: "Plant in full sun. Water deeply and regularly. Stake tall varieties to prevent toppling.",
+    lightRequirements: "Full sun",
+    wateringSchedule: "Daily during hot weather",
+    soilType: "Well-draining garden soil",
+    size: "Large (100-200cm)",
+    rating: 4.5,
+    reviews: 78,
     inStock: true,
-    tags: ["Pest Control", "Bright Colors", "Easy Care"]
+    tags: ["Tall", "Cheerful", "Sun Following", "Dramatic"]
   },
   {
     id: "6",
-    name: "Strawberry Seeds - Alpine",
-    price: 399,
-    image: "/images/seeds.jpg",
-    category: "Fruit Seeds",
-    description: "Alpine strawberry seeds that produce small, sweet strawberries perfect for containers.",
-    growingSeason: "Spring to Fall",
-    germinationTime: "21-30 days",
-    plantHeight: "15-20cm",
-    rating: 4.4,
-    reviews: 67,
+    name: "Jasmine Plant",
+    price: 1199,
+    image: getPlantImageUrl("jasmine plant.jpeg"),
+    category: "Flowering Plants",
+    subcategory: "Outdoor Plants",
+    description: "Fragrant white flowers that bloom at night. Perfect for trellises and garden borders.",
+    careInstructions: "Plant in well-draining soil. Water regularly during blooming season. Prune after flowering.",
+    lightRequirements: "Full sun to partial shade",
+    wateringSchedule: "Twice a week",
+    soilType: "Well-draining garden soil",
+    size: "Medium (35-45cm)",
+    rating: 4.8,
+    reviews: 85,
     inStock: true,
-    tags: ["Sweet", "Container Friendly", "Perennial"]
+    tags: ["Fragrant", "Night Blooming", "Climbing", "White Flowers"]
+  },
+  {
+    id: "7",
+    name: "Peace Lily",
+    price: 899,
+    image: getPlantImageUrl("Peace Lily.jpeg"),
+    category: "Flowering Plants",
+    subcategory: "Indoor Plants",
+    description: "Elegant white blooms and glossy green leaves. Known for its air-purifying qualities and easy care.",
+    careInstructions: "Keep soil moist but not soggy. Place in low to bright indirect light. Blooms year-round.",
+    lightRequirements: "Low to bright indirect light",
+    wateringSchedule: "Twice a week",
+    soilType: "Rich, well-draining soil",
+    size: "Small (20-30cm)",
+    rating: 4.6,
+    reviews: 89,
+    inStock: true,
+    tags: ["Air Purifying", "Indoor", "White Flowers", "Low Light"]
   }
 ];
 
 const categories = [
-  "All Seeds",
-  "Vegetable Seeds",
-  "Flower Seeds",
-  "Herb Seeds",
-  "Fruit Seeds",
-  "Starter Kits"
+  "All Plants",
+  "Flowering Plants"
 ];
 
 const sortOptions = [
@@ -139,12 +178,8 @@ const sortOptions = [
 ];
 
 const categoryIcons = {
-  "Vegetable Seeds": Apple,
-  "Flower Seeds": Flower,
-  "Herb Seeds": Sprout,
-  "Fruit Seeds": Apple,
-  "Starter Kits": Sprout,
-  "All Seeds": Filter
+  "All Plants": Filter,
+  "Flowering Plants": Flower
 };
 
 interface SeedsPageProps {
@@ -152,31 +187,36 @@ interface SeedsPageProps {
 }
 
 export default function SeedsPage({ onAddToCart }: SeedsPageProps) {
-  const [selectedCategory, setSelectedCategory] = useState("All Seeds");
+  const [selectedCategory, setSelectedCategory] = useState("All Plants");
   const [sortBy, setSortBy] = useState("featured");
   const [searchQuery, setSearchQuery] = useState("");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
-  const [selectedSeed, setSelectedSeed] = useState<Seed | null>(null);
+  const [selectedPlant, setSelectedPlant] = useState<Plant | null>(null);
+  const [, setLocation] = useLocation();
 
-  // Filter and sort seeds
-  const filteredAndSortedSeeds = useMemo(() => {
+  const handlePlantClick = (plantId: string) => {
+    setLocation(`/plant/${plantId}`);
+  };
+
+  // Filter and sort plants
+  const filteredAndSortedPlants = useMemo(() => {
     let filtered = sampleSeeds;
 
     // Filter by category
-    if (selectedCategory !== "All Seeds") {
-      filtered = filtered.filter(seed => seed.category === selectedCategory);
+    if (selectedCategory !== "All Plants") {
+      filtered = filtered.filter(plant => plant.category === selectedCategory);
     }
 
     // Filter by search query
     if (searchQuery) {
-      filtered = filtered.filter(seed =>
-        seed.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        seed.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        seed.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()))
+      filtered = filtered.filter(plant =>
+        plant.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        plant.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        plant.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()))
       );
     }
 
-    // Sort seeds
+    // Sort plants
     switch (sortBy) {
       case "price-low":
         filtered.sort((a, b) => a.price - b.price);
@@ -226,9 +266,9 @@ export default function SeedsPage({ onAddToCart }: SeedsPageProps) {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">Seeds & Seedlings</h1>
+              <h1 className="text-3xl font-bold text-gray-900">Flowering Plants</h1>
               <p className="text-gray-600 mt-1">
-                Grow your own garden from seed
+                Beautiful flowering plants for your garden
               </p>
             </div>
             
@@ -260,7 +300,7 @@ export default function SeedsPage({ onAddToCart }: SeedsPageProps) {
             {/* Search */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Search Seeds
+                Search Plants
               </label>
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
@@ -326,24 +366,24 @@ export default function SeedsPage({ onAddToCart }: SeedsPageProps) {
                 ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6" 
                 : "space-y-4"
             }`}>
-              {filteredAndSortedSeeds.map((seed) => (
-                <Card key={seed.id} className="group hover:shadow-lg transition-shadow">
+              {filteredAndSortedPlants.map((plant) => (
+                <Card key={plant.id} className="group hover:shadow-lg transition-shadow">
                   <CardContent className="p-0">
                     {viewMode === "grid" ? (
                       // Grid View
                       <div>
                         <div className="relative aspect-square overflow-hidden rounded-t-lg">
                           <img
-                            src={seed.image}
-                            alt={seed.name}
+                            src={plant.image}
+                            alt={plant.name}
                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                           />
-                          {seed.originalPrice && (
+                          {plant.originalPrice && (
                             <Badge className="absolute top-2 left-2 bg-red-500">
-                              {Math.round((1 - seed.price / seed.originalPrice) * 100)}% OFF
+                              {Math.round((1 - plant.price / plant.originalPrice) * 100)}% OFF
                             </Badge>
                           )}
-                          {!seed.inStock && (
+                          {!plant.inStock && (
                             <Badge variant="secondary" className="absolute top-2 right-2">
                               Out of Stock
                             </Badge>
@@ -353,7 +393,7 @@ export default function SeedsPage({ onAddToCart }: SeedsPageProps) {
                         <div className="p-4">
                           <div className="flex items-start justify-between mb-2">
                             <h3 className="font-semibold text-lg text-gray-900 group-hover:text-primary transition-colors">
-                              {seed.name}
+                              {plant.name}
                             </h3>
                             <Button
                               variant="ghost"
@@ -365,55 +405,53 @@ export default function SeedsPage({ onAddToCart }: SeedsPageProps) {
                           </div>
                           
                           <p className="text-sm text-gray-600 mb-3 line-clamp-2">
-                            {seed.description}
+                            {plant.description}
                           </p>
                           
                           <div className="flex items-center gap-2 mb-3">
                             <div className="flex items-center">
-                              {renderStars(seed.rating)}
+                              {renderStars(plant.rating)}
                             </div>
                             <span className="text-sm text-gray-500">
-                              ({seed.reviews})
+                              ({plant.reviews})
                             </span>
                           </div>
                           
                           <div className="flex items-center justify-between mb-4">
                             <div className="flex items-center gap-2">
                               <span className="text-xl font-bold text-primary">
-                                {formatPrice(seed.price)}
+                                {formatPrice(plant.price)}
                               </span>
-                              {seed.originalPrice && (
+                              {plant.originalPrice && (
                                 <span className="text-sm text-gray-500 line-through">
-                                  {formatPrice(seed.originalPrice)}
+                                  {formatPrice(plant.originalPrice)}
                                 </span>
                               )}
                             </div>
                             <Badge variant="outline" className="text-xs">
-                              {seed.category}
+                              {plant.category}
                             </Badge>
                           </div>
                           
                           <div className="flex gap-2">
-                            <Dialog>
-                              <DialogTrigger asChild>
-                                <Button 
-                                  variant="outline" 
-                                  className="flex-1"
-                                  onClick={() => setSelectedSeed(seed)}
-                                >
-                                  <Eye className="h-4 w-4 mr-2" />
-                                  View Details
-                                </Button>
-                              </DialogTrigger>
-                            </Dialog>
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              className="flex-1 text-xs min-w-0"
+                              onClick={() => handlePlantClick(plant.id)}
+                            >
+                              <Eye className="h-3 w-3 mr-1" />
+                              <span className="truncate">View Details</span>
+                            </Button>
                             
                             <Button 
-                              className="flex-1"
-                              onClick={() => onAddToCart(seed.id)}
-                              disabled={!seed.inStock}
+                              size="sm"
+                              className="flex-1 text-xs min-w-0"
+                              onClick={() => onAddToCart(plant.id)}
+                              disabled={!plant.inStock}
                             >
-                              <ShoppingCart className="h-4 w-4 mr-2" />
-                              Add to Cart
+                              <ShoppingCart className="h-3 w-3 mr-1" />
+                              <span className="truncate">Add to Cart</span>
                             </Button>
                           </div>
                         </div>
@@ -423,13 +461,13 @@ export default function SeedsPage({ onAddToCart }: SeedsPageProps) {
                       <div className="flex">
                         <div className="relative w-32 h-32 flex-shrink-0">
                           <img
-                            src={seed.image}
-                            alt={seed.name}
+                            src={plant.image}
+                            alt={plant.name}
                             className="w-full h-full object-cover"
                           />
-                          {seed.originalPrice && (
+                          {plant.originalPrice && (
                             <Badge className="absolute top-1 left-1 bg-red-500 text-xs">
-                              {Math.round((1 - seed.price / seed.originalPrice) * 100)}% OFF
+                              {Math.round((1 - plant.price / plant.originalPrice) * 100)}% OFF
                             </Badge>
                           )}
                         </div>
@@ -437,62 +475,58 @@ export default function SeedsPage({ onAddToCart }: SeedsPageProps) {
                         <div className="flex-1 p-4">
                           <div className="flex items-start justify-between mb-2">
                             <h3 className="font-semibold text-lg text-gray-900">
-                              {seed.name}
+                              {plant.name}
                             </h3>
                             <div className="flex items-center gap-2">
                               <Button variant="ghost" size="sm">
                                 <Heart className="h-4 w-4" />
                               </Button>
                               <Badge variant="outline" className="text-xs">
-                                {seed.category}
+                                {plant.category}
                               </Badge>
                             </div>
                           </div>
                           
                           <p className="text-sm text-gray-600 mb-3">
-                            {seed.description}
+                            {plant.description}
                           </p>
                           
                           <div className="flex items-center gap-4 mb-3">
                             <div className="flex items-center gap-2">
                               <div className="flex items-center">
-                                {renderStars(seed.rating)}
+                                {renderStars(plant.rating)}
                               </div>
                               <span className="text-sm text-gray-500">
-                                ({seed.reviews} reviews)
+                                ({plant.reviews} reviews)
                               </span>
                             </div>
                             
                             <div className="flex items-center gap-2">
                               <span className="text-xl font-bold text-primary">
-                                {formatPrice(seed.price)}
+                                {formatPrice(plant.price)}
                               </span>
-                              {seed.originalPrice && (
+                              {plant.originalPrice && (
                                 <span className="text-sm text-gray-500 line-through">
-                                  {formatPrice(seed.originalPrice)}
+                                  {formatPrice(plant.originalPrice)}
                                 </span>
                               )}
                             </div>
                           </div>
                           
                           <div className="flex gap-2">
-                            <Dialog>
-                              <DialogTrigger asChild>
-                                <Button 
-                                  variant="outline" 
-                                  size="sm"
-                                  onClick={() => setSelectedSeed(seed)}
-                                >
-                                  <Eye className="h-4 w-4 mr-2" />
-                                  View Details
-                                </Button>
-                              </DialogTrigger>
-                            </Dialog>
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              onClick={() => handlePlantClick(plant.id)}
+                            >
+                              <Eye className="h-4 w-4 mr-2" />
+                              View Details
+                            </Button>
                             
                             <Button 
                               size="sm"
-                              onClick={() => onAddToCart(seed.id)}
-                              disabled={!seed.inStock}
+                              onClick={() => onAddToCart(plant.id)}
+                              disabled={!plant.inStock}
                             >
                               <ShoppingCart className="h-4 w-4 mr-2" />
                               Add to Cart
@@ -507,13 +541,13 @@ export default function SeedsPage({ onAddToCart }: SeedsPageProps) {
             </div>
 
             {/* No Results */}
-            {filteredAndSortedSeeds.length === 0 && (
+            {filteredAndSortedPlants.length === 0 && (
               <div className="text-center py-12">
                 <div className="text-gray-400 mb-4">
                   <Filter className="h-12 w-12 mx-auto" />
                 </div>
                 <h3 className="text-lg font-medium text-gray-900 mb-2">
-                  No seeds found
+                  No plants found
                 </h3>
                 <p className="text-gray-500">
                   Try adjusting your search or filter criteria
@@ -525,24 +559,24 @@ export default function SeedsPage({ onAddToCart }: SeedsPageProps) {
       </div>
 
       {/* Product Details Modal */}
-      {selectedSeed && (
-        <Dialog open={!!selectedSeed} onOpenChange={() => setSelectedSeed(null)}>
+      {selectedPlant && (
+        <Dialog open={!!selectedPlant} onOpenChange={() => setSelectedPlant(null)}>
           <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
-              <DialogTitle className="text-2xl">{selectedSeed.name}</DialogTitle>
+              <DialogTitle className="text-2xl">{selectedPlant.name}</DialogTitle>
             </DialogHeader>
             
             <div className="space-y-6">
               {/* Product Image */}
               <div className="relative aspect-square overflow-hidden rounded-lg">
                 <img
-                  src={selectedSeed.image}
-                  alt={selectedSeed.name}
+                  src={selectedPlant.image}
+                  alt={selectedPlant.name}
                   className="w-full h-full object-cover"
                 />
-                {selectedSeed.originalPrice && (
+                {selectedPlant.originalPrice && (
                   <Badge className="absolute top-2 left-2 bg-red-500">
-                    {Math.round((1 - selectedSeed.price / selectedSeed.originalPrice) * 100)}% OFF
+                    {Math.round((1 - selectedPlant.price / selectedPlant.originalPrice) * 100)}% OFF
                   </Badge>
                 )}
               </div>
@@ -551,21 +585,21 @@ export default function SeedsPage({ onAddToCart }: SeedsPageProps) {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <span className="text-3xl font-bold text-primary">
-                    {formatPrice(selectedSeed.price)}
+                    {formatPrice(selectedPlant.price)}
                   </span>
-                  {selectedSeed.originalPrice && (
+                  {selectedPlant.originalPrice && (
                     <span className="text-lg text-gray-500 line-through">
-                      {formatPrice(selectedSeed.originalPrice)}
+                      {formatPrice(selectedPlant.originalPrice)}
                     </span>
                   )}
                 </div>
                 
                 <div className="flex items-center gap-2">
                   <div className="flex items-center">
-                    {renderStars(selectedSeed.rating)}
+                    {renderStars(selectedPlant.rating)}
                   </div>
                   <span className="text-sm text-gray-500">
-                    ({selectedSeed.reviews} reviews)
+                    ({selectedPlant.reviews} reviews)
                   </span>
                 </div>
               </div>
@@ -573,22 +607,32 @@ export default function SeedsPage({ onAddToCart }: SeedsPageProps) {
               {/* Description */}
               <div>
                 <h4 className="font-semibold text-lg mb-2">Description</h4>
-                <p className="text-gray-600">{selectedSeed.description}</p>
+                <p className="text-gray-600">{selectedPlant.description}</p>
               </div>
 
-              {/* Growing Information */}
+              {/* Care Instructions */}
+              <div>
+                <h4 className="font-semibold text-lg mb-2">Care Instructions</h4>
+                <p className="text-gray-600">{selectedPlant.careInstructions}</p>
+              </div>
+
+              {/* Plant Details */}
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <h5 className="font-medium text-gray-900">Growing Season</h5>
-                  <p className="text-sm text-gray-600">{selectedSeed.growingSeason}</p>
+                  <h5 className="font-medium text-gray-900">Light Requirements</h5>
+                  <p className="text-sm text-gray-600">{selectedPlant.lightRequirements}</p>
                 </div>
                 <div>
-                  <h5 className="font-medium text-gray-900">Germination Time</h5>
-                  <p className="text-sm text-gray-600">{selectedSeed.germinationTime}</p>
+                  <h5 className="font-medium text-gray-900">Watering Schedule</h5>
+                  <p className="text-sm text-gray-600">{selectedPlant.wateringSchedule}</p>
                 </div>
                 <div>
-                  <h5 className="font-medium text-gray-900">Plant Height</h5>
-                  <p className="text-sm text-gray-600">{selectedSeed.plantHeight}</p>
+                  <h5 className="font-medium text-gray-900">Soil Type</h5>
+                  <p className="text-sm text-gray-600">{selectedPlant.soilType}</p>
+                </div>
+                <div>
+                  <h5 className="font-medium text-gray-900">Size</h5>
+                  <p className="text-sm text-gray-600">{selectedPlant.size}</p>
                 </div>
               </div>
 
@@ -596,7 +640,7 @@ export default function SeedsPage({ onAddToCart }: SeedsPageProps) {
               <div>
                 <h5 className="font-medium text-gray-900 mb-2">Features</h5>
                 <div className="flex flex-wrap gap-2">
-                  {selectedSeed.tags.map((tag) => (
+                  {selectedPlant.tags.map((tag) => (
                     <Badge key={tag} variant="secondary">
                       {tag}
                     </Badge>
@@ -609,10 +653,10 @@ export default function SeedsPage({ onAddToCart }: SeedsPageProps) {
                 <Button 
                   className="flex-1"
                   onClick={() => {
-                    onAddToCart(selectedSeed.id);
-                    setSelectedSeed(null);
+                    onAddToCart(selectedPlant.id);
+                    setSelectedPlant(null);
                   }}
-                  disabled={!selectedSeed.inStock}
+                  disabled={!selectedPlant.inStock}
                 >
                   <ShoppingCart className="h-4 w-4 mr-2" />
                   Add to Cart

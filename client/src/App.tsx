@@ -3,10 +3,13 @@ import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { CartProvider, useCart } from "@/contexts/CartContext";
 import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import NotFound from "@/pages/not-found";
 import PlantsPage from "@/pages/PlantsPage";
+import PlantDetailPage from "@/pages/PlantDetailPage";
+import CartPage from "@/pages/CartPage";
 import AboutPage from "@/pages/AboutPage";
 import ToolsPage from "@/pages/ToolsPage";
 import SeedsPage from "@/pages/SeedsPage";
@@ -14,7 +17,7 @@ import GuidesPage from "@/pages/GuidesPage";
 import Header from "@/components/Header";
 import Hero from "@/components/Hero";
 import CategoriesSection from "@/components/CategoriesSection";
-import FeaturedProducts from "@/components/FeaturedProducts";
+import CollectionsSection from "@/components/CollectionsSection";
 import GuidesSection from "@/components/GuidesSection";
 import Footer from "@/components/Footer";
 import CartDrawer from "@/components/CartDrawer";
@@ -130,10 +133,8 @@ function Home() {
           onCategoryClick={(categoryId) => console.log('Category:', categoryId)} //todo: remove mock functionality
         />
         
-        <FeaturedProducts
-          onProductClick={(productId) => console.log('Product:', productId)} //todo: remove mock functionality
-          onAddToCart={handleAddToCart}
-          onViewAll={() => setLocation('/plants')}
+        <CollectionsSection
+          onCollectionClick={(collectionId) => console.log('Collection:', collectionId)} //todo: remove mock functionality
         />
         
         <GuidesSection
@@ -161,6 +162,8 @@ function Home() {
 
 function PlantsPageWrapper() {
   const sessionId = getSessionId();
+  const { getTotalItems } = useCart();
+  const [, setLocation] = useLocation();
   
   const addToCartMutation = useMutation({
     mutationFn: ({ productId }: { productId: string }) => 
@@ -180,8 +183,8 @@ function PlantsPageWrapper() {
   return (
     <div className="min-h-screen bg-background">
       <Header 
-        cartItems={0}
-        onCartClick={() => console.log('Cart clicked')}
+        cartItems={getTotalItems()}
+        onCartClick={() => setLocation('/cart')}
         onSearchChange={(query) => console.log('Search:', query)}
       />
       <PlantsPage onAddToCart={handleAddToCart} />
@@ -190,31 +193,17 @@ function PlantsPageWrapper() {
 }
 
 function ToolsPageWrapper() {
-  const sessionId = getSessionId();
-  
-  const addToCartMutation = useMutation({
-    mutationFn: ({ productId }: { productId: string }) => 
-      addToCart(sessionId, productId, 1),
-    onSuccess: () => {
-      console.log('Added to cart successfully');
-    },
-    onError: (error) => {
-      console.error('Failed to add to cart:', error);
-    },
-  });
-
-  const handleAddToCart = (productId: string) => {
-    addToCartMutation.mutate({ productId });
-  };
+  const { getTotalItems } = useCart();
+  const [, setLocation] = useLocation();
 
   return (
     <div className="min-h-screen bg-background">
       <Header 
-        cartItems={0}
-        onCartClick={() => console.log('Cart clicked')}
+        cartItems={getTotalItems()}
+        onCartClick={() => setLocation('/cart')}
         onSearchChange={(query) => console.log('Search:', query)}
       />
-      <ToolsPage onAddToCart={handleAddToCart} />
+      <ToolsPage />
     </div>
   );
 }
@@ -279,11 +268,58 @@ function GuidesPageWrapper() {
   );
 }
 
+function PlantDetailPageWrapper() {
+  const sessionId = getSessionId();
+  
+  // Debug: Log that this wrapper is being rendered
+  console.log('PlantDetailPageWrapper rendered, URL:', window.location.pathname);
+  
+  const addToCartMutation = useMutation({
+    mutationFn: ({ productId }: { productId: string }) => 
+      addToCart(sessionId, productId, 1),
+    onSuccess: () => {
+      console.log('Added to cart successfully');
+    },
+    onError: (error) => {
+      console.error('Failed to add to cart:', error);
+    },
+  });
+
+  const handleAddToCart = (productId: string) => {
+    addToCartMutation.mutate({ productId });
+  };
+
+  return <PlantDetailPage onAddToCart={handleAddToCart} />;
+}
+
+function CartPageWrapper() {
+  const sessionId = getSessionId();
+  
+  const addToCartMutation = useMutation({
+    mutationFn: ({ productId }: { productId: string }) => 
+      addToCart(sessionId, productId, 1),
+    onSuccess: () => {
+      console.log('Added to cart successfully');
+    },
+    onError: (error) => {
+      console.error('Failed to add to cart:', error);
+    },
+  });
+
+  const handleAddToCart = (productId: string) => {
+    addToCartMutation.mutate({ productId });
+  };
+
+  return <CartPage onAddToCart={handleAddToCart} />;
+}
+
 function Router() {
   return (
     <Switch>
       <Route path="/" component={Home} />
       <Route path="/plants" component={PlantsPageWrapper} />
+      <Route path="/plant/*" component={PlantDetailPageWrapper} />
+      <Route path="/cart" component={CartPageWrapper} />
       <Route path="/about" component={AboutPageWrapper} />
       <Route path="/tools" component={ToolsPageWrapper} />
       <Route path="/seeds" component={SeedsPageWrapper} />
@@ -297,8 +333,10 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        <Toaster />
-        <Router />
+        <CartProvider>
+          <Toaster />
+          <Router />
+        </CartProvider>
       </TooltipProvider>
     </QueryClientProvider>
   );

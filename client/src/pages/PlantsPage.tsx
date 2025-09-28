@@ -1,5 +1,6 @@
 import { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useLocation } from "wouter";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -9,6 +10,7 @@ import { Search, Filter, Grid, List, ShoppingCart, Eye, Heart, Star } from "luci
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
 import { getImageUrl } from "@/lib/api";
+import { useCart } from "@/contexts/CartContext";
 
 interface Plant {
   id: string;
@@ -36,16 +38,89 @@ const getPlantImageUrl = (filename: string) => {
   return `/images/${filename}`;
 };
 
-// Sample plant data with INR prices
+// All plants data with INR prices - organized by the 5 main categories
 const samplePlants: Plant[] = [
+  // 🏡 INDOOR PLANTS
   {
     id: "1",
+    name: "Money Plant (Pothos)",
+    price: 599,
+    image: getPlantImageUrl("money plant.jpeg"),
+    category: "Indoor Plants",
+    subcategory: "Indoor",
+    description: "Popular trailing plant that's easy to care for and brings good luck. Perfect for beginners.",
+    careInstructions: "Water when soil is dry. Provide bright, indirect light. Can tolerate low light conditions.",
+    lightRequirements: "Bright, indirect light to low light",
+    wateringSchedule: "Once a week",
+    soilType: "Well-draining potting mix",
+    size: "Small (15-30cm)",
+    rating: 4.8,
+    reviews: 198,
+    inStock: true,
+    tags: ["Easy Care", "Trailing", "Good Luck", "Beginner Friendly"]
+  },
+  {
+    id: "2",
+    name: "ZZ Plant",
+    price: 1299,
+    image: getPlantImageUrl("zz plant.jpeg"),
+    category: "Indoor Plants",
+    subcategory: "Indoor",
+    description: "Extremely low-maintenance plant with glossy, dark green leaves. Perfect for busy people and low-light areas.",
+    careInstructions: "Water sparingly - once every 2-3 weeks. Thrives in low light. Very drought tolerant.",
+    lightRequirements: "Low to bright indirect light",
+    wateringSchedule: "Every 2-3 weeks",
+    soilType: "Well-draining potting mix",
+    size: "Medium (30-50cm)",
+    rating: 4.9,
+    reviews: 145,
+    inStock: true,
+    tags: ["Low Maintenance", "Drought Tolerant", "Glossy", "Low Light"]
+  },
+  {
+    id: "3",
+    name: "Spider Plant",
+    price: 799,
+    image: getPlantImageUrl("Spider Plant.jpeg"),
+    category: "Indoor Plants",
+    subcategory: "Indoor",
+    description: "Easy-care plant that produces baby plantlets. Great for hanging baskets and air purification.",
+    careInstructions: "Water when soil is dry. Provide bright, indirect light. Remove baby plantlets to encourage growth.",
+    lightRequirements: "Bright, indirect light",
+    wateringSchedule: "Once a week",
+    soilType: "Well-draining potting mix",
+    size: "Medium (25-40cm)",
+    rating: 4.7,
+    reviews: 123,
+    inStock: true,
+    tags: ["Easy Care", "Air Purifying", "Baby Plantlets", "Hanging"]
+  },
+  {
+    id: "4",
+    name: "Rubber Plant",
+    price: 1499,
+    image: getPlantImageUrl("rubber plant.jpeg"),
+    category: "Indoor Plants",
+    subcategory: "Indoor",
+    description: "Sturdy plant with large, glossy leaves. Perfect for adding height and drama to your indoor space.",
+    careInstructions: "Water when top inch of soil is dry. Provide bright, indirect light. Wipe leaves occasionally.",
+    lightRequirements: "Bright, indirect light",
+    wateringSchedule: "Once a week",
+    soilType: "Well-draining potting mix",
+    size: "Large (60-100cm)",
+    rating: 4.6,
+    reviews: 87,
+    inStock: true,
+    tags: ["Large Leaves", "Glossy", "Sturdy", "Dramatic"]
+  },
+  {
+    id: "5",
     name: "Monstera Deliciosa",
     price: 1299,
     originalPrice: 1599,
     image: getPlantImageUrl("monstera.jpeg"),
     category: "Indoor Plants",
-    subcategory: "Decorative Plants",
+    subcategory: "Indoor",
     description: "A stunning tropical plant with large, split leaves that brings a touch of the jungle to your home. Perfect for modern interiors.",
     careInstructions: "Water when top inch of soil is dry. Mist leaves weekly. Provide bright, indirect light.",
     lightRequirements: "Bright, indirect light",
@@ -55,15 +130,15 @@ const samplePlants: Plant[] = [
     rating: 4.8,
     reviews: 127,
     inStock: true,
-    tags: ["Low Maintenance", "Air Purifying", "Trending"]
+    tags: ["Low Maintenance", "Air Purifying", "Trending", "Split Leaves"]
   },
   {
-    id: "2",
+    id: "6",
     name: "Peace Lily",
     price: 899,
     image: getPlantImageUrl("Peace Lily.jpeg"),
     category: "Indoor Plants",
-    subcategory: "Flowering Plants",
+    subcategory: "Indoor",
     description: "Elegant white blooms and glossy green leaves. Known for its air-purifying qualities and easy care.",
     careInstructions: "Keep soil moist but not soggy. Place in low to bright indirect light. Blooms year-round.",
     lightRequirements: "Low to bright indirect light",
@@ -73,52 +148,15 @@ const samplePlants: Plant[] = [
     rating: 4.6,
     reviews: 89,
     inStock: true,
-    tags: ["Air Purifying", "Flowering", "Low Light"]
+    tags: ["Air Purifying", "White Flowers", "Low Light", "Easy Care"]
   },
   {
-    id: "3",
-    name: "Snake Plant (Sansevieria)",
-    price: 799,
-    originalPrice: 999,
-    image: getPlantImageUrl("Snake Plant.jpeg"),
-    category: "Indoor Plants",
-    subcategory: "Decorative Plants",
-    description: "Extremely low-maintenance plant with striking vertical leaves. Perfect for beginners and busy lifestyles.",
-    careInstructions: "Water sparingly - once every 2-3 weeks. Thrives in low light conditions.",
-    lightRequirements: "Low to bright light",
-    wateringSchedule: "Every 2-3 weeks",
-    soilType: "Cactus/succulent mix",
-    size: "Medium (25-35cm)",
-    rating: 4.9,
-    reviews: 156,
-    inStock: true,
-    tags: ["Low Maintenance", "Air Purifying", "Beginner Friendly"]
-  },
-  {
-    id: "4",
-    name: "Rose Plant (Red)",
-    price: 1599,
-    image: getPlantImageUrl("rose plant.jpeg"),
-    category: "Outdoor Plants",
-    subcategory: "Flowering Plants",
-    description: "Classic red roses that bloom beautifully in your garden. Perfect for gifting and romantic occasions.",
-    careInstructions: "Plant in well-draining soil. Water deeply once a week. Provide 6+ hours of direct sunlight.",
-    lightRequirements: "Full sun (6+ hours)",
-    wateringSchedule: "Once a week",
-    soilType: "Well-draining garden soil",
-    size: "Large (40-50cm)",
-    rating: 4.7,
-    reviews: 93,
-    inStock: true,
-    tags: ["Flowering", "Garden", "Gift"]
-  },
-  {
-    id: "5",
+    id: "7",
     name: "Aloe Vera",
     price: 599,
     image: getPlantImageUrl("aloe vera.jpeg"),
     category: "Indoor Plants",
-    subcategory: "Succulents",
+    subcategory: "Indoor",
     description: "Medicinal succulent with healing properties. Easy to care for and great for skin treatments.",
     careInstructions: "Water deeply but infrequently. Allow soil to dry completely between waterings.",
     lightRequirements: "Bright, direct light",
@@ -128,33 +166,163 @@ const samplePlants: Plant[] = [
     rating: 4.5,
     reviews: 74,
     inStock: true,
-    tags: ["Medicinal", "Low Maintenance", "Succulent"]
+    tags: ["Medicinal", "Low Maintenance", "Succulent", "Healing"]
   },
+
+  // 🌳 OUTDOOR PLANTS
   {
-    id: "6",
-    name: "Lemon Tree",
-    price: 2499,
-    image: getPlantImageUrl("lemon tree.jpeg"),
+    id: "8",
+    name: "Neem Plant",
+    price: 999,
+    image: getPlantImageUrl("neem plant.jpeg"),
     category: "Outdoor Plants",
-    subcategory: "Fruit Plants",
-    description: "Dwarf lemon tree perfect for patios and small gardens. Produces fragrant flowers and edible lemons.",
-    careInstructions: "Plant in large container. Water regularly during growing season. Fertilize monthly.",
-    lightRequirements: "Full sun",
-    wateringSchedule: "2-3 times a week",
-    soilType: "Well-draining potting mix",
-    size: "Large (60-80cm)",
-    rating: 4.4,
-    reviews: 67,
+    subcategory: "Outdoor",
+    description: "Medicinal tree with numerous health benefits. Natural pest repellent and air purifier for your garden.",
+    careInstructions: "Plant in well-draining soil. Water regularly during dry periods. Prune to maintain shape.",
+    lightRequirements: "Full sun to partial shade",
+    wateringSchedule: "Once a week",
+    soilType: "Well-draining garden soil",
+    size: "Large (100-150cm)",
+    rating: 4.5,
+    reviews: 92,
     inStock: true,
-    tags: ["Fruit Bearing", "Outdoor", "Citrus"]
+    tags: ["Medicinal", "Pest Repellent", "Air Purifying", "Health Benefits"]
   },
   {
-    id: "7",
+    id: "9",
+    name: "Tulsi Plant (Holy Basil)",
+    price: 699,
+    image: getPlantImageUrl("tulsi plant.jpeg"),
+    category: "Outdoor Plants",
+    subcategory: "Outdoor",
+    description: "Sacred plant with medicinal properties. Used in Ayurveda and perfect for home gardens and religious purposes.",
+    careInstructions: "Plant in well-draining soil. Water regularly. Pinch flowers to encourage leaf growth.",
+    lightRequirements: "Full sun to partial shade",
+    wateringSchedule: "Twice a week",
+    soilType: "Well-draining garden soil",
+    size: "Small (20-40cm)",
+    rating: 4.7,
+    reviews: 156,
+    inStock: true,
+    tags: ["Sacred", "Medicinal", "Ayurveda", "Religious"]
+  },
+  {
+    id: "10",
+    name: "Ashwagandha Plant",
+    price: 1199,
+    image: getPlantImageUrl("ashwagandha.jpeg"),
+    category: "Outdoor Plants",
+    subcategory: "Outdoor",
+    description: "Medicinal herb known for its adaptogenic properties. Used in traditional medicine for stress relief and vitality.",
+    careInstructions: "Plant in well-draining soil. Water regularly. Harvest roots after 2-3 years of growth.",
+    lightRequirements: "Full sun to partial shade",
+    wateringSchedule: "Twice a week",
+    soilType: "Well-draining garden soil",
+    size: "Medium (40-60cm)",
+    rating: 4.4,
+    reviews: 78,
+    inStock: true,
+    tags: ["Medicinal", "Adaptogenic", "Stress Relief", "Traditional Medicine"]
+  },
+
+  // 🌸 FLOWERING PLANTS
+  {
+    id: "11",
+    name: "Hibiscus Plant",
+    price: 1299,
+    image: getPlantImageUrl("hibiscus-plant.jpeg"),
+    category: "Flowering Plants",
+    subcategory: "Flowering",
+    description: "Beautiful tropical flowering plant with large, colorful blooms. Perfect for gardens and outdoor spaces.",
+    careInstructions: "Plant in well-draining soil. Water regularly during blooming season. Provide full sun for best flowering.",
+    lightRequirements: "Full sun (6+ hours)",
+    wateringSchedule: "Twice a week",
+    soilType: "Well-draining garden soil",
+    size: "Medium (40-60cm)",
+    rating: 4.7,
+    reviews: 89,
+    inStock: true,
+    tags: ["Flowering", "Tropical", "Colorful Blooms", "Outdoor"]
+  },
+  {
+    id: "12",
+    name: "Rose Plant",
+    price: 1599,
+    image: getPlantImageUrl("rose plant.jpeg"),
+    category: "Flowering Plants",
+    subcategory: "Flowering",
+    description: "Classic red roses that bloom beautifully in your garden. Perfect for gifting and romantic occasions.",
+    careInstructions: "Plant in well-draining soil. Water deeply once a week. Provide 6+ hours of direct sunlight.",
+    lightRequirements: "Full sun (6+ hours)",
+    wateringSchedule: "Once a week",
+    soilType: "Well-draining garden soil",
+    size: "Large (40-50cm)",
+    rating: 4.8,
+    reviews: 127,
+    inStock: true,
+    tags: ["Flowering", "Garden", "Gift", "Classic"]
+  },
+  {
+    id: "13",
+    name: "Marigold Plant",
+    price: 599,
+    image: getPlantImageUrl("marigold plant.jpeg"),
+    category: "Flowering Plants",
+    subcategory: "Flowering",
+    description: "Bright orange and yellow marigold flowers. Great for borders, pest control, and adding color to your garden.",
+    careInstructions: "Plant in well-draining soil. Water regularly. Deadhead spent flowers to encourage more blooms.",
+    lightRequirements: "Full sun to partial shade",
+    wateringSchedule: "Twice a week",
+    soilType: "Well-draining garden soil",
+    size: "Small (20-30cm)",
+    rating: 4.6,
+    reviews: 95,
+    inStock: true,
+    tags: ["Flowering", "Pest Control", "Bright Colors", "Easy Care"]
+  },
+  {
+    id: "14",
+    name: "Bougainvillea Plant",
+    price: 1899,
+    image: getPlantImageUrl("bougainvillea-plant.jpeg"),
+    category: "Flowering Plants",
+    subcategory: "Flowering",
+    description: "Vibrant climbing plant with colorful bracts. Perfect for trellises, walls, and creating stunning garden displays.",
+    careInstructions: "Plant in well-draining soil. Water regularly during growing season. Prune after flowering to maintain shape.",
+    lightRequirements: "Full sun",
+    wateringSchedule: "Twice a week",
+    soilType: "Well-draining garden soil",
+    size: "Large (60-100cm)",
+    rating: 4.9,
+    reviews: 156,
+    inStock: true,
+    tags: ["Climbing", "Colorful", "Vibrant", "Trellis"]
+  },
+  {
+    id: "15",
+    name: "Sunflower Plant",
+    price: 799,
+    image: getPlantImageUrl("sunflower-plant.jpeg"),
+    category: "Flowering Plants",
+    subcategory: "Flowering",
+    description: "Tall, cheerful sunflowers that follow the sun. Perfect for creating a dramatic garden focal point.",
+    careInstructions: "Plant in full sun. Water deeply and regularly. Stake tall varieties to prevent toppling.",
+    lightRequirements: "Full sun",
+    wateringSchedule: "Daily during hot weather",
+    soilType: "Well-draining garden soil",
+    size: "Large (100-200cm)",
+    rating: 4.5,
+    reviews: 78,
+    inStock: true,
+    tags: ["Tall", "Cheerful", "Sun Following", "Dramatic"]
+  },
+  {
+    id: "16",
     name: "Jasmine Plant",
     price: 1199,
     image: getPlantImageUrl("jasmine plant.jpeg"),
-    category: "Outdoor Plants",
-    subcategory: "Flowering Plants",
+    category: "Flowering Plants",
+    subcategory: "Flowering",
     description: "Fragrant white flowers that bloom at night. Perfect for trellises and garden borders.",
     careInstructions: "Plant in well-draining soil. Water regularly during blooming season. Prune after flowering.",
     lightRequirements: "Full sun to partial shade",
@@ -164,62 +332,192 @@ const samplePlants: Plant[] = [
     rating: 4.8,
     reviews: 85,
     inStock: true,
-    tags: ["Fragrant", "Flowering", "Climbing"]
+    tags: ["Fragrant", "Night Blooming", "Climbing", "White Flowers"]
   },
+
+  // 🎍 DECORATIVE PLANTS
   {
-    id: "8",
-    name: "Jade Plant (Crassula Ovata)",
-    price: 899,
-    originalPrice: 1199,
-    image: getPlantImageUrl("aloe vera.jpeg"), // Using aloe vera image as placeholder
-    category: "Indoor Plants",
-    subcategory: "Succulents",
-    description: "A beautiful succulent with thick, glossy leaves that symbolize good luck and prosperity. Perfect for beginners and low-maintenance plant lovers.",
-    careInstructions: "Water when soil is completely dry. Allow soil to dry out between waterings. Thrives in bright, indirect light.",
-    lightRequirements: "Bright, indirect light",
+    id: "17",
+    name: "Snake Plant (Sansevieria)",
+    price: 799,
+    originalPrice: 999,
+    image: getPlantImageUrl("Snake Plant.jpeg"),
+    category: "Decorative Plants",
+    subcategory: "Decorative",
+    description: "Extremely low-maintenance plant with striking vertical leaves. Perfect for beginners and busy lifestyles.",
+    careInstructions: "Water sparingly - once every 2-3 weeks. Thrives in low light conditions.",
+    lightRequirements: "Low to bright light",
     wateringSchedule: "Every 2-3 weeks",
     soilType: "Cactus/succulent mix",
-    size: "Small (15-25cm)",
-    rating: 4.7,
-    reviews: 92,
-    inStock: true,
-    tags: ["Succulent", "Low Maintenance", "Good Luck", "Beginner Friendly"]
-  },
-  {
-    id: "9",
-    name: "Piper Plant (Betel Leaf)",
-    price: 699,
-    image: getPlantImageUrl("Peace Lily.jpeg"), // Using Peace Lily image as placeholder
-    category: "Indoor Plants",
-    subcategory: "Decorative Plants",
-    description: "An attractive climbing plant with heart-shaped leaves. Known for its air-purifying qualities and easy care requirements.",
-    careInstructions: "Keep soil consistently moist. Provide bright, indirect light. Mist leaves occasionally for humidity.",
-    lightRequirements: "Bright, indirect light",
-    wateringSchedule: "2-3 times a week",
-    soilType: "Well-draining potting mix",
     size: "Medium (25-35cm)",
-    rating: 4.5,
-    reviews: 78,
-    inStock: true,
-    tags: ["Climbing", "Air Purifying", "Heart-shaped Leaves", "Easy Care"]
-  },
-  {
-    id: "10",
-    name: "Lavender Plant",
-    price: 1299,
-    image: getPlantImageUrl("rose plant.jpeg"), // Using rose plant image as placeholder
-    category: "Indoor Plants",
-    subcategory: "Aromatic Plants",
-    description: "Fragrant purple flowers with a calming aroma. Perfect for indoor herb gardens and aromatherapy. Adds beauty and fragrance to any space.",
-    careInstructions: "Water when top inch of soil is dry. Provide plenty of bright light. Prune regularly to maintain shape.",
-    lightRequirements: "Bright, direct light",
-    wateringSchedule: "Once a week",
-    soilType: "Well-draining, slightly alkaline soil",
-    size: "Medium (20-30cm)",
-    rating: 4.8,
+    rating: 4.9,
     reviews: 156,
     inStock: true,
-    tags: ["Aromatic", "Purple Flowers", "Calming", "Herb Garden"]
+    tags: ["Low Maintenance", "Air Purifying", "Beginner Friendly", "Vertical"]
+  },
+  {
+    id: "18",
+    name: "Areca Palm Plant",
+    price: 1899,
+    image: getPlantImageUrl("areca palm plant.jpeg"),
+    category: "Decorative Plants",
+    subcategory: "Decorative",
+    description: "Elegant palm with feathery fronds that adds tropical beauty to any space. Excellent air purifier.",
+    careInstructions: "Keep soil consistently moist. Provide bright, indirect light. Mist leaves regularly for humidity.",
+    lightRequirements: "Bright, indirect light",
+    wateringSchedule: "Twice a week",
+    soilType: "Well-draining potting mix",
+    size: "Large (60-80cm)",
+    rating: 4.7,
+    reviews: 134,
+    inStock: true,
+    tags: ["Tropical", "Air Purifying", "Feathery", "Elegant"]
+  },
+  {
+    id: "19",
+    name: "Fiddle Leaf Fig",
+    price: 2499,
+    image: getPlantImageUrl("fidde leaf plant.jpeg"),
+    category: "Decorative Plants",
+    subcategory: "Decorative",
+    description: "Trendy houseplant with large, violin-shaped leaves. Perfect statement piece for modern interiors.",
+    careInstructions: "Water when top inch of soil is dry. Provide bright, indirect light. Rotate regularly for even growth.",
+    lightRequirements: "Bright, indirect light",
+    wateringSchedule: "Once a week",
+    soilType: "Well-draining potting mix",
+    size: "Large (80-120cm)",
+    rating: 4.8,
+    reviews: 167,
+    inStock: true,
+    tags: ["Trendy", "Statement Plant", "Large Leaves", "Modern"]
+  },
+  {
+    id: "20",
+    name: "Croton Plant",
+    price: 1299,
+    image: getPlantImageUrl("croton plant.jpeg"),
+    category: "Decorative Plants",
+    subcategory: "Decorative",
+    description: "Colorful plant with vibrant, variegated leaves in shades of red, orange, and yellow. Adds tropical flair.",
+    careInstructions: "Keep soil moist. Provide bright, indirect light. Higher humidity preferred.",
+    lightRequirements: "Bright, indirect light",
+    wateringSchedule: "Twice a week",
+    soilType: "Well-draining potting mix",
+    size: "Medium (30-50cm)",
+    rating: 4.5,
+    reviews: 98,
+    inStock: true,
+    tags: ["Colorful", "Variegated", "Tropical", "Vibrant"]
+  },
+  {
+    id: "21",
+    name: "Bamboo Plant (Lucky Bamboo)",
+    price: 699,
+    image: getPlantImageUrl("bamboo plant.jpeg"),
+    category: "Decorative Plants",
+    subcategory: "Decorative",
+    description: "Symbol of good luck and prosperity. Easy to care for and perfect for feng shui arrangements.",
+    careInstructions: "Keep in water or well-draining soil. Change water weekly if growing in water. Provide indirect light.",
+    lightRequirements: "Indirect light",
+    wateringSchedule: "Weekly water change",
+    soilType: "Water or well-draining soil",
+    size: "Small (20-40cm)",
+    rating: 4.6,
+    reviews: 112,
+    inStock: true,
+    tags: ["Good Luck", "Feng Shui", "Easy Care", "Prosperity"]
+  },
+
+  // 🍎 FRUIT PLANTS
+  {
+    id: "22",
+    name: "Mango Plant",
+    price: 2199,
+    image: getPlantImageUrl("mango plant.jpeg"),
+    category: "Fruit Plants",
+    subcategory: "Fruit",
+    description: "Tropical fruit tree that produces sweet, juicy mangoes. Perfect for gardens and large containers.",
+    careInstructions: "Plant in well-draining soil. Water regularly during growing season. Fertilize monthly with fruit tree fertilizer.",
+    lightRequirements: "Full sun",
+    wateringSchedule: "2-3 times a week",
+    soilType: "Well-draining garden soil",
+    size: "Large (80-120cm)",
+    rating: 4.7,
+    reviews: 89,
+    inStock: true,
+    tags: ["Fruit Bearing", "Tropical", "Sweet", "Large Tree"]
+  },
+  {
+    id: "23",
+    name: "Guava Plant",
+    price: 1899,
+    image: getPlantImageUrl("guava plant.jpeg"),
+    category: "Fruit Plants",
+    subcategory: "Fruit",
+    description: "Fast-growing fruit tree that produces sweet, aromatic guavas. Great for home gardens.",
+    careInstructions: "Plant in well-draining soil. Water regularly. Prune to maintain shape and encourage fruiting.",
+    lightRequirements: "Full sun to partial shade",
+    wateringSchedule: "Twice a week",
+    soilType: "Well-draining garden soil",
+    size: "Medium (60-80cm)",
+    rating: 4.6,
+    reviews: 76,
+    inStock: true,
+    tags: ["Fruit Bearing", "Fast Growing", "Aromatic", "Sweet"]
+  },
+  {
+    id: "24",
+    name: "Banana Plant",
+    price: 1599,
+    image: getPlantImageUrl("banana plant.jpeg"),
+    category: "Fruit Plants",
+    subcategory: "Fruit",
+    description: "Tropical plant that produces sweet bananas. Adds exotic beauty to your garden.",
+    careInstructions: "Plant in rich, well-draining soil. Water regularly and keep soil moist. Protect from strong winds.",
+    lightRequirements: "Full sun",
+    wateringSchedule: "Daily during hot weather",
+    soilType: "Rich, well-draining soil",
+    size: "Large (100-150cm)",
+    rating: 4.5,
+    reviews: 67,
+    inStock: true,
+    tags: ["Tropical", "Fruit Bearing", "Exotic", "Large"]
+  },
+  {
+    id: "25",
+    name: "Lemon Tree",
+    price: 2499,
+    image: getPlantImageUrl("lemon tree.jpeg"),
+    category: "Fruit Plants",
+    subcategory: "Fruit",
+    description: "Dwarf lemon tree perfect for patios and small gardens. Produces fragrant flowers and edible lemons.",
+    careInstructions: "Plant in large container. Water regularly during growing season. Fertilize monthly.",
+    lightRequirements: "Full sun",
+    wateringSchedule: "2-3 times a week",
+    soilType: "Well-draining potting mix",
+    size: "Large (60-80cm)",
+    rating: 4.4,
+    reviews: 67,
+    inStock: true,
+    tags: ["Fruit Bearing", "Citrus", "Fragrant", "Dwarf"]
+  },
+  {
+    id: "26",
+    name: "Papaya Plant",
+    price: 1799,
+    image: getPlantImageUrl("papaya plant.jpeg"),
+    category: "Fruit Plants",
+    subcategory: "Fruit",
+    description: "Fast-growing tropical tree that produces sweet, nutritious papayas. Perfect for warm climates.",
+    careInstructions: "Plant in well-draining soil. Water regularly. Protect from frost and strong winds.",
+    lightRequirements: "Full sun",
+    wateringSchedule: "Twice a week",
+    soilType: "Well-draining garden soil",
+    size: "Large (80-120cm)",
+    rating: 4.3,
+    reviews: 54,
+    inStock: true,
+    tags: ["Tropical", "Fast Growing", "Nutritious", "Warm Climate"]
   }
 ];
 
@@ -229,9 +527,7 @@ const categories = [
   "Outdoor Plants",
   "Flowering Plants",
   "Decorative Plants",
-  "Fruit Plants",
-  "Succulents",
-  "Aromatic Plants"
+  "Fruit Plants"
 ];
 
 const sortOptions = [
@@ -253,6 +549,18 @@ export default function PlantsPage({ onAddToCart }: PlantsPageProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [selectedPlant, setSelectedPlant] = useState<Plant | null>(null);
+  const [, setLocation] = useLocation();
+  const { addToCart, isInCart, getTotalItems } = useCart();
+
+  const handlePlantClick = (plantId: string) => {
+    setLocation(`/plant/${plantId}`);
+  };
+
+  const handleAddToCart = (plant: Plant) => {
+    console.log('PlantsPage: Adding plant to cart:', plant.name, plant.id);
+    addToCart(plant);
+    onAddToCart(plant.id);
+  };
 
   // Filter and sort plants
   const filteredAndSortedPlants = useMemo(() => {
@@ -423,12 +731,15 @@ export default function PlantsPage({ onAddToCart }: PlantsPageProps) {
                 : "space-y-4"
             }`}>
               {filteredAndSortedPlants.map((plant) => (
-                <Card key={plant.id} className="group hover:shadow-lg transition-shadow">
+                <Card key={plant.id} className="group hover:shadow-lg transition-shadow overflow-hidden">
                   <CardContent className="p-0">
                     {viewMode === "grid" ? (
                       // Grid View
-                      <div>
-                        <div className="relative aspect-square overflow-hidden rounded-t-lg">
+                      <div className="flex flex-col h-full">
+                        <div 
+                          className="relative aspect-square overflow-hidden cursor-pointer"
+                          onClick={() => handlePlantClick(plant.id)}
+                        >
                           <img
                             src={plant.image}
                             alt={plant.name}
@@ -446,9 +757,12 @@ export default function PlantsPage({ onAddToCart }: PlantsPageProps) {
                           )}
                         </div>
                         
-                        <div className="p-4">
+                        <div className="p-4 flex flex-col flex-1">
                           <div className="flex items-start justify-between mb-2">
-                            <h3 className="font-semibold text-lg text-gray-900 group-hover:text-primary transition-colors">
+                            <h3 
+                              className="font-semibold text-lg text-gray-900 group-hover:text-primary transition-colors cursor-pointer"
+                              onClick={() => handlePlantClick(plant.id)}
+                            >
                               {plant.name}
                             </h3>
                             <Button
@@ -489,27 +803,25 @@ export default function PlantsPage({ onAddToCart }: PlantsPageProps) {
                             </Badge>
                           </div>
                           
-                          <div className="flex gap-2">
-                            <Dialog>
-                              <DialogTrigger asChild>
+                          <div className="flex gap-2 mt-auto pt-3">
                                 <Button 
                                   variant="outline" 
-                                  className="flex-1"
-                                  onClick={() => setSelectedPlant(plant)}
+                              size="sm"
+                              className="flex-1 text-xs min-w-0"
+                              onClick={() => handlePlantClick(plant.id)}
                                 >
-                                  <Eye className="h-4 w-4 mr-2" />
-                                  View Details
+                              <Eye className="h-3 w-3 mr-1" />
+                              <span className="truncate">View Details</span>
                                 </Button>
-                              </DialogTrigger>
-                            </Dialog>
                             
                             <Button 
-                              className="flex-1"
-                              onClick={() => onAddToCart(plant.id)}
+                              size="sm"
+                              className="flex-1 text-xs min-w-0"
+                              onClick={() => handleAddToCart(plant)}
                               disabled={!plant.inStock}
                             >
-                              <ShoppingCart className="h-4 w-4 mr-2" />
-                              Add to Cart
+                              <ShoppingCart className="h-3 w-3 mr-1" />
+                              <span className="truncate">{isInCart(plant.id) ? 'Added' : 'Add to Cart'}</span>
                             </Button>
                           </div>
                         </div>
@@ -517,7 +829,10 @@ export default function PlantsPage({ onAddToCart }: PlantsPageProps) {
                     ) : (
                       // List View
                       <div className="flex">
-                        <div className="relative w-32 h-32 flex-shrink-0">
+                        <div 
+                          className="relative w-32 h-32 flex-shrink-0 cursor-pointer"
+                          onClick={() => handlePlantClick(plant.id)}
+                        >
                           <img
                             src={plant.image}
                             alt={plant.name}
@@ -532,7 +847,10 @@ export default function PlantsPage({ onAddToCart }: PlantsPageProps) {
                         
                         <div className="flex-1 p-4">
                           <div className="flex items-start justify-between mb-2">
-                            <h3 className="font-semibold text-lg text-gray-900">
+                            <h3 
+                              className="font-semibold text-lg text-gray-900 cursor-pointer hover:text-primary transition-colors"
+                              onClick={() => handlePlantClick(plant.id)}
+                            >
                               {plant.name}
                             </h3>
                             <div className="flex items-center gap-2">
@@ -571,27 +889,25 @@ export default function PlantsPage({ onAddToCart }: PlantsPageProps) {
                             </div>
                           </div>
                           
-                          <div className="flex gap-2">
-                            <Dialog>
-                              <DialogTrigger asChild>
+                          <div className="flex gap-2 flex-shrink-0">
                                 <Button 
                                   variant="outline" 
                                   size="sm"
-                                  onClick={() => setSelectedPlant(plant)}
+                              className="text-xs min-w-0"
+                              onClick={() => handlePlantClick(plant.id)}
                                 >
-                                  <Eye className="h-4 w-4 mr-2" />
-                                  View Details
+                              <Eye className="h-3 w-3 mr-1" />
+                              <span className="truncate">View Details</span>
                                 </Button>
-                              </DialogTrigger>
-                            </Dialog>
                             
                             <Button 
                               size="sm"
-                              onClick={() => onAddToCart(plant.id)}
+                              className="text-xs min-w-0"
+                              onClick={() => handleAddToCart(plant)}
                               disabled={!plant.inStock}
                             >
-                              <ShoppingCart className="h-4 w-4 mr-2" />
-                              Add to Cart
+                              <ShoppingCart className="h-3 w-3 mr-1" />
+                              <span className="truncate">{isInCart(plant.id) ? 'Added' : 'Add to Cart'}</span>
                             </Button>
                           </div>
                         </div>

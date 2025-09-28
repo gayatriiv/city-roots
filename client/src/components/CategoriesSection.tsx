@@ -4,6 +4,7 @@ import { ArrowRight } from "lucide-react";
 import floweringPlantsImage from "@assets/generated_images/Flowering_plants_collection_5d058eb7.png";
 import gardeningToolsImage from "@assets/generated_images/Gardening_tools_collection_9c82fa3c.png";
 import seedsImage from "@assets/generated_images/Seeds_and_seedlings_9e473d23.png";
+import SimpleCounter from "@/components/SimpleCounter";
 
 interface Category {
   id: string;
@@ -19,61 +20,63 @@ interface CategoriesSectionProps {
 }
 
 export default function CategoriesSection({ onCategoryClick }: CategoriesSectionProps) {
-  //todo: remove mock functionality
+  // Main categories in 2x2 grid layout
   const categories: Category[] = [
     {
-      id: 'flowering-plants',
-      name: 'Flowering Plants',
-      description: 'Beautiful blooms for every season',
+      id: 'all-plants',
+      name: 'All Plants',
+      description: 'Complete collection of indoor and outdoor plants',
       image: floweringPlantsImage,
-      productCount: 156,
+      productCount: 26, // Total plants in our catalog
       featured: true
     },
     {
-      id: 'gardening-tools',
-      name: 'Gardening Tools',
-      description: 'Professional quality tools for every gardener',
+      id: 'tools',
+      name: 'Tools',
+      description: 'Essential gardening tools and equipment',
       image: gardeningToolsImage,
-      productCount: 89,
+      productCount: 12, // Mock data for tools
       featured: true
     },
     {
-      id: 'seeds-seedlings',
-      name: 'Seeds & Seedlings',
-      description: 'Start your garden from the beginning',
+      id: 'seeds',
+      name: 'Seeds',
+      description: 'High-quality seeds and seedlings',
       image: seedsImage,
-      productCount: 234,
+      productCount: 15, // Mock data for seeds
       featured: true
     },
     {
-      id: 'decorative-plants',
-      name: 'Decorative Plants',
-      description: 'Indoor and outdoor decorative plants',
-      image: floweringPlantsImage, // Reusing for demo
-      productCount: 92,
-      featured: false
-    },
-    {
-      id: 'fruit-plants',
-      name: 'Fruit Plants',
-      description: 'Grow your own fresh fruits',
-      image: seedsImage, // Reusing for demo
-      productCount: 67,
-      featured: false
-    },
-    {
-      id: 'gift-kits',
-      name: 'Gift Kits',
+      id: 'gift-sets',
+      name: 'Gifting Sets',
       description: 'Perfect starter kits for gardening enthusiasts',
-      image: gardeningToolsImage, // Reusing for demo
-      productCount: 45,
-      featured: false
+      image: gardeningToolsImage,
+      productCount: 8, // Mock data for gift sets
+      featured: true
     }
   ];
 
   const handleCategoryClick = (categoryId: string) => {
-    console.log(`Navigate to category: ${categoryId}`); //todo: remove mock functionality
-    onCategoryClick?.(categoryId);
+    console.log(`Navigate to category: ${categoryId}`);
+    
+    // Navigate to appropriate page based on category
+    switch (categoryId) {
+      case 'all-plants':
+        window.location.href = '/plants';
+        break;
+      case 'tools':
+        window.location.href = '/tools';
+        break;
+      case 'seeds':
+        window.location.href = '/seeds';
+        break;
+      case 'gift-sets':
+        // For now, navigate to plants page for gift sets
+        window.location.href = '/plants';
+        break;
+      default:
+        onCategoryClick?.(categoryId);
+    }
   };
 
   return (
@@ -90,8 +93,8 @@ export default function CategoriesSection({ onCategoryClick }: CategoriesSection
         </div>
 
         {/* Featured Categories Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          {categories.filter(cat => cat.featured).map((category) => (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+          {categories.filter(cat => cat.featured).map((category, index) => (
             <Card
               key={category.id}
               className="group hover-elevate cursor-pointer overflow-hidden"
@@ -115,7 +118,11 @@ export default function CategoriesSection({ onCategoryClick }: CategoriesSection
                 </div>
                 <div className="absolute top-4 right-4">
                   <span className="bg-white/20 backdrop-blur-sm text-white px-2 py-1 rounded-full text-xs" data-testid={`product-count-${category.id}`}>
-                    {category.productCount} items
+                    <SimpleCounter 
+                      target={category.productCount} 
+                      duration={2000}
+                      delay={index * 200}
+                    /> items
                   </span>
                 </div>
               </div>
@@ -123,38 +130,6 @@ export default function CategoriesSection({ onCategoryClick }: CategoriesSection
           ))}
         </div>
 
-        {/* Other Categories */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
-          {categories.filter(cat => !cat.featured).map((category) => (
-            <Card
-              key={category.id}
-              className="group hover-elevate cursor-pointer"
-              onClick={() => handleCategoryClick(category.id)}
-              data-testid={`category-card-${category.id}`}
-            >
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-3">
-                    <img
-                      src={category.image}
-                      alt={category.name}
-                      className="w-12 h-12 object-cover rounded-md"
-                    />
-                    <div>
-                      <h4 className="font-semibold text-card-foreground" data-testid={`category-name-${category.id}`}>
-                        {category.name}
-                      </h4>
-                      <p className="text-xs text-muted-foreground" data-testid={`product-count-${category.id}`}>
-                        {category.productCount} items
-                      </p>
-                    </div>
-                  </div>
-                  <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
 
         {/* View All Button */}
         <div className="text-center">

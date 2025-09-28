@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useState } from "react";
 import { useLocation, Link } from "wouter";
+import AnimatedCounter from "@/components/AnimatedCounter";
 
 interface HeaderProps {
   cartItems?: number;
@@ -123,10 +124,16 @@ export default function Header({ cartItems = 0, onCartClick, onSearchChange }: H
               <ShoppingCart className="h-5 w-5" />
               {cartItems > 0 && (
                 <Badge 
-                  className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center text-xs bg-primary text-primary-foreground"
+                  className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center text-xs bg-primary text-primary-foreground animate-pulse"
                   data-testid="cart-badge"
                 >
-                  {cartItems > 99 ? "99+" : cartItems}
+                  <AnimatedCounter 
+                    target={cartItems > 99 ? 99 : cartItems} 
+                    duration={1000}
+                    delay={0}
+                    suffix={cartItems > 99 ? "+" : ""}
+                    className="text-xs"
+                  />
                 </Badge>
               )}
             </Button>

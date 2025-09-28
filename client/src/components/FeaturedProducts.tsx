@@ -4,6 +4,8 @@ import { ArrowRight } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { fetchProducts } from "@/lib/api";
 import { getImageUrl } from "@/lib/api";
+import SimpleCounter from "@/components/SimpleCounter";
+import { useCart } from "@/contexts/CartContext";
 
 interface FeaturedProductsProps {
   onProductClick?: (productId: string) => void;
@@ -16,6 +18,9 @@ export default function FeaturedProducts({ onProductClick, onAddToCart, onViewAl
     queryKey: ['products', { featured: true }],
     queryFn: () => fetchProducts({ featured: true }),
   });
+  
+  const { getTotalItems } = useCart();
+  const cartItems = getTotalItems();
 
   return (
     <section className="py-16 bg-accent/30" data-testid="featured-products-section">
@@ -26,9 +31,31 @@ export default function FeaturedProducts({ onProductClick, onAddToCart, onViewAl
             <h2 className="text-3xl sm:text-4xl font-serif font-bold text-foreground mb-4">
               Featured Products
             </h2>
-            <p className="text-lg text-muted-foreground">
+            <p className="text-lg text-muted-foreground mb-2">
               Handpicked selections from our gardening experts
             </p>
+            <div className="flex items-center gap-6 text-sm text-muted-foreground">
+              <div className="flex items-center gap-2">
+                <span className="font-semibold text-primary">
+                  <SimpleCounter 
+                    target={26} 
+                    duration={2000}
+                    delay={1000}
+                  />
+                </span>
+                <span>Total Plants</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="font-semibold text-green-600">
+                  <SimpleCounter 
+                    target={cartItems} 
+                    duration={1500}
+                    delay={1500}
+                  />
+                </span>
+                <span>In Your Cart</span>
+              </div>
+            </div>
           </div>
           <Button
             variant="outline"

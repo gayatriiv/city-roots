@@ -2,9 +2,6 @@ import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Clock, User, ArrowRight, BookOpen, Leaf } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
-import { fetchGuides } from "@/lib/api";
-import { getImageUrl } from "@/lib/api";
 
 interface Guide {
   id: string;
@@ -24,12 +21,42 @@ interface GuidesSectionProps {
 }
 
 export default function GuidesSection({ onGuideClick, onViewAllGuides }: GuidesSectionProps) {
-  const { data: allGuides = [], isLoading } = useQuery({
-    queryKey: ['guides'],
-    queryFn: () => fetchGuides(),
-  });
-
-  const guides = allGuides;
+  // Static guides data with actual images
+  const guides: Guide[] = [
+    {
+      id: 'beginner-guide',
+      title: 'Starting Your First Garden: A Complete Beginner\'s Guide',
+      description: 'Everything you need to know to start your gardening journey, from choosing the right location to planting your first seeds.',
+      image: '/images/beginners guide.png',
+      difficulty: 'Beginner',
+      readTime: '8 min read',
+      author: 'Sarah Johnson',
+      category: 'Getting Started',
+      featured: true
+    },
+    {
+      id: 'seeds-indoor',
+      title: 'Master the Art of Starting Seeds Indoors',
+      description: 'Learn professional techniques for starting seeds indoors to get a head start on the growing season.',
+      image: '/images/seeds indoor.png',
+      difficulty: 'Intermediate',
+      readTime: '12 min read',
+      author: 'Mike Chen',
+      category: 'Seed Starting',
+      featured: true
+    },
+    {
+      id: 'tools-guide',
+      title: 'Essential Tools Every Gardener Should Own',
+      description: 'Discover the must-have tools that will make your gardening tasks easier and more efficient.',
+      image: '/images/gardening-guide.png',
+      difficulty: 'Beginner',
+      readTime: '6 min read',
+      author: 'Emma Davis',
+      category: 'Tools & Equipment',
+      featured: true
+    }
+  ];
 
   const handleGuideClick = (guideId: string) => {
     console.log(`Open guide: ${guideId}`); //todo: remove mock functionality
@@ -62,49 +89,44 @@ export default function GuidesSection({ onGuideClick, onViewAllGuides }: GuidesS
         </div>
 
         {/* Featured Guides */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-          {isLoading ? (
-            // Loading skeleton
-            Array.from({ length: 3 }).map((_, index) => (
-              <div key={index} className="bg-card rounded-lg overflow-hidden animate-pulse">
-                <div className="bg-muted h-48"></div>
-                <div className="p-4 space-y-2">
-                  <div className="bg-muted h-4 rounded w-1/4"></div>
-                  <div className="bg-muted h-6 rounded w-3/4"></div>
-                  <div className="bg-muted h-4 rounded w-full"></div>
-                  <div className="bg-muted h-4 rounded w-2/3"></div>
-                </div>
-              </div>
-            ))
-          ) : (
-            guides.filter(guide => guide.featured).map((guide) => (
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8 items-start">
+          {guides.filter(guide => guide.featured).map((guide) => (
               <Card
               key={guide.id}
-              className="group hover-elevate cursor-pointer overflow-hidden"
+              className="group hover-elevate cursor-pointer overflow-hidden flex flex-col h-full"
               onClick={() => handleGuideClick(guide.id)}
               data-testid={`guide-card-${guide.id}`}
             >
               <div className="relative h-48">
                 <img
-                  src={getImageUrl(guide.image)}
+                  src={guide.image}
                   alt={guide.title}
                   className="w-full h-full object-cover transition-transform group-hover:scale-105"
+                  onError={(e) => {
+                    console.error(`Failed to load image: ${guide.image}`);
+                    e.currentTarget.src = '/images/placeholder-guide.jpg';
+                  }}
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-                <Badge
-                  className={`absolute top-3 left-3 ${getDifficultyColor(guide.difficulty)}`}
-                  data-testid={`difficulty-badge-${guide.id}`}
-                >
-                  {guide.difficulty}
-                </Badge>
-              </div>
-
-              <CardContent className="p-4">
-                <div className="space-y-2">
-                  <Badge variant="outline" className="text-xs" data-testid={`category-badge-${guide.id}`}>
+                <div className="absolute top-3 left-3 flex flex-col gap-2">
+                  <Badge
+                    className={`${getDifficultyColor(guide.difficulty)} text-xs`}
+                    data-testid={`difficulty-badge-${guide.id}`}
+                  >
+                    {guide.difficulty}
+                  </Badge>
+                  <Badge
+                    variant="outline"
+                    className="bg-white/90 text-gray-800 text-xs"
+                    data-testid={`category-badge-${guide.id}`}
+                  >
                     {guide.category}
                   </Badge>
-                  
+                </div>
+              </div>
+
+              <CardContent className="p-4 flex flex-col flex-1">
+                <div className="space-y-2 flex-1">
                   <h3 className="font-semibold text-lg leading-tight text-card-foreground group-hover:text-primary transition-colors" data-testid={`guide-title-${guide.id}`}>
                     {guide.title}
                   </h3>
@@ -112,22 +134,21 @@ export default function GuidesSection({ onGuideClick, onViewAllGuides }: GuidesS
                   <p className="text-sm text-muted-foreground line-clamp-3" data-testid={`guide-description-${guide.id}`}>
                     {guide.description}
                   </p>
+                </div>
 
-                  <div className="flex items-center justify-between text-xs text-muted-foreground">
-                    <div className="flex items-center gap-2">
-                      <User className="h-3 w-3" />
-                      <span data-testid={`guide-author-${guide.id}`}>{guide.author}</span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <Clock className="h-3 w-3" />
-                      <span data-testid={`guide-read-time-${guide.id}`}>{guide.readTime}</span>
-                    </div>
+                <div className="flex items-center justify-between text-xs text-muted-foreground mt-4">
+                  <div className="flex items-center gap-2">
+                    <User className="h-3 w-3" />
+                    <span data-testid={`guide-author-${guide.id}`}>{guide.author}</span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <Clock className="h-3 w-3" />
+                    <span data-testid={`guide-read-time-${guide.id}`}>{guide.readTime}</span>
                   </div>
                 </div>
               </CardContent>
             </Card>
-            ))
-          )}
+          ))}
         </div>
 
         {/* Other Guides */}
@@ -142,19 +163,23 @@ export default function GuidesSection({ onGuideClick, onViewAllGuides }: GuidesS
               <CardContent className="p-4">
                 <div className="flex gap-4">
                   <img
-                    src={getImageUrl(guide.image)}
+                    src={guide.image}
                     alt={guide.title}
                     className="w-20 h-20 object-cover rounded-md flex-shrink-0"
+                    onError={(e) => {
+                      console.error(`Failed to load image: ${guide.image}`);
+                      e.currentTarget.src = '/images/placeholder-guide.jpg';
+                    }}
                   />
                   <div className="flex-1 space-y-2">
-                    <div className="flex gap-2">
+                    <div className="flex flex-col gap-1">
                       <Badge
-                        className={`text-xs ${getDifficultyColor(guide.difficulty)}`}
+                        className={`text-xs w-fit ${getDifficultyColor(guide.difficulty)}`}
                         data-testid={`difficulty-badge-${guide.id}`}
                       >
                         {guide.difficulty}
                       </Badge>
-                      <Badge variant="outline" className="text-xs" data-testid={`category-badge-${guide.id}`}>
+                      <Badge variant="outline" className="text-xs w-fit" data-testid={`category-badge-${guide.id}`}>
                         {guide.category}
                       </Badge>
                     </div>

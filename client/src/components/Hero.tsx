@@ -1,6 +1,8 @@
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Leaf, Sparkles } from "lucide-react";
 import heroImage from "@assets/generated_images/Indoor_living_space_with_plants_70e292ac.png";
+import SimpleCounter from "@/components/SimpleCounter";
+import { useCart } from "@/contexts/CartContext";
 
 interface HeroProps {
   onShopNow?: () => void;
@@ -8,6 +10,16 @@ interface HeroProps {
 }
 
 export default function Hero({ onShopNow, onLearnMore }: HeroProps) {
+  const { getTotalItems } = useCart();
+  
+  // Calculate dynamic counts
+  const totalPlants = 26; // Total plants in our catalog
+  const cartItems = getTotalItems();
+  const happyCustomers = 150; // Mock data for happy customers
+  
+  // Debug logging
+  console.log('Hero - totalPlants:', totalPlants, 'cartItems:', cartItems, 'happyCustomers:', happyCustomers);
+
   return (
     <section className="relative h-screen flex items-center justify-center overflow-hidden">
       {/* Background Image with Overlay */}
@@ -65,16 +77,39 @@ export default function Hero({ onShopNow, onLearnMore }: HeroProps) {
         {/* Stats */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 text-white">
           <div className="text-center" data-testid="stat-products">
-            <div className="text-3xl font-bold mb-1">10+</div>
+            <div className="text-3xl font-bold mb-1">
+              <SimpleCounter 
+                target={totalPlants} 
+                duration={2500}
+                delay={500}
+                suffix="+"
+                className="text-green-300"
+              />
+            </div>
             <div className="text-sm text-gray-300">Plant Varieties</div>
           </div>
           <div className="text-center" data-testid="stat-customers">
-            <div className="text-3xl font-bold mb-1">New</div>
-            <div className="text-sm text-gray-300">Fresh Start</div>
+            <div className="text-3xl font-bold mb-1">
+              <SimpleCounter 
+                target={happyCustomers} 
+                duration={3000}
+                delay={1000}
+                suffix="+"
+                className="text-blue-300"
+              />
+            </div>
+            <div className="text-sm text-gray-300">Happy Customers</div>
           </div>
-          <div className="text-center" data-testid="stat-guides">
-            <div className="text-3xl font-bold mb-1">Growing</div>
-            <div className="text-sm text-gray-300">With You</div>
+          <div className="text-center" data-testid="stat-cart">
+            <div className="text-3xl font-bold mb-1">
+              <SimpleCounter 
+                target={cartItems} 
+                duration={2000}
+                delay={1500}
+                className="text-yellow-300"
+              />
+            </div>
+            <div className="text-sm text-gray-300">Items in Cart</div>
           </div>
         </div>
       </div>
