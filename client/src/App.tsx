@@ -139,7 +139,7 @@ function Home() {
         
         <GuidesSection
           onGuideClick={(guideId) => console.log('Guide:', guideId)} //todo: remove mock functionality
-          onViewAllGuides={() => console.log('View all guides')} //todo: remove mock functionality
+          onViewAllGuides={() => setLocation('/guides')} // Updated this line
         />
       </main>
       

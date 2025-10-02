@@ -66,8 +66,12 @@ export default function Header({ cartItems = 0, onCartClick, onSearchChange }: H
               <DropdownMenu key={category.name}>
                 <DropdownMenuTrigger asChild>
                   <Button
-                    variant={location === "/plants" && category.name === "Plants" ? "default" : "ghost"}
-                    className="text-sm text-muted-foreground hover:text-foreground transition-colors px-3 py-2"
+                    variant={location === `/${category.name.toLowerCase()}` ? "default" : "ghost"}
+                    className={`text-sm transition-colors px-3 py-2 ${
+                      location === `/${category.name.toLowerCase()}` 
+                        ? "text-primary-foreground" // White text when selected
+                        : "text-muted-foreground hover:text-foreground"
+                    }`}
                     data-testid={`nav-${category.name.toLowerCase()}`}
                   >
                     {category.name}
@@ -75,17 +79,20 @@ export default function Header({ cartItems = 0, onCartClick, onSearchChange }: H
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="start" className="w-48">
-                  {category.name === "Plants" && (
-                    <DropdownMenuItem asChild>
-                      <Link href="/plants" className="block w-full">
-                        All Plants
-                      </Link>
-                    </DropdownMenuItem>
-                  )}
+                  {/* Add "All" category link */}
+                  <DropdownMenuItem asChild>
+                    <Link 
+                      href={`/${category.name.toLowerCase()}`} 
+                      className="block w-full"
+                      data-testid={`nav-all-${category.name.toLowerCase()}`}
+                    >
+                      All {category.name}
+                    </Link>
+                  </DropdownMenuItem>
                   {category.items.map((item) => (
                     <DropdownMenuItem
                       key={item}
-                      onClick={() => console.log(`Navigate to ${item}`)} //todo: remove mock functionality
+                      onClick={() => console.log(`Navigate to ${item}`)}
                       data-testid={`nav-item-${item.toLowerCase().replace(/\s+/g, '-')}`}
                     >
                       {item}

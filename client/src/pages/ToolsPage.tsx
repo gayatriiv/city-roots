@@ -3,7 +3,6 @@ import { useLocation } from 'wouter';
 import { useQuery } from '@tanstack/react-query';
 import { Search, LayoutGrid, List, Star, ShoppingCart, Eye, ArrowLeft, X } from 'lucide-react';
 
-import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -125,12 +124,6 @@ export default function ToolsPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <Header
-        cartItems={getTotalItems()}
-        onCartClick={() => setLocation('/cart')}
-        onSearchChange={setSearchQuery}
-      />
-
       <main className="container mx-auto px-4 py-8">
         <div className="flex items-center justify-between mb-6">
           <h1 className="text-3xl font-bold text-foreground">Our Tools Collection</h1>
@@ -227,19 +220,27 @@ export default function ToolsPage() {
                       e.currentTarget.src = '/images/placeholder-tool.jpg';
                     }}
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-                  <Badge className="absolute top-3 left-3 bg-white/20 backdrop-blur-sm text-white px-2 py-1 rounded-full text-xs">
-                    {tool.category}
-                  </Badge>
+                  {/* Move the gradient overlay to only cover the bottom portion */}
+                  <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/60 to-transparent" />
                 </div>
 
                 <CardContent className={`p-4 flex flex-col ${viewMode === 'list' ? 'flex-1' : ''}`}>
+                  {/* Tool name */}
                   <h3 className="font-semibold text-lg text-card-foreground group-hover:text-primary transition-colors mb-2">
                     {tool.name}
                   </h3>
+                  
+                  {/* Category badge - moved below title */}
+                  <Badge className="w-fit mb-3 bg-muted hover:bg-muted text-muted-foreground">
+                    {tool.category}
+                  </Badge>
+
+                  {/* Description */}
                   <p className="text-sm text-muted-foreground line-clamp-2 flex-1 mb-3">
                     {tool.description}
                   </p>
+
+                  {/* Price and Rating */}
                   <div className="flex items-center justify-between mb-3">
                     <span className="text-lg font-bold text-primary">
                       {formatPrice(tool.price)}
@@ -249,6 +250,8 @@ export default function ToolsPage() {
                       <span>{tool.rating.toFixed(1)} ({tool.reviews})</span>
                     </div>
                   </div>
+
+                  {/* Buttons */}
                   <div className={`flex gap-2 ${viewMode === 'list' ? 'flex-shrink-0' : 'mt-auto pt-3'}`}>
                     <Button
                       variant="outline"
