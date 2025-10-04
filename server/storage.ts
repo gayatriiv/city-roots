@@ -6,7 +6,17 @@ import {
   type CartItem,
   type InsertCartItem,
   type Guide,
-  type InsertGuide
+  type InsertGuide,
+  type Customer,
+  type InsertCustomer,
+  type Address,
+  type InsertAddress,
+  type Order,
+  type InsertOrder,
+  type OrderItem,
+  type InsertOrderItem,
+  type OrderTracking,
+  type InsertOrderTracking
 } from "@shared/schema";
 import { randomUUID } from "crypto";
 
@@ -39,6 +49,29 @@ export interface IStorage {
   getFeaturedGuides(): Promise<Guide[]>;
   getGuidesByCategory(category: string): Promise<Guide[]>;
   createGuide(guide: InsertGuide): Promise<Guide>;
+
+  // Customer methods
+  getCustomer(id: string): Promise<Customer | undefined>;
+  getCustomerByPhone(phone: string): Promise<Customer | undefined>;
+  createCustomer(customer: InsertCustomer): Promise<Customer>;
+  verifyCustomer(phone: string, data: { name?: string; email?: string }): Promise<Customer>;
+
+  // Address methods
+  createAddress(address: InsertAddress): Promise<Address>;
+
+  // Order methods
+  createOrder(order: InsertOrder): Promise<Order>;
+  getOrderById(id: string): Promise<Order | undefined>;
+  getOrderByNumber(orderNumber: string): Promise<Order | undefined>;
+  updateOrderPayment(orderId: string, paymentData: { razorpayPaymentId: string; razorpaySignature: string; paymentStatus: string }): Promise<Order>;
+
+  // Order Item methods
+  createOrderItem(item: InsertOrderItem): Promise<OrderItem>;
+  getOrderItems(orderId: string): Promise<OrderItem[]>;
+
+  // Order Tracking methods
+  createOrderTracking(tracking: InsertOrderTracking): Promise<OrderTracking>;
+  getOrderTracking(orderId: string): Promise<OrderTracking[]>;
 }
 
 export class MemStorage implements IStorage {
@@ -46,12 +79,22 @@ export class MemStorage implements IStorage {
   private products: Map<string, Product>;
   private cartItems: Map<string, CartItem>;
   private guides: Map<string, Guide>;
+  private customers: Map<string, Customer>;
+  private addresses: Map<string, Address>;
+  private orders: Map<string, Order>;
+  private orderItems: Map<string, OrderItem>;
+  private orderTracking: Map<string, OrderTracking>;
 
   constructor() {
     this.users = new Map();
     this.products = new Map();
     this.cartItems = new Map();
     this.guides = new Map();
+    this.customers = new Map();
+    this.addresses = new Map();
+    this.orders = new Map();
+    this.orderItems = new Map();
+    this.orderTracking = new Map();
     this.seedData();
   }
 
@@ -247,6 +290,139 @@ export class MemStorage implements IStorage {
     return guide;
   }
 
+  // Customer methods
+  async getCustomer(id: string): Promise<Customer | undefined> {
+    return this.customers.get(id);
+  }
+
+  async getCustomerByPhone(phone: string): Promise<Customer | undefined> {
+    return Array.from(this.customers.values()).find(customer => customer.phone === phone);
+  }
+
+  async createCustomer(insertCustomer: InsertCustomer): Promise<Customer> {
+    const id = randomUUID();
+    const customer: Customer = {
+      ...insertCustomer,
+      id,
+      isVerified: insertCustomer.isVerified ?? false,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+    this.customers.set(id, customer);
+    return customer;
+  }
+
+  async verifyCustomer(phone: string, data: { name?: string; email?: string }): Promise<Customer> {
+    const customer = await this.getCustomerByPhone(phone);
+    if (!customer) {
+      throw new Error('Customer not found');
+    }
+
+    const updatedCustomer: Customer = {
+      ...customer,
+      name: data.name || customer.name,
+      email: data.email || customer.email,
+      isVerified: true,
+      updatedAt: new Date(),
+    };
+    this.customers.set(customer.id, updatedCustomer);
+    return updatedCustomer;
+  }
+
+  // Address methods
+  async createAddress(insertAddress: InsertAddress): Promise<Address> {
+    const id = randomUUID();
+    const address: Address = {
+      ...insertAddress,
+      id,
+      isDefault: insertAddress.isDefault ?? false,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+    this.addresses.set(id, address);
+    return address;
+  }
+
+  // Order methods
+  async createOrder(insertOrder: InsertOrder): Promise<Order> {
+    const id = randomUUID();
+    const order: Order = {
+      ...insertOrder,
+      id,
+      status: insertOrder.status ?? 'pending',
+      paymentStatus: insertOrder.paymentStatus ?? 'pending',
+      paymentMethod: insertOrder.paymentMethod ?? 'razorpay',
+      razorpayOrderId: insertOrder.razorpayOrderId ?? null,
+      razorpayPaymentId: insertOrder.razorpayPaymentId ?? null,
+      razorpaySignature: insertOrder.razorpaySignature ?? null,
+      shipping: insertOrder.shipping ?? null,
+      notes: insertOrder.notes ?? null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+    this.orders.set(id, order);
+    return order;
+  }
+
+  async getOrderById(id: string): Promise<Order | undefined> {
+    return this.orders.get(id);
+  }
+
+  async getOrderByNumber(orderNumber: string): Promise<Order | undefined> {
+    return Array.from(this.orders.values()).find(order => order.orderNumber === orderNumber);
+  }
+
+  async updateOrderPayment(orderId: string, paymentData: { razorpayPaymentId: string; razorpaySignature: string; paymentStatus: string }): Promise<Order> {
+    const order = this.orders.get(orderId);
+    if (!order) {
+      throw new Error('Order not found');
+    }
+
+    const updatedOrder: Order = {
+      ...order,
+      razorpayPaymentId: paymentData.razorpayPaymentId,
+      razorpaySignature: paymentData.razorpaySignature,
+      paymentStatus: paymentData.paymentStatus,
+      updatedAt: new Date(),
+    };
+    this.orders.set(orderId, updatedOrder);
+    return updatedOrder;
+  }
+
+  // Order Item methods
+  async createOrderItem(insertOrderItem: InsertOrderItem): Promise<OrderItem> {
+    const id = randomUUID();
+    const orderItem: OrderItem = {
+      ...insertOrderItem,
+      id,
+      createdAt: new Date(),
+    };
+    this.orderItems.set(id, orderItem);
+    return orderItem;
+  }
+
+  async getOrderItems(orderId: string): Promise<OrderItem[]> {
+    return Array.from(this.orderItems.values()).filter(item => item.orderId === orderId);
+  }
+
+  // Order Tracking methods
+  async createOrderTracking(insertOrderTracking: InsertOrderTracking): Promise<OrderTracking> {
+    const id = randomUUID();
+    const tracking: OrderTracking = {
+      ...insertOrderTracking,
+      id,
+      timestamp: insertOrderTracking.timestamp ?? new Date(),
+    };
+    this.orderTracking.set(id, tracking);
+    return tracking;
+  }
+
+  async getOrderTracking(orderId: string): Promise<OrderTracking[]> {
+    return Array.from(this.orderTracking.values())
+      .filter(tracking => tracking.orderId === orderId)
+      .sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
+  }
+
   // Seed data for development
   private seedData() {
     // Sample products
@@ -256,7 +432,7 @@ export class MemStorage implements IStorage {
         description: "Beautiful collection of hybrid roses perfect for beginners. Includes red, pink, and white varieties with full care instructions.",
         price: "49.99",
         originalPrice: "69.99",
-        image: "/api/images/flowering-plants.jpg",
+        image: "/images/rose bush.jpg",
         category: "Flowering Plants",
         difficulty: "Beginner",
         rating: "4.8",
@@ -269,7 +445,7 @@ export class MemStorage implements IStorage {
         name: "Professional Gardening Tool Set",
         description: "Complete set of professional-grade tools including pruners, trowel, watering can, and more.",
         price: "89.99",
-        image: "/api/images/gardening-tools.jpg",
+        image: "/images/gardening toolkit.jpg",
         category: "Gardening Tools",
         rating: "4.9",
         reviewCount: 243,
@@ -282,7 +458,7 @@ export class MemStorage implements IStorage {
         description: "Everything you need to start your herb garden with basil, parsley, cilantro, and rosemary seeds.",
         price: "24.99",
         originalPrice: "34.99",
-        image: "/api/images/seeds.jpg",
+        image: "/images/herbal toolkit.jpg",
         category: "Seeds",
         difficulty: "Beginner",
         rating: "4.6",
@@ -295,7 +471,7 @@ export class MemStorage implements IStorage {
         name: "Mini Succulent Collection",
         description: "Adorable collection of 6 mini succulents perfect for indoor decoration and gifts.",
         price: "34.99",
-        image: "/api/images/flowering-plants.jpg",
+        image: "/images/mini plants.jpg",
         category: "Decorative Plants",
         difficulty: "Beginner",
         rating: "4.7",
@@ -308,21 +484,21 @@ export class MemStorage implements IStorage {
         name: "Heirloom Tomato Plant Set",
         description: "Heritage variety tomato plants that produce delicious, flavorful tomatoes all season long.",
         price: "19.99",
-        image: "/api/images/seeds.jpg",
+        image: "/images/tomato.jpg",
         category: "Fruit Plants",
         difficulty: "Intermediate",
         rating: "4.5",
         reviewCount: 78,
-        inStock: false,
+        inStock: true,
         isOnSale: false,
-        featured: false,
+        featured: true,
       },
       {
         name: "New Gardener's Gift Kit",
         description: "Complete starter kit with tools, seeds, pots, and comprehensive beginner's guide.",
         price: "79.99",
         originalPrice: "99.99",
-        image: "/api/images/gardening-tools.jpg",
+        image: "/images/beginner.jpg",
         category: "Gift Kits",
         difficulty: "Beginner",
         rating: "4.9",
@@ -344,7 +520,7 @@ export class MemStorage implements IStorage {
         title: "Starting Your First Garden: A Complete Beginner's Guide",
         description: "Everything you need to know to start your gardening journey, from choosing the right location to planting your first seeds.",
         content: "Lorem ipsum dolor sit amet, consectetur adipiscing elit...",
-        image: "/api/images/hero.jpg",
+        image: "/images/beginner guide.jpg",
         difficulty: "Beginner",
         readTime: "8 min read",
         author: "Sarah Johnson",
@@ -355,7 +531,7 @@ export class MemStorage implements IStorage {
         title: "Master the Art of Starting Seeds Indoors",
         description: "Learn professional techniques for starting seeds indoors to get a head start on the growing season.",
         content: "Lorem ipsum dolor sit amet, consectetur adipiscing elit...",
-        image: "/api/images/seeds.jpg",
+        image: "/images/seed.jpg",
         difficulty: "Intermediate",
         readTime: "12 min read",
         author: "Mike Chen",
@@ -366,7 +542,7 @@ export class MemStorage implements IStorage {
         title: "Essential Tools Every Gardener Should Own",
         description: "Discover the must-have tools that will make your gardening tasks easier and more efficient.",
         content: "Lorem ipsum dolor sit amet, consectetur adipiscing elit...",
-        image: "/api/images/gardening-tools.jpg",
+        image: "/images/essentials.jpg",
         difficulty: "Beginner",
         readTime: "6 min read",
         author: "Emma Davis",
