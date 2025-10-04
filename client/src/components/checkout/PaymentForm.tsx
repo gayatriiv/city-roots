@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Loader2, CreditCard, Shield, CheckCircle, ArrowLeft } from "lucide-react";
 import { CustomerData, AddressData } from "@/pages/CheckoutPage";
+import { useScroll } from "@/hooks/useScroll";
 import { Product } from "@/contexts/CartContext";
 
 interface PaymentFormProps {
@@ -16,12 +17,7 @@ interface PaymentFormProps {
   onBack: () => void;
 }
 
-// Mock Razorpay integration
-declare global {
-  interface Window {
-    Razorpay: any;
-  }
-}
+// Demo payment integration
 
 export default function PaymentForm({ 
   customerData, 
@@ -32,7 +28,7 @@ export default function PaymentForm({
 }: PaymentFormProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [razorpayLoaded, setRazorpayLoaded] = useState(false);
+  const { scrollToTop } = useScroll();
 
   const subtotal = cartItems.reduce((total, item) => total + (item.product.price * item.quantity), 0);
   const tax = subtotal * 0.18;
@@ -47,24 +43,6 @@ export default function PaymentForm({
     }).format(price);
   };
 
-  // Load Razorpay script
-  useEffect(() => {
-    const script = document.createElement('script');
-    script.src = 'https://checkout.razorpay.com/v1/checkout.js';
-    script.async = true;
-    script.onload = () => {
-      setRazorpayLoaded(true);
-    };
-    script.onerror = () => {
-      setError('Failed to load payment gateway. Please refresh and try again.');
-    };
-    document.body.appendChild(script);
-
-    return () => {
-      document.body.removeChild(script);
-    };
-  }, []);
-
   const generateOrderNumber = () => {
     const timestamp = Date.now().toString().slice(-6);
     const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
@@ -72,11 +50,6 @@ export default function PaymentForm({
   };
 
   const handlePayment = async () => {
-    if (!razorpayLoaded) {
-      setError('Payment gateway is still loading. Please wait a moment.');
-      return;
-    }
-
     setLoading(true);
     setError('');
 
@@ -104,84 +77,22 @@ export default function PaymentForm({
 
       const orderData = await orderResponse.json();
       
-      // Prepare Razorpay order response
-      const razorpayOrderResponse = {
-        id: orderData.order.id,
-        amount: Math.round(total * 100), // Razorpay expects amount in paise
-        currency: 'INR',
-        receipt: orderData.order.orderNumber,
-        notes: {
-          customer_phone: customerData.phone,
-          customer_email: customerData.email || '',
-          customer_name: customerData.name,
-          address: `${addressData.addressLine1}, ${addressData.city}, ${addressData.state} ${addressData.postalCode}`
-        }
-      };
+      // For demo purposes, simulate successful payment
+      // In production, this would integrate with Razorpay
+      setTimeout(() => {
+        // Simulate payment processing
+        console.log('Demo payment processing...');
+        
+        // Create mock payment response
+        const mockPaymentResponse = {
+          razorpay_order_id: orderData.order.id,
+          razorpay_payment_id: `pay_${Date.now()}`,
+          razorpay_signature: `mock_signature_${Date.now()}`
+        };
 
-      // Razorpay options
-      const options = {
-        key: 'rzp_test_1DP5mmOlF5G5ag', // Test key - replace with your actual key
-        amount: razorpayOrderResponse.amount,
-        currency: razorpayOrderResponse.currency,
-        name: 'VerdantCart',
-        description: `Order #${orderData.order.orderNumber}`,
-        image: '/logo.png',
-        order_id: razorpayOrderResponse.id,
-        handler: async function (response: any) {
-          try {
-            // Verify payment on server
-            const verificationResponse = await fetch('/api/orders/verify-payment', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify({
-                razorpay_order_id: response.razorpay_order_id,
-                razorpay_payment_id: response.razorpay_payment_id,
-                razorpay_signature: response.razorpay_signature,
-                orderData: {
-                  customerData,
-                  addressData,
-                  cartItems,
-                  subtotal,
-                  tax,
-                  shipping,
-                  total,
-                  orderNumber
-                }
-              }),
-            });
-
-            const result = await verificationResponse.json();
-            
-            if (result.success) {
-              onPaymentSuccess(result.orderId);
-            } else {
-              setError('Payment verification failed. Please try again.');
-            }
-          } catch (err) {
-            console.error('Payment verification error:', err);
-            setError('Payment verification failed. Please contact support.');
-          }
-        },
-        prefill: {
-          name: customerData.name,
-          email: customerData.email || '',
-          contact: customerData.phone,
-        },
-        notes: razorpayOrderResponse.notes,
-        theme: {
-          color: '#059669',
-        },
-        modal: {
-          ondismiss: function() {
-            setLoading(false);
-          }
-        }
-      };
-
-      const razorpay = new window.Razorpay(options);
-      razorpay.open();
+        // Verify payment on server
+        handlePaymentVerification(mockPaymentResponse, orderData);
+      }, 2000);
 
     } catch (err) {
       console.error('Payment error:', err);
@@ -190,9 +101,48 @@ export default function PaymentForm({
     }
   };
 
+  const handlePaymentVerification = async (paymentResponse: any, orderData: any) => {
+    try {
+      const verificationResponse = await fetch('/api/orders/verify-payment', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          razorpay_order_id: paymentResponse.razorpay_order_id,
+          razorpay_payment_id: paymentResponse.razorpay_payment_id,
+          razorpay_signature: paymentResponse.razorpay_signature,
+          orderData: {
+            customerData,
+            addressData,
+            cartItems,
+            subtotal,
+            tax,
+            shipping,
+            total,
+            orderNumber: orderData.order.orderNumber
+          }
+        }),
+      });
+
+      const result = await verificationResponse.json();
+      
+      if (result.success) {
+        onPaymentSuccess(result.orderId);
+      } else {
+        setError('Payment verification failed. Please try again.');
+        setLoading(false);
+      }
+    } catch (err) {
+      console.error('Payment verification error:', err);
+      setError('Payment verification failed. Please contact support.');
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="space-y-6">
-      <div className="text-center">
+      <div id="payment-header" className="text-center scroll-snap-start">
         <div className="mx-auto w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mb-4">
           <CreditCard className="h-6 w-6 text-green-600" />
         </div>
@@ -211,7 +161,7 @@ export default function PaymentForm({
       )}
 
       {/* Order Summary */}
-      <Card>
+      <Card id="order-summary" className="scroll-snap-start">
         <CardHeader>
           <CardTitle className="text-lg">Order Summary</CardTitle>
         </CardHeader>
@@ -250,7 +200,7 @@ export default function PaymentForm({
       </Card>
 
       {/* Delivery Address */}
-      <Card>
+      <Card id="delivery-address" className="scroll-snap-start">
         <CardHeader>
           <CardTitle className="text-lg">Delivery Address</CardTitle>
         </CardHeader>
@@ -267,34 +217,41 @@ export default function PaymentForm({
       </Card>
 
       {/* Payment Method */}
-      <Card>
+      <Card id="payment-method" className="scroll-snap-start">
         <CardHeader>
           <CardTitle className="text-lg">Payment Method</CardTitle>
           <CardDescription>
-            Secure payment powered by Razorpay
+            Demo mode - Payment simulation for testing
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="flex items-center gap-3 p-4 border rounded-lg bg-gray-50">
-            <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-              <CreditCard className="h-4 w-4 text-blue-600" />
+          <div className="flex items-center gap-3 p-4 border rounded-lg bg-green-50 border-green-200">
+            <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+              <CreditCard className="h-4 w-4 text-green-600" />
             </div>
             <div className="flex-1">
-              <p className="font-medium">Credit/Debit Card, UPI, Net Banking</p>
-              <p className="text-sm text-gray-600">Powered by Razorpay</p>
+              <p className="font-medium">Demo Payment Gateway</p>
+              <p className="text-sm text-green-700">Simulated payment processing</p>
             </div>
-            <Badge variant="secondary">Recommended</Badge>
+            <Badge className="bg-green-100 text-green-800 border-green-300">Demo Mode</Badge>
           </div>
           
-          <div className="flex items-center gap-2 mt-4 text-sm text-gray-600">
+          <div className="flex items-center gap-2 mt-4 text-sm text-green-700">
             <Shield className="h-4 w-4" />
-            <span>Your payment information is secure and encrypted</span>
+            <span>This is a demo payment - no real money will be charged</span>
+          </div>
+          
+          <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+            <p className="text-sm text-blue-800">
+              <strong>Demo Instructions:</strong> Click "Pay Now" to simulate a successful payment. 
+              The payment will be processed automatically after 2 seconds.
+            </p>
           </div>
         </CardContent>
       </Card>
 
       {/* Action Buttons */}
-      <div className="flex gap-4">
+      <div id="payment-actions" className="flex gap-4 scroll-snap-start">
         <Button
           type="button"
           variant="outline"
@@ -306,29 +263,95 @@ export default function PaymentForm({
         </Button>
         <Button
           onClick={handlePayment}
-          disabled={loading || !razorpayLoaded}
+          disabled={loading}
           className="flex-1"
         >
           {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-          {razorpayLoaded ? 'Pay Now' : 'Loading...'}
+          {loading ? 'Processing Payment...' : 'Pay Now (Demo)'}
         </Button>
       </div>
 
       {/* Security Notice */}
-      <Card className="bg-green-50 border-green-200">
+      <Card id="security-notice" className="bg-green-50 border-green-200 scroll-snap-start">
         <CardContent className="pt-4">
           <div className="flex items-start gap-3">
             <CheckCircle className="h-5 w-5 text-green-600 mt-0.5" />
             <div className="text-sm text-green-800">
-              <p className="font-medium mb-1">Secure Payment Guarantee</p>
+              <p className="font-medium mb-1">Demo Payment System</p>
               <p>
-                Your payment is processed securely through Razorpay. We never store your card details. 
-                All transactions are encrypted and PCI DSS compliant.
+                This is a demonstration payment system. No real money will be charged. 
+                In production, this would integrate with secure payment gateways like Razorpay.
               </p>
             </div>
           </div>
         </CardContent>
       </Card>
+
+      {/* Demo Content to Show Scroll */}
+      <div className="space-y-4 pt-8">
+        <div className="text-center">
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">Payment Security & Information</h3>
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="bg-green-50 p-4 rounded-lg">
+            <h4 className="font-medium text-green-900 mb-2">🔒 Secure Payment</h4>
+            <p className="text-sm text-green-800">All payments are processed through secure, encrypted channels with PCI DSS compliance.</p>
+          </div>
+          
+          <div className="bg-blue-50 p-4 rounded-lg">
+            <h4 className="font-medium text-blue-900 mb-2">💳 Multiple Payment Options</h4>
+            <p className="text-sm text-blue-800">Pay using credit/debit cards, UPI, net banking, or digital wallets.</p>
+          </div>
+          
+          <div className="bg-purple-50 p-4 rounded-lg">
+            <h4 className="font-medium text-purple-900 mb-2">🛡️ Fraud Protection</h4>
+            <p className="text-sm text-purple-800">Advanced fraud detection systems protect your transactions and personal information.</p>
+          </div>
+          
+          <div className="bg-orange-50 p-4 rounded-lg">
+            <h4 className="font-medium text-orange-900 mb-2">📱 Instant Confirmation</h4>
+            <p className="text-sm text-orange-800">Receive instant payment confirmation via SMS and email after successful transaction.</p>
+          </div>
+        </div>
+
+        <div className="bg-gray-50 p-4 rounded-lg">
+          <h4 className="font-medium text-gray-900 mb-2">💰 Payment Methods Accepted</h4>
+          <div className="text-sm text-gray-700 space-y-1">
+            <p><strong>Credit/Debit Cards:</strong> Visa, Mastercard, American Express</p>
+            <p><strong>UPI:</strong> Google Pay, PhonePe, Paytm, BHIM</p>
+            <p><strong>Net Banking:</strong> All major Indian banks</p>
+            <p><strong>Digital Wallets:</strong> Paytm, MobiKwik, FreeCharge</p>
+          </div>
+        </div>
+
+        <div className="bg-yellow-50 border border-yellow-200 p-4 rounded-lg">
+          <h4 className="font-medium text-yellow-900 mb-2">💡 Demo Payment Mode</h4>
+          <p className="text-sm text-yellow-800">
+            This is a demonstration payment system. No real money will be charged. 
+            Click "Pay Now (Demo)" to simulate a successful payment and proceed to order confirmation.
+          </p>
+        </div>
+
+        <div className="bg-blue-50 border border-blue-200 p-4 rounded-lg">
+          <h4 className="font-medium text-blue-900 mb-2">📞 Need Help?</h4>
+          <p className="text-sm text-blue-800">
+            If you encounter any payment issues, contact our support team at 
+            <strong> +91 98765 43210</strong> or email us at 
+            <strong> support@verdantcart.com</strong>
+          </p>
+        </div>
+
+        <div className="text-center pt-4">
+          <Button
+            variant="outline"
+            onClick={() => scrollToTop()}
+            className="text-sm"
+          >
+            ↑ Scroll to Top
+          </Button>
+        </div>
+      </div>
     </div>
   );
 }

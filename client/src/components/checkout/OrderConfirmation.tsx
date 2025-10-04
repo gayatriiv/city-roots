@@ -5,6 +5,8 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { CheckCircle, Package, Truck, MapPin, Phone, Mail, Download, Share2 } from "lucide-react";
 import { CustomerData, AddressData } from "@/pages/CheckoutPage";
+import ScrollToTop from "@/components/ui/ScrollToTop";
+import { useScroll } from "@/hooks/useScroll";
 
 interface OrderConfirmationProps {
   orderId: string;
@@ -22,6 +24,7 @@ export default function OrderConfirmation({
   const [orderNumber] = useState(`VC${Date.now().toString().slice(-6)}${Math.floor(Math.random() * 1000).toString().padStart(3, '0')}`);
   const [estimatedDelivery] = useState(new Date(Date.now() + 3 * 24 * 60 * 60 * 1000)); // 3 days from now
   const [trackingNumber] = useState(`TRK${Date.now().toString().slice(-8)}`);
+  const { scrollToTop, scrollToElement } = useScroll();
 
   const formatDate = (date: Date) => {
     return date.toLocaleDateString('en-IN', {
@@ -86,7 +89,7 @@ Thank you for your order!
   return (
     <div className="space-y-6">
       {/* Success Header */}
-      <div className="text-center">
+      <div id="order-success" className="text-center scroll-snap-start">
         <div className="mx-auto w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-4">
           <CheckCircle className="h-8 w-8 text-green-600" />
         </div>
@@ -102,8 +105,44 @@ Thank you for your order!
         </div>
       </div>
 
+      {/* Quick Navigation */}
+      <div className="flex flex-wrap gap-2 justify-center mb-6">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => scrollToElement('order-status')}
+          className="text-xs"
+        >
+          Order Status
+        </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => scrollToElement('delivery-info')}
+          className="text-xs"
+        >
+          Delivery Info
+        </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => scrollToElement('contact-info')}
+          className="text-xs"
+        >
+          Contact Info
+        </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => scrollToElement('action-buttons')}
+          className="text-xs"
+        >
+          Actions
+        </Button>
+      </div>
+
       {/* Order Status */}
-      <Card>
+      <Card id="order-status" className="scroll-snap-start">
         <CardHeader>
           <CardTitle className="text-lg">Order Status</CardTitle>
         </CardHeader>
@@ -143,7 +182,7 @@ Thank you for your order!
       </Card>
 
       {/* Delivery Information */}
-      <Card>
+      <Card id="delivery-info" className="scroll-snap-start">
         <CardHeader>
           <CardTitle className="text-lg">Delivery Information</CardTitle>
         </CardHeader>
@@ -182,7 +221,7 @@ Thank you for your order!
       </Card>
 
       {/* Contact Information */}
-      <Card>
+      <Card id="contact-info" className="scroll-snap-start">
         <CardHeader>
           <CardTitle className="text-lg">Need Help?</CardTitle>
           <CardDescription>
@@ -210,7 +249,7 @@ Thank you for your order!
       </Card>
 
       {/* Action Buttons */}
-      <div className="flex flex-col sm:flex-row gap-4">
+      <div id="action-buttons" className="flex flex-col sm:flex-row gap-4 scroll-snap-start">
         <Button
           onClick={onContinueShopping}
           className="flex-1"
@@ -233,10 +272,17 @@ Thank you for your order!
           <Share2 className="mr-2 h-4 w-4" />
           Share Order
         </Button>
+        <Button
+          variant="outline"
+          onClick={() => scrollToTop()}
+          className="flex-1"
+        >
+          ↑ Back to Top
+        </Button>
       </div>
 
       {/* Order Updates Notice */}
-      <Card className="bg-blue-50 border-blue-200">
+      <Card id="order-updates" className="bg-blue-50 border-blue-200 scroll-snap-start">
         <CardContent className="pt-4">
           <div className="text-sm text-blue-800">
             <p className="font-medium mb-2">📱 Order Updates</p>
@@ -250,7 +296,7 @@ Thank you for your order!
       </Card>
 
       {/* Next Steps */}
-      <Card className="bg-green-50 border-green-200">
+      <Card id="next-steps" className="bg-green-50 border-green-200 scroll-snap-start">
         <CardContent className="pt-4">
           <div className="text-sm text-green-800">
             <p className="font-medium mb-2">🌱 What's Next?</p>
@@ -263,6 +309,8 @@ Thank you for your order!
           </div>
         </CardContent>
       </Card>
+      
+      <ScrollToTop />
     </div>
   );
 }

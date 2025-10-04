@@ -553,7 +553,7 @@ export default function PlantsPage({ onAddToCart }: PlantsPageProps) {
   const { addToCart, isInCart, getTotalItems } = useCart();
 
   const handlePlantClick = (plantId: string) => {
-    setLocation(`/plant/${plantId}`);
+    setLocation(`/product/${plantId}`);
   };
 
   const handleAddToCart = (plant: Plant) => {

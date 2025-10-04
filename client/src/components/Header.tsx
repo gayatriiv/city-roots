@@ -183,15 +183,13 @@ export default function Header({ cartItems = 0, onCartClick, onSearchChange }: H
                     {category.name}
                   </h4>
                   <div className="space-y-1 pl-4">
-                    {category.name === "Plants" && (
-                      <Link
-                        href="/plants"
-                        className="block w-full text-left py-1 px-2 text-sm text-muted-foreground hover:text-foreground hover:bg-accent rounded-md transition-colors"
-                        onClick={() => setIsMobileMenuOpen(false)}
-                      >
-                        All Plants
-                      </Link>
-                    )}
+                    <Link
+                      href={`/${category.name.toLowerCase()}`}
+                      className="block w-full text-left py-2 px-2 text-sm text-muted-foreground hover:text-foreground hover:bg-accent rounded-md transition-colors font-medium"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                    >
+                      All {category.name}
+                    </Link>
                     {category.items.map((item) => (
                       <button
                         key={item}
@@ -208,6 +206,24 @@ export default function Header({ cartItems = 0, onCartClick, onSearchChange }: H
                   </div>
                 </div>
               ))}
+              
+              {/* Additional Mobile Links */}
+              <div className="pt-4 border-t border-border">
+                <Link
+                  href="/about"
+                  className="block w-full text-left py-2 px-2 text-sm text-muted-foreground hover:text-foreground hover:bg-accent rounded-md transition-colors"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  About Us
+                </Link>
+                <Link
+                  href="/track-order"
+                  className="block w-full text-left py-2 px-2 text-sm text-muted-foreground hover:text-foreground hover:bg-accent rounded-md transition-colors"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  Track Order
+                </Link>
+              </div>
             </nav>
           </div>
         )}

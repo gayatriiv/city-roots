@@ -1,4 +1,4 @@
-import { Switch, Route, useLocation } from "wouter";
+import { Switch, Route, useLocation, useRoute } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
@@ -12,6 +12,7 @@ import PlantDetailPage from "@/pages/PlantDetailPage";
 import CartPage from "@/pages/CartPage";
 import CheckoutPage from "@/pages/CheckoutPage";
 import OrderTrackingPage from "@/pages/OrderTrackingPage";
+import ProductDetailPage from "@/pages/ProductDetailPage";
 import AboutPage from "@/pages/AboutPage";
 import ToolsPage from "@/pages/ToolsPage";
 import SeedsPage from "@/pages/SeedsPage";
@@ -23,6 +24,7 @@ import CollectionsSection from "@/components/CollectionsSection";
 import GuidesSection from "@/components/GuidesSection";
 import Footer from "@/components/Footer";
 import CartDrawer from "@/components/CartDrawer";
+import ScrollToTop from "@/components/ui/ScrollToTop";
 import { fetchCartItems, addToCart, updateCartItemQuantity, removeFromCart, clearCart, getSessionId, getImageUrl } from "@/lib/api";
 
 interface CartItem {
@@ -118,7 +120,7 @@ function Home() {
   const totalItems = cartItems.reduce((sum, item) => sum + item.quantity, 0);
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background scroll-snap-y">
       <Header 
         cartItems={totalItems}
         onCartClick={() => setIsCartOpen(true)}
@@ -158,6 +160,8 @@ function Home() {
         onRemoveItem={handleRemoveItem}
         onCheckout={handleCheckout}
       />
+      
+      <ScrollToTop />
     </div>
   );
 }
@@ -190,6 +194,7 @@ function PlantsPageWrapper() {
         onSearchChange={(query) => console.log('Search:', query)}
       />
       <PlantsPage onAddToCart={handleAddToCart} />
+      <ScrollToTop />
     </div>
   );
 }
@@ -206,6 +211,7 @@ function ToolsPageWrapper() {
         onSearchChange={(query) => console.log('Search:', query)}
       />
       <ToolsPage />
+      <ScrollToTop />
     </div>
   );
 }
@@ -236,6 +242,7 @@ function SeedsPageWrapper() {
         onSearchChange={(query) => console.log('Search:', query)}
       />
       <SeedsPage onAddToCart={handleAddToCart} />
+      <ScrollToTop />
     </div>
   );
 }
@@ -249,6 +256,7 @@ function AboutPageWrapper() {
         onSearchChange={(query) => console.log('Search:', query)}
       />
       <AboutPage />
+      <ScrollToTop />
     </div>
   );
 }
@@ -266,6 +274,7 @@ function GuidesPageWrapper() {
         onSearchChange={(query) => console.log('Search:', query)}
       />
       <GuidesPage onGuideClick={handleGuideClick} />
+      <ScrollToTop />
     </div>
   );
 }
@@ -291,7 +300,12 @@ function PlantDetailPageWrapper() {
     addToCartMutation.mutate({ productId });
   };
 
-  return <PlantDetailPage onAddToCart={handleAddToCart} />;
+  return (
+    <div className="min-h-screen bg-background">
+      <PlantDetailPage onAddToCart={handleAddToCart} />
+      <ScrollToTop />
+    </div>
+  );
 }
 
 function CartPageWrapper() {
@@ -312,7 +326,12 @@ function CartPageWrapper() {
     addToCartMutation.mutate({ productId });
   };
 
-  return <CartPage onAddToCart={handleAddToCart} />;
+  return (
+    <div className="min-h-screen bg-background">
+      <CartPage onAddToCart={handleAddToCart} />
+      <ScrollToTop />
+    </div>
+  );
 }
 
 function CheckoutPageWrapper() {
@@ -333,7 +352,42 @@ function CheckoutPageWrapper() {
     addToCartMutation.mutate({ productId });
   };
 
-  return <CheckoutPage onAddToCart={handleAddToCart} />;
+  return (
+    <div className="min-h-screen bg-background">
+      <CheckoutPage onAddToCart={handleAddToCart} />
+      <ScrollToTop />
+    </div>
+  );
+}
+
+function ProductDetailPageWrapper() {
+  const [, params] = useRoute('/product/:id');
+  const sessionId = getSessionId();
+  const addToCartMutation = useMutation({
+    mutationFn: ({ productId }: { productId: string }) => 
+      addToCart(sessionId, productId, 1),
+    onError: (error) => {
+      console.error('Failed to add to cart:', error);
+    },
+  });
+
+  const handleAddToCart = (productId: string) => {
+    addToCartMutation.mutate({ productId });
+  };
+
+  if (!params?.id) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <p className="text-lg text-destructive">Product ID not found</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-background">
+      <ProductDetailPage productId={params.id} onAddToCart={handleAddToCart} />
+    </div>
+  );
 }
 
 function Router() {
@@ -343,8 +397,9 @@ function Router() {
       <Route path="/plants" component={PlantsPageWrapper} />
       <Route path="/plant/*" component={PlantDetailPageWrapper} />
       <Route path="/cart" component={CartPageWrapper} />
-      <Route path="/checkout" component={CheckoutPageWrapper} />
-      <Route path="/track-order" component={OrderTrackingPage} />
+              <Route path="/checkout" component={CheckoutPageWrapper} />
+              <Route path="/track-order" component={OrderTrackingPage} />
+              <Route path="/product/:id" component={ProductDetailPageWrapper} />
       <Route path="/about" component={AboutPageWrapper} />
       <Route path="/tools" component={ToolsPageWrapper} />
       <Route path="/seeds" component={SeedsPageWrapper} />

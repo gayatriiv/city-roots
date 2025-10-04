@@ -195,7 +195,7 @@ export default function SeedsPage({ onAddToCart }: SeedsPageProps) {
   const [, setLocation] = useLocation();
 
   const handlePlantClick = (plantId: string) => {
-    setLocation(`/plant/${plantId}`);
+    setLocation(`/product/${plantId}`);
   };
 
   // Filter and sort plants
@@ -266,9 +266,9 @@ export default function SeedsPage({ onAddToCart }: SeedsPageProps) {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">Flowering Plants</h1>
+              <h1 className="text-3xl font-bold text-gray-900">Seeds</h1>
               <p className="text-gray-600 mt-1">
-                Beautiful flowering plants for your garden
+                Discover our collection of {filteredAndSortedPlants.length} quality seeds
               </p>
             </div>
             
@@ -300,7 +300,7 @@ export default function SeedsPage({ onAddToCart }: SeedsPageProps) {
             {/* Search */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Search Plants
+                Search Seeds
               </label>
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />

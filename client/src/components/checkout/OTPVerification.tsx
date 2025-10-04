@@ -6,6 +6,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Loader2, Phone, Shield } from "lucide-react";
 import { CustomerData } from "@/pages/CheckoutPage";
+import ScrollToTop from "@/components/ui/ScrollToTop";
+import { useScroll } from "@/hooks/useScroll";
 
 interface OTPVerificationProps {
   onVerified: (data: CustomerData) => void;
@@ -20,6 +22,7 @@ export default function OTPVerification({ onVerified }: OTPVerificationProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [resendTimer, setResendTimer] = useState(0);
+  const { scrollToTop } = useScroll();
 
   // Mock OTP - in real app, this would come from server
   const [mockOTP] = useState('123456');
@@ -145,7 +148,7 @@ export default function OTPVerification({ onVerified }: OTPVerificationProps) {
   if (step === 'phone') {
     return (
       <div className="space-y-6">
-        <div className="text-center">
+        <div id="phone-input" className="text-center scroll-snap-start">
           <div className="mx-auto w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mb-4">
             <Phone className="h-6 w-6 text-blue-600" />
           </div>
@@ -216,13 +219,63 @@ export default function OTPVerification({ onVerified }: OTPVerificationProps) {
             By continuing, you agree to receive SMS notifications for order updates
           </p>
         </div>
+
+        {/* Demo Content to Show Scroll */}
+        <div className="space-y-4 pt-8">
+          <div className="text-center">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Why Verify Your Phone?</h3>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="bg-blue-50 p-4 rounded-lg">
+              <h4 className="font-medium text-blue-900 mb-2">🔒 Secure Checkout</h4>
+              <p className="text-sm text-blue-800">We verify your identity to ensure secure transactions and prevent fraud.</p>
+            </div>
+            
+            <div className="bg-green-50 p-4 rounded-lg">
+              <h4 className="font-medium text-green-900 mb-2">📱 Order Updates</h4>
+              <p className="text-sm text-green-800">Receive real-time SMS updates about your order status and delivery.</p>
+            </div>
+            
+            <div className="bg-purple-50 p-4 rounded-lg">
+              <h4 className="font-medium text-purple-900 mb-2">🚚 Delivery Notifications</h4>
+              <p className="text-sm text-purple-800">Get notified when your order is out for delivery and arrives.</p>
+            </div>
+            
+            <div className="bg-orange-50 p-4 rounded-lg">
+              <h4 className="font-medium text-orange-900 mb-2">💬 Customer Support</h4>
+              <p className="text-sm text-orange-800">Easy contact for order assistance and support inquiries.</p>
+            </div>
+          </div>
+
+          <div className="bg-gray-50 p-4 rounded-lg">
+            <h4 className="font-medium text-gray-900 mb-2">📋 What Happens Next?</h4>
+            <ol className="text-sm text-gray-700 space-y-1 list-decimal list-inside">
+              <li>Enter your 10-digit mobile number</li>
+              <li>Receive a 6-digit OTP via SMS</li>
+              <li>Verify your phone number</li>
+              <li>Proceed to add your delivery address</li>
+              <li>Complete your secure payment</li>
+            </ol>
+          </div>
+
+          <div className="text-center pt-4">
+            <Button
+              variant="outline"
+              onClick={() => scrollToTop()}
+              className="text-sm"
+            >
+              ↑ Scroll to Top
+            </Button>
+          </div>
+        </div>
       </div>
     );
   }
 
   return (
     <div className="space-y-6">
-      <div className="text-center">
+      <div id="otp-verification" className="text-center scroll-snap-start">
         <div className="mx-auto w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mb-4">
           <Shield className="h-6 w-6 text-green-600" />
         </div>
@@ -280,6 +333,64 @@ export default function OTPVerification({ onVerified }: OTPVerificationProps) {
           </Button>
         )}
       </div>
+
+      {/* Demo Content to Show Scroll */}
+      <div className="space-y-4 pt-8">
+        <div className="text-center">
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">OTP Verification Help</h3>
+        </div>
+        
+        <div className="bg-yellow-50 border border-yellow-200 p-4 rounded-lg">
+          <h4 className="font-medium text-yellow-900 mb-2">💡 Demo OTP Code</h4>
+          <p className="text-sm text-yellow-800">
+            For demo purposes, use the OTP code: <strong className="text-lg">123456</strong>
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="bg-blue-50 p-4 rounded-lg">
+            <h4 className="font-medium text-blue-900 mb-2">📱 Check Your SMS</h4>
+            <p className="text-sm text-blue-800">Look for an SMS from City Roots with your 6-digit verification code.</p>
+          </div>
+          
+          <div className="bg-green-50 p-4 rounded-lg">
+            <h4 className="font-medium text-green-900 mb-2">⏰ Code Expiry</h4>
+            <p className="text-sm text-green-800">The OTP code is valid for 10 minutes after sending.</p>
+          </div>
+          
+          <div className="bg-red-50 p-4 rounded-lg">
+            <h4 className="font-medium text-red-900 mb-2">❌ Wrong Code?</h4>
+            <p className="text-sm text-red-800">If you enter the wrong code 3 times, you'll need to request a new OTP.</p>
+          </div>
+          
+          <div className="bg-purple-50 p-4 rounded-lg">
+            <h4 className="font-medium text-purple-900 mb-2">🔄 Didn't Receive?</h4>
+            <p className="text-sm text-purple-800">Check your spam folder or wait 60 seconds to resend the code.</p>
+          </div>
+        </div>
+
+        <div className="bg-gray-50 p-4 rounded-lg">
+          <h4 className="font-medium text-gray-900 mb-2">🛡️ Security Features</h4>
+          <ul className="text-sm text-gray-700 space-y-1 list-disc list-inside">
+            <li>One-time use verification code</li>
+            <li>Automatic expiry after 10 minutes</li>
+            <li>Rate limiting to prevent abuse</li>
+            <li>Secure SMS delivery via trusted providers</li>
+          </ul>
+        </div>
+
+        <div className="text-center pt-4">
+          <Button
+            variant="outline"
+            onClick={() => scrollToTop()}
+            className="text-sm"
+          >
+            ↑ Scroll to Top
+          </Button>
+        </div>
+      </div>
+      
+      <ScrollToTop />
     </div>
   );
 }

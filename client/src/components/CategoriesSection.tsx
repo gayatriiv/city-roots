@@ -80,7 +80,7 @@ export default function CategoriesSection({ onCategoryClick }: CategoriesSection
   };
 
   return (
-    <section className="py-16 bg-background" data-testid="categories-section">
+    <section id="categories" className="py-16 bg-background scroll-snap-start" data-testid="categories-section">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <div className="text-center mb-12">
@@ -93,7 +93,7 @@ export default function CategoriesSection({ onCategoryClick }: CategoriesSection
         </div>
 
         {/* Featured Categories Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 mb-8">
           {categories.filter(cat => cat.featured).map((category, index) => (
             <Card
               key={category.id}

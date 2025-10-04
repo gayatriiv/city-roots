@@ -73,7 +73,7 @@ export default function CollectionsSection({ onCollectionClick }: CollectionsSec
   };
 
   return (
-    <section className="py-16 bg-background" data-testid="collections-section">
+    <section id="collections" className="py-16 bg-background scroll-snap-start" data-testid="collections-section">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <div className="text-center mb-12">

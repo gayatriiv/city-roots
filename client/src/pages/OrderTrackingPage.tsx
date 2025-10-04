@@ -8,6 +8,7 @@ import { Separator } from "@/components/ui/separator";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { ArrowLeft, Package, Truck, CheckCircle, Clock, Search } from "lucide-react";
 import Header from "@/components/Header";
+import ScrollToTop from "@/components/ui/ScrollToTop";
 
 interface TrackingEntry {
   id: string;
@@ -277,6 +278,8 @@ export default function OrderTrackingPage() {
           </div>
         )}
       </div>
+      
+      <ScrollToTop />
     </div>
   );
 }

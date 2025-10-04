@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { useState } from "react";
+import { useScroll } from "@/hooks/useScroll";
 
 interface FooterProps {
   onNewsletterSignup?: (email: string) => void;
@@ -12,6 +13,7 @@ interface FooterProps {
 export default function Footer({ onNewsletterSignup, onNavigate }: FooterProps) {
   const [email, setEmail] = useState("");
   const [isSubscribing, setIsSubscribing] = useState(false);
+  const { scrollToTop } = useScroll();
 
   const handleNewsletterSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -85,7 +87,7 @@ export default function Footer({ onNewsletterSignup, onNavigate }: FooterProps) 
     <footer className="bg-muted/30 pt-16 pb-8" data-testid="footer">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Main Footer Content */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-8 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-6 lg:gap-8 mb-8">
           {/* Brand and Newsletter */}
           <div className="lg:col-span-2 space-y-4">
             <div className="flex items-center space-x-2">
@@ -106,7 +108,7 @@ export default function Footer({ onNewsletterSignup, onNavigate }: FooterProps) 
               <p className="text-xs text-muted-foreground">
                 Get gardening tips, exclusive offers, and seasonal guides
               </p>
-              <form onSubmit={handleNewsletterSubmit} className="flex gap-2" data-testid="newsletter-form">
+              <form onSubmit={handleNewsletterSubmit} className="flex flex-col sm:flex-row gap-2" data-testid="newsletter-form">
                 <Input
                   type="email"
                   placeholder="Enter your email"
@@ -119,6 +121,7 @@ export default function Footer({ onNewsletterSignup, onNavigate }: FooterProps) 
                   type="submit" 
                   size="sm"
                   disabled={isSubscribing}
+                  className="whitespace-nowrap"
                   data-testid="newsletter-submit"
                 >
                   {isSubscribing ? 'Signing up...' : 'Subscribe'}
@@ -227,9 +230,20 @@ export default function Footer({ onNewsletterSignup, onNavigate }: FooterProps) 
             </button>
           </div>
           
-          <div className="flex items-center space-x-2 text-sm text-muted-foreground">
-            <Leaf className="h-3 w-3 text-primary" />
-            <span>Growing sustainably since 2020</span>
+          <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-2 text-sm text-muted-foreground">
+              <Leaf className="h-3 w-3 text-primary" />
+              <span>Growing sustainably since 2020</span>
+            </div>
+            
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={scrollToTop}
+              className="text-xs"
+            >
+              Back to Top
+            </Button>
           </div>
         </div>
       </div>

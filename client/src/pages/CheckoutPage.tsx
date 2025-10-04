@@ -11,17 +11,18 @@ import OTPVerification from "@/components/checkout/OTPVerification";
 import AddressForm from "@/components/checkout/AddressForm";
 import PaymentForm from "@/components/checkout/PaymentForm";
 import OrderConfirmation from "@/components/checkout/OrderConfirmation";
+import ScrollToTop from "@/components/ui/ScrollToTop";
 
 export type CheckoutStep = 'phone' | 'address' | 'payment' | 'confirmation';
 
-interface CustomerData {
+export interface CustomerData {
   phone: string;
   name: string;
   email: string;
   isVerified: boolean;
 }
 
-interface AddressData {
+export interface AddressData {
   fullName: string;
   addressLine1: string;
   addressLine2?: string;
@@ -144,14 +145,14 @@ export default function CheckoutPage({ onAddToCart }: CheckoutPageProps) {
           Back to Cart
         </Button>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
           {/* Checkout Steps */}
           <div className="lg:col-span-2">
             <div className="mb-8">
               <h1 className="text-3xl font-bold text-gray-900 mb-6">Checkout</h1>
               
               {/* Progress Steps */}
-              <div className="flex items-center justify-between mb-8">
+              <div className="hidden sm:flex items-center justify-between mb-8">
                 {(['phone', 'address', 'payment', 'confirmation'] as CheckoutStep[]).map((step, index) => (
                   <div key={step} className="flex items-center">
                     <div className="flex items-center">
@@ -165,6 +166,22 @@ export default function CheckoutPage({ onAddToCart }: CheckoutPageProps) {
                     )}
                   </div>
                 ))}
+              </div>
+              
+              {/* Mobile Progress Steps */}
+              <div className="sm:hidden mb-6">
+                <div className="flex items-center justify-between">
+                  {(['phone', 'address', 'payment', 'confirmation'] as CheckoutStep[]).map((step, index) => (
+                    <div key={step} className="flex flex-col items-center">
+                      {getStepIcon(step, currentStep)}
+                      <span className="text-xs font-medium text-gray-900 mt-1 text-center">
+                        {step === 'phone' ? 'Phone' : 
+                         step === 'address' ? 'Address' : 
+                         step === 'payment' ? 'Payment' : 'Confirm'}
+                      </span>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
 
@@ -181,33 +198,41 @@ export default function CheckoutPage({ onAddToCart }: CheckoutPageProps) {
               </CardHeader>
               <CardContent>
                 {currentStep === 'phone' && (
-                  <OTPVerification onVerified={handlePhoneVerified} />
+                  <div id="phone-verification" className="scroll-snap-start">
+                    <OTPVerification onVerified={handlePhoneVerified} />
+                  </div>
                 )}
                 
                 {currentStep === 'address' && customerData && (
-                  <AddressForm 
-                    customerData={customerData}
-                    onSubmit={handleAddressSubmitted}
-                  />
+                  <div id="address-form" className="scroll-snap-start">
+                    <AddressForm 
+                      customerData={customerData}
+                      onSubmit={handleAddressSubmitted}
+                    />
+                  </div>
                 )}
                 
                 {currentStep === 'payment' && customerData && addressData && (
-                  <PaymentForm 
-                    customerData={customerData}
-                    addressData={addressData}
-                    cartItems={cartItems}
-                    onPaymentSuccess={handlePaymentSuccess}
-                    onBack={() => setCurrentStep('address')}
-                  />
+                  <div id="payment-form" className="scroll-snap-start">
+                    <PaymentForm 
+                      customerData={customerData}
+                      addressData={addressData}
+                      cartItems={cartItems}
+                      onPaymentSuccess={handlePaymentSuccess}
+                      onBack={() => setCurrentStep('address')}
+                    />
+                  </div>
                 )}
                 
                 {currentStep === 'confirmation' && orderId && (
-                  <OrderConfirmation 
-                    orderId={orderId}
-                    customerData={customerData!}
-                    addressData={addressData!}
-                    onContinueShopping={() => setLocation('/plants')}
-                  />
+                  <div id="order-confirmation" className="scroll-snap-start">
+                    <OrderConfirmation 
+                      orderId={orderId}
+                      customerData={customerData!}
+                      addressData={addressData!}
+                      onContinueShopping={() => setLocation('/plants')}
+                    />
+                  </div>
                 )}
               </CardContent>
             </Card>
@@ -270,6 +295,8 @@ export default function CheckoutPage({ onAddToCart }: CheckoutPageProps) {
           )}
         </div>
       </div>
+      
+      <ScrollToTop />
     </div>
   );
 }

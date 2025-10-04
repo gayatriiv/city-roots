@@ -21,7 +21,7 @@ export default function Hero({ onShopNow, onLearnMore }: HeroProps) {
   console.log('Hero - totalPlants:', totalPlants, 'cartItems:', cartItems, 'happyCustomers:', happyCustomers);
 
   return (
-    <section className="relative h-screen flex items-center justify-center overflow-hidden">
+    <section id="hero" className="relative h-screen flex items-center justify-center overflow-hidden scroll-snap-start">
       {/* Background Image with Overlay */}
       <div className="absolute inset-0">
         <img
@@ -35,20 +35,20 @@ export default function Hero({ onShopNow, onLearnMore }: HeroProps) {
 
       {/* Content */}
       <div className="relative z-10 text-center max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h1 className="text-4xl sm:text-5xl lg:text-6xl font-serif font-bold text-white mb-6 leading-tight">
+        <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-serif font-bold text-white mb-4 sm:mb-6 leading-tight">
           Transform Your Space with
           <span className="block text-green-300">Nature's Beauty</span>
         </h1>
 
-        <p className="text-xl text-white/90 mb-8 max-w-2xl mx-auto leading-relaxed font-medium">
+        <p className="text-lg sm:text-xl text-white/90 mb-6 sm:mb-8 max-w-2xl mx-auto leading-relaxed font-medium px-4">
           Fresh plants, quality tools, and helpful guides 
           for your urban gardening adventure
         </p>
 
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-12">
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 mb-8 sm:mb-12 px-4">
           <Button
             size="lg"
-            className="bg-primary text-primary-foreground hover:bg-primary/90 text-lg px-8 py-3"
+            className="bg-primary text-primary-foreground hover:bg-primary/90 text-base sm:text-lg px-6 sm:px-8 py-3 w-full sm:w-auto"
             onClick={() => {
               console.log('Shop Now clicked'); //todo: remove mock functionality
               onShopNow?.();
@@ -56,26 +56,26 @@ export default function Hero({ onShopNow, onLearnMore }: HeroProps) {
             data-testid="hero-shop-now"
           >
             Shop Now
-            <ArrowRight className="ml-2 h-5 w-5" />
+            <ArrowRight className="ml-2 h-4 w-4 sm:h-5 sm:w-5" />
           </Button>
           
           <Button
             variant="outline"
             size="lg"
-            className="bg-white/10 border-white/20 text-white hover:bg-white/20 backdrop-blur-sm text-lg px-8 py-3"
+            className="bg-white/10 border-white/20 text-white hover:bg-white/20 backdrop-blur-sm text-base sm:text-lg px-6 sm:px-8 py-3 w-full sm:w-auto"
             onClick={() => {
               console.log('Learn More clicked'); //todo: remove mock functionality
               onLearnMore?.();
             }}
             data-testid="hero-learn-more"
           >
-            <Leaf className="mr-2 h-5 w-5" />
+            <Leaf className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
             Learn More
           </Button>
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 text-white">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 sm:gap-8 text-white px-4">
           <div className="text-center" data-testid="stat-products">
             <div className="text-3xl font-bold mb-1">
               <SimpleCounter 
