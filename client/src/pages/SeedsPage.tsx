@@ -461,7 +461,6 @@ export default function SeedsPage({ onAddToCart }: SeedsPageProps) {
                               className="flex-1 text-xs min-w-0"
                               onClick={() => handleAddToCart(plant)}
                               disabled={!plant.inStock}
-                              variant={isInCart(plant.id) ? "secondary" : "default"}
                             >
                               <ShoppingCart className="h-3 w-3 mr-1" />
                               <span className="truncate">{isInCart(plant.id) ? 'Added' : 'Add to Cart'}</span>
