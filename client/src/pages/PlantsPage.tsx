@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { Card, CardContent } from "@/components/ui/card";
@@ -549,8 +549,25 @@ export default function PlantsPage({ onAddToCart }: PlantsPageProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [selectedPlant, setSelectedPlant] = useState<Plant | null>(null);
-  const [, setLocation] = useLocation();
+  const [location, setLocation] = useLocation();
   const { addToCart, isInCart, getTotalItems } = useCart();
+
+  console.log('PlantsPage rendered with selectedCategory:', selectedCategory);
+
+  // Handle URL category parameter
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const categoryParam = urlParams.get('category');
+    console.log('URL category parameter:', categoryParam);
+    console.log('Current location:', location);
+    if (categoryParam) {
+      console.log('Setting selected category to:', categoryParam);
+      setSelectedCategory(categoryParam);
+    } else {
+      // Reset to "All Plants" if no category parameter
+      setSelectedCategory("All Plants");
+    }
+  }, [location]);
 
   const handlePlantClick = (plantId: string) => {
     setLocation(`/product/${plantId}`);
@@ -565,12 +582,23 @@ export default function PlantsPage({ onAddToCart }: PlantsPageProps) {
   // Filter and sort plants
   const filteredAndSortedPlants = useMemo(() => {
     let filtered = samplePlants;
+    
+    console.log('Current selectedCategory state:', selectedCategory);
 
     // Filter by category
     if (selectedCategory !== "All Plants") {
-      filtered = filtered.filter(plant => 
-        plant.category === selectedCategory || plant.subcategory === selectedCategory
-      );
+      console.log('Filtering by category:', selectedCategory);
+      console.log('Available plants before filter:', samplePlants.length);
+      
+      filtered = filtered.filter(plant => {
+        const matches = plant.category === selectedCategory || plant.subcategory === selectedCategory;
+        if (matches) {
+          console.log('Found matching plant:', plant.name, 'Category:', plant.category, 'Subcategory:', plant.subcategory);
+        }
+        return matches;
+      });
+      
+      console.log('Filtered plants count:', filtered.length);
     }
 
     // Filter by search query

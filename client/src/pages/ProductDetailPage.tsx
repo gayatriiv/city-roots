@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useLocation } from "wouter";
+import { useLocation, useRoute } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { ArrowLeft, Star, ShoppingCart, Heart, Share2, CheckCircle, Truck, Shield, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -10,6 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useCart } from "@/contexts/CartContext";
 import ScrollToTop from "@/components/ui/ScrollToTop";
 import { useScroll } from "@/hooks/useScroll";
+import { toolsData, Tool } from "@/data/toolsData";
 
 interface Product {
   id: string;
@@ -41,18 +42,67 @@ interface ProductDetailPageProps {
 
 export default function ProductDetailPage({ productId, onAddToCart }: ProductDetailPageProps) {
   const [, setLocation] = useLocation();
+  const [, toolParams] = useRoute('/tool/:id');
   const { addToCart, isInCart } = useCart();
   const { scrollToTop } = useScroll();
   const [selectedImage, setSelectedImage] = useState(0);
 
+  // Check if this is a tool or plant based on the URL path
+  const isTool = window.location.pathname.startsWith('/tool/');
+  const tool = isTool ? toolsData.find(t => t.id === productId) : null;
+  
+  // Debug logging
+  console.log('ProductDetailPage - productId:', productId);
+  console.log('ProductDetailPage - isTool:', isTool);
+  console.log('ProductDetailPage - toolParams:', toolParams);
+  console.log('ProductDetailPage - tool found:', tool);
+  console.log('ProductDetailPage - current URL:', window.location.pathname);
+
   // Mock product data - in real app, this would come from API
   const { data: product, isLoading, error } = useQuery<Product>({
-    queryKey: ['product', productId],
+    queryKey: ['product', productId, isTool ? 'tool' : 'plant'],
     queryFn: async () => {
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 500));
       
-      // Mock product data based on ID
+      // If it's a tool, return tool data
+      if (isTool && tool) {
+        console.log('Returning tool data for:', tool.name);
+        return {
+          id: tool.id,
+          name: tool.name,
+          price: tool.price,
+          image: tool.image,
+          category: tool.category,
+          subcategory: tool.category,
+          description: tool.description,
+          detailedDescription: tool.description,
+          careInstructions: "Follow manufacturer instructions for proper use and maintenance.",
+          lightRequirements: "N/A",
+          wateringSchedule: "N/A",
+          soilType: "N/A",
+          size: "Standard",
+          rating: tool.rating,
+          reviews: tool.reviews,
+          inStock: tool.inStock,
+          tags: tool.tags,
+          features: tool.tags,
+          specifications: {
+            "Category": tool.category,
+            "Material": "High-quality materials",
+            "Warranty": "1 year manufacturer warranty",
+            "Usage": "Professional and home use",
+            "Maintenance": "Regular cleaning recommended"
+          }
+        };
+      }
+      
+      if (isTool && !tool) {
+        console.error('Tool not found for ID:', productId);
+        throw new Error('Tool not found');
+      }
+      
+      // Default plant data
       const mockProduct: Product = {
         id: productId,
         name: "Money Plant (Pothos)",
@@ -126,9 +176,9 @@ export default function ProductDetailPage({ productId, onAddToCart }: ProductDet
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
           <p className="text-lg text-destructive mb-4">Product not found</p>
-          <Button onClick={() => setLocation('/plants')}>
+          <Button onClick={() => setLocation(isTool ? '/tools' : '/plants')}>
             <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to Products
+            Back to {isTool ? 'Tools' : 'Products'}
           </Button>
         </div>
       </div>
@@ -143,11 +193,11 @@ export default function ProductDetailPage({ productId, onAddToCart }: ProductDet
         {/* Back Button */}
         <Button
           variant="ghost"
-          onClick={() => setLocation('/plants')}
+          onClick={() => setLocation(isTool ? '/tools' : '/plants')}
           className="mb-6"
         >
           <ArrowLeft className="h-4 w-4 mr-2" />
-          Back to Products
+          Back to {isTool ? 'Tools' : 'Products'}
         </Button>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8 mb-8">

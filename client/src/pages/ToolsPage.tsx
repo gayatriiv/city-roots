@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useLocation } from 'wouter';
 import { useQuery } from '@tanstack/react-query';
 import { Search, LayoutGrid, List, Star, ShoppingCart, Eye } from 'lucide-react';
@@ -25,6 +25,15 @@ export default function ToolsPage() {
   const [sortBy, setSortBy] = useState<string>('name-asc');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+
+  // Handle URL category parameter
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const categoryParam = urlParams.get('category');
+    if (categoryParam) {
+      setSelectedCategory(categoryParam);
+    }
+  }, []);
 
   // Mock fetching tools data
   const { data: tools, isLoading, error } = useQuery<Tool[]>({
@@ -92,7 +101,7 @@ export default function ToolsPage() {
   };
 
   const handleToolClick = (toolId: string) => {
-    setLocation(`/product/${toolId}`);
+    setLocation(`/tool/${toolId}`);
   };
 
   const handleAddToCart = (tool: Tool) => {

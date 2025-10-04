@@ -280,10 +280,8 @@ function GuidesPageWrapper() {
 }
 
 function PlantDetailPageWrapper() {
+  const [, params] = useRoute('/plant/:id');
   const sessionId = getSessionId();
-  
-  // Debug: Log that this wrapper is being rendered
-  console.log('PlantDetailPageWrapper rendered, URL:', window.location.pathname);
   
   const addToCartMutation = useMutation({
     mutationFn: ({ productId }: { productId: string }) => 
@@ -300,9 +298,17 @@ function PlantDetailPageWrapper() {
     addToCartMutation.mutate({ productId });
   };
 
+  if (!params?.id) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <p className="text-lg text-destructive">Plant ID not found</p>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-background">
-      <PlantDetailPage onAddToCart={handleAddToCart} />
+      <PlantDetailPage plantId={params.id} onAddToCart={handleAddToCart} />
       <ScrollToTop />
     </div>
   );
@@ -361,8 +367,19 @@ function CheckoutPageWrapper() {
 }
 
 function ProductDetailPageWrapper() {
-  const [, params] = useRoute('/product/:id');
+  const [, productParams] = useRoute('/product/:id');
+  const [, toolParams] = useRoute('/tool/:id');
   const sessionId = getSessionId();
+  
+  // Determine which route matched and get the ID
+  const params = productParams || toolParams;
+  const isTool = !!toolParams;
+  
+  console.log('ProductDetailPageWrapper - productParams:', productParams);
+  console.log('ProductDetailPageWrapper - toolParams:', toolParams);
+  console.log('ProductDetailPageWrapper - params:', params);
+  console.log('ProductDetailPageWrapper - isTool:', isTool);
+  
   const addToCartMutation = useMutation({
     mutationFn: ({ productId }: { productId: string }) => 
       addToCart(sessionId, productId, 1),
@@ -395,11 +412,12 @@ function Router() {
     <Switch>
       <Route path="/" component={Home} />
       <Route path="/plants" component={PlantsPageWrapper} />
-      <Route path="/plant/*" component={PlantDetailPageWrapper} />
+      <Route path="/plant/:id" component={PlantDetailPageWrapper} />
       <Route path="/cart" component={CartPageWrapper} />
-              <Route path="/checkout" component={CheckoutPageWrapper} />
-              <Route path="/track-order" component={OrderTrackingPage} />
-              <Route path="/product/:id" component={ProductDetailPageWrapper} />
+      <Route path="/checkout" component={CheckoutPageWrapper} />
+      <Route path="/track-order" component={OrderTrackingPage} />
+      <Route path="/tool/:id" component={ProductDetailPageWrapper} />
+      <Route path="/product/:id" component={ProductDetailPageWrapper} />
       <Route path="/about" component={AboutPageWrapper} />
       <Route path="/tools" component={ToolsPageWrapper} />
       <Route path="/seeds" component={SeedsPageWrapper} />

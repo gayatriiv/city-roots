@@ -21,12 +21,28 @@ interface HeaderProps {
 export default function Header({ cartItems = 0, onCartClick, onSearchChange }: HeaderProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [location] = useLocation();
+  const [location, setLocation] = useLocation();
 
   const handleSearchChange = (value: string) => {
     setSearchQuery(value);
     onSearchChange?.(value);
     console.log('Search query:', value); //todo: remove mock functionality
+  };
+
+  const handleCategoryClick = (category: string, item: string) => {
+    const categoryMap: { [key: string]: string } = {
+      'Plants': 'plants',
+      'Tools': 'tools', 
+      'Seeds': 'seeds',
+      'Guides': 'guides'
+    };
+    
+    const baseRoute = categoryMap[category];
+    if (!baseRoute) return;
+    
+    // Create URL with category filter
+    const filterParam = encodeURIComponent(item);
+    setLocation(`/${baseRoute}?category=${filterParam}`);
   };
 
   const mainCategories = [
@@ -92,7 +108,7 @@ export default function Header({ cartItems = 0, onCartClick, onSearchChange }: H
                   {category.items.map((item) => (
                     <DropdownMenuItem
                       key={item}
-                      onClick={() => console.log(`Navigate to ${item}`)}
+                      onClick={() => handleCategoryClick(category.name, item)}
                       data-testid={`nav-item-${item.toLowerCase().replace(/\s+/g, '-')}`}
                     >
                       {item}
@@ -195,7 +211,7 @@ export default function Header({ cartItems = 0, onCartClick, onSearchChange }: H
                         key={item}
                         className="block w-full text-left py-1 px-2 text-sm text-muted-foreground hover:text-foreground hover:bg-accent rounded-md transition-colors"
                         onClick={() => {
-                          console.log(`Navigate to ${item}`); //todo: remove mock functionality
+                          handleCategoryClick(category.name, item);
                           setIsMobileMenuOpen(false);
                         }}
                         data-testid={`mobile-nav-item-${item.toLowerCase().replace(/\s+/g, '-')}`}

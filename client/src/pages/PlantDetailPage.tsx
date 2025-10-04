@@ -560,10 +560,11 @@ const samplePlants: Plant[] = [
 ];
 
 interface PlantDetailPageProps {
+  plantId: string;
   onAddToCart: (productId: string) => void;
 }
 
-export default function PlantDetailPage({ onAddToCart }: PlantDetailPageProps) {
+export default function PlantDetailPage({ plantId, onAddToCart }: PlantDetailPageProps) {
   const [plant, setPlant] = useState<Plant | null>(null);
   const [loading, setLoading] = useState(true);
   const [, setLocation] = useLocation();
@@ -577,14 +578,7 @@ export default function PlantDetailPage({ onAddToCart }: PlantDetailPageProps) {
   const { addToCart, isInCart, getTotalItems } = useCart();
   
   useEffect(() => {
-    // Debug: Log that this component is being rendered
-    console.log('PlantDetailPage rendered, URL:', window.location.pathname);
-    
-    // Get plant ID from URL
-    const pathParts = window.location.pathname.split('/');
-    const plantId = pathParts[pathParts.length - 1];
-    
-    console.log('Extracted plant ID:', plantId);
+    console.log('PlantDetailPage rendered with plantId:', plantId);
     console.log('Available plants:', samplePlants.map(p => ({ id: p.id, name: p.name })));
     
     // Find plant by ID
@@ -595,7 +589,7 @@ export default function PlantDetailPage({ onAddToCart }: PlantDetailPageProps) {
       setPlant(foundPlant);
     }
     setLoading(false);
-  }, []);
+  }, [plantId]);
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('en-IN', {
