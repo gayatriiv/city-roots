@@ -10,6 +10,8 @@ import NotFound from "@/pages/not-found";
 import PlantsPage from "@/pages/PlantsPage";
 import PlantDetailPage from "@/pages/PlantDetailPage";
 import CartPage from "@/pages/CartPage";
+import CheckoutPage from "@/pages/CheckoutPage";
+import OrderTrackingPage from "@/pages/OrderTrackingPage";
 import AboutPage from "@/pages/AboutPage";
 import ToolsPage from "@/pages/ToolsPage";
 import SeedsPage from "@/pages/SeedsPage";
@@ -313,6 +315,27 @@ function CartPageWrapper() {
   return <CartPage onAddToCart={handleAddToCart} />;
 }
 
+function CheckoutPageWrapper() {
+  const sessionId = getSessionId();
+  
+  const addToCartMutation = useMutation({
+    mutationFn: ({ productId }: { productId: string }) => 
+      addToCart(sessionId, productId, 1),
+    onSuccess: () => {
+      console.log('Added to cart successfully');
+    },
+    onError: (error) => {
+      console.error('Failed to add to cart:', error);
+    },
+  });
+
+  const handleAddToCart = (productId: string) => {
+    addToCartMutation.mutate({ productId });
+  };
+
+  return <CheckoutPage onAddToCart={handleAddToCart} />;
+}
+
 function Router() {
   return (
     <Switch>
@@ -320,6 +343,8 @@ function Router() {
       <Route path="/plants" component={PlantsPageWrapper} />
       <Route path="/plant/*" component={PlantDetailPageWrapper} />
       <Route path="/cart" component={CartPageWrapper} />
+      <Route path="/checkout" component={CheckoutPageWrapper} />
+      <Route path="/track-order" component={OrderTrackingPage} />
       <Route path="/about" component={AboutPageWrapper} />
       <Route path="/tools" component={ToolsPageWrapper} />
       <Route path="/seeds" component={SeedsPageWrapper} />

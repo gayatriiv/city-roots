@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertProductSchema, insertCartItemSchema } from "@shared/schema";
+import { insertProductSchema, insertCartItemSchema, insertCustomerSchema, insertAddressSchema, insertOrderSchema, insertOrderItemSchema, insertOrderTrackingSchema } from "@shared/schema";
 import { z } from "zod";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -180,6 +180,266 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('Error fetching guide:', error);
       res.status(500).json({ error: 'Failed to fetch guide' });
+    }
+  });
+
+  // Customer routes
+  app.post("/api/customers/verify-phone", async (req, res) => {
+    try {
+      const { phone } = req.body;
+      
+      if (!phone) {
+        return res.status(400).json({ error: 'Phone number is required' });
+      }
+
+      // Validate phone number format
+      const phoneRegex = /^[6-9]\d{9}$/;
+      if (!phoneRegex.test(phone)) {
+        return res.status(400).json({ error: 'Invalid phone number format' });
+      }
+
+      // Check if customer exists
+      let customer = await storage.getCustomerByPhone(phone);
+      
+      if (!customer) {
+        // Create new customer
+        customer = await storage.createCustomer({
+          phone,
+          name: `User ${phone.slice(-4)}`,
+          email: '',
+          isVerified: false
+        });
+      }
+
+      // Generate and send OTP (mock implementation)
+      const otp = '123456'; // In real app, generate random OTP and send via SMS
+      
+      res.json({ 
+        success: true, 
+        message: 'OTP sent successfully',
+        otp: otp, // Only for demo purposes
+        customer: {
+          id: customer.id,
+          phone: customer.phone,
+          name: customer.name,
+          email: customer.email,
+          isVerified: customer.isVerified
+        }
+      });
+    } catch (error) {
+      console.error('Error verifying phone:', error);
+      res.status(500).json({ error: 'Failed to verify phone number' });
+    }
+  });
+
+  app.post("/api/customers/verify-otp", async (req, res) => {
+    try {
+      const { phone, otp, name, email } = req.body;
+      
+      if (!phone || !otp) {
+        return res.status(400).json({ error: 'Phone number and OTP are required' });
+      }
+
+      // Mock OTP verification (in real app, verify with SMS service)
+      if (otp !== '123456') {
+        return res.status(400).json({ error: 'Invalid OTP' });
+      }
+
+      // Update customer verification status
+      const customer = await storage.verifyCustomer(phone, { name, email });
+      
+      res.json({ 
+        success: true, 
+        message: 'Phone verified successfully',
+        customer: {
+          id: customer.id,
+          phone: customer.phone,
+          name: customer.name,
+          email: customer.email,
+          isVerified: customer.isVerified
+        }
+      });
+    } catch (error) {
+      console.error('Error verifying OTP:', error);
+      res.status(500).json({ error: 'Failed to verify OTP' });
+    }
+  });
+
+  // Address routes
+  app.post("/api/addresses", async (req, res) => {
+    try {
+      const addressData = insertAddressSchema.parse(req.body);
+      const address = await storage.createAddress(addressData);
+      res.json(address);
+    } catch (error) {
+      console.error('Error creating address:', error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: 'Invalid address data', details: error.errors });
+      }
+      res.status(500).json({ error: 'Failed to create address' });
+    }
+  });
+
+  // Order routes
+  app.post("/api/orders", async (req, res) => {
+    try {
+      const { customerData, addressData, cartItems, subtotal, tax, shipping, total } = req.body;
+      
+      // Validate required data
+      if (!customerData || !addressData || !cartItems || !Array.isArray(cartItems)) {
+        return res.status(400).json({ error: 'Missing required order data' });
+      }
+
+      // Create or get customer
+      let customer = await storage.getCustomerByPhone(customerData.phone);
+      if (!customer) {
+        customer = await storage.createCustomer({
+          phone: customerData.phone,
+          name: customerData.name,
+          email: customerData.email || '',
+          isVerified: true
+        });
+      }
+
+      // Create address
+      const address = await storage.createAddress({
+        customerId: customer.id,
+        type: 'shipping',
+        fullName: addressData.fullName,
+        addressLine1: addressData.addressLine1,
+        addressLine2: addressData.addressLine2,
+        city: addressData.city,
+        state: addressData.state,
+        postalCode: addressData.postalCode,
+        country: addressData.country,
+        phone: addressData.phone,
+        isDefault: true
+      });
+
+      // Create order
+      const orderNumber = `VC${Date.now().toString().slice(-6)}${Math.floor(Math.random() * 1000).toString().padStart(3, '0')}`;
+      const order = await storage.createOrder({
+        orderNumber,
+        customerId: customer.id,
+        shippingAddressId: address.id,
+        subtotal: subtotal.toString(),
+        tax: tax.toString(),
+        shipping: shipping.toString(),
+        total: total.toString(),
+        notes: 'Order placed via web checkout'
+      });
+
+      // Create order items
+      for (const item of cartItems) {
+        await storage.createOrderItem({
+          orderId: order.id,
+          productId: item.product.id,
+          productName: item.product.name,
+          productImage: item.product.image,
+          productPrice: item.product.price.toString(),
+          quantity: item.quantity,
+          totalPrice: (item.product.price * item.quantity).toString()
+        });
+      }
+
+      // Create initial tracking entry
+      await storage.createOrderTracking({
+        orderId: order.id,
+        status: 'order_placed',
+        message: 'Order has been placed successfully',
+        location: 'VerdantCart Warehouse'
+      });
+
+      res.json({
+        success: true,
+        order: {
+          id: order.id,
+          orderNumber: order.orderNumber,
+          status: order.status,
+          total: order.total,
+          createdAt: order.createdAt
+        }
+      });
+    } catch (error) {
+      console.error('Error creating order:', error);
+      res.status(500).json({ error: 'Failed to create order' });
+    }
+  });
+
+  app.post("/api/orders/verify-payment", async (req, res) => {
+    try {
+      const { razorpay_order_id, razorpay_payment_id, razorpay_signature, orderData } = req.body;
+      
+      // In a real app, verify the Razorpay signature
+      // For demo purposes, we'll just accept the payment
+      
+      // Update order with payment details
+      const order = await storage.updateOrderPayment(razorpay_order_id, {
+        razorpayPaymentId: razorpay_payment_id,
+        razorpaySignature: razorpay_signature,
+        paymentStatus: 'paid'
+      });
+
+      // Update order tracking
+      await storage.createOrderTracking({
+        orderId: order.id,
+        status: 'payment_confirmed',
+        message: 'Payment has been confirmed successfully',
+        location: 'Payment Gateway'
+      });
+
+      // Send confirmation notifications (mock)
+      console.log('Sending confirmation email to:', orderData.customerData.email);
+      console.log('Sending confirmation SMS to:', orderData.customerData.phone);
+
+      res.json({
+        success: true,
+        orderId: order.id,
+        message: 'Payment verified successfully'
+      });
+    } catch (error) {
+      console.error('Error verifying payment:', error);
+      res.status(500).json({ error: 'Failed to verify payment' });
+    }
+  });
+
+  app.get("/api/orders/:orderId", async (req, res) => {
+    try {
+      const order = await storage.getOrderById(req.params.orderId);
+      if (!order) {
+        return res.status(404).json({ error: 'Order not found' });
+      }
+
+      const orderItems = await storage.getOrderItems(order.id);
+      const tracking = await storage.getOrderTracking(order.id);
+
+      res.json({
+        order,
+        items: orderItems,
+        tracking
+      });
+    } catch (error) {
+      console.error('Error fetching order:', error);
+      res.status(500).json({ error: 'Failed to fetch order' });
+    }
+  });
+
+  app.get("/api/orders/tracking/:orderNumber", async (req, res) => {
+    try {
+      const order = await storage.getOrderByNumber(req.params.orderNumber);
+      if (!order) {
+        return res.status(404).json({ error: 'Order not found' });
+      }
+
+      const tracking = await storage.getOrderTracking(order.id);
+
+      res.json({
+        order,
+        tracking
+      });
+    } catch (error) {
+      console.error('Error fetching order tracking:', error);
+      res.status(500).json({ error: 'Failed to fetch order tracking' });
     }
   });
 

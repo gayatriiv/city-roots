@@ -28,8 +28,7 @@ export default function CartPage({ onAddToCart }: CartPageProps) {
   };
 
   const handleCheckout = () => {
-    // In a real app, this would redirect to checkout page
-    alert('Checkout functionality would be implemented here!');
+    setLocation('/checkout');
   };
 
   return (

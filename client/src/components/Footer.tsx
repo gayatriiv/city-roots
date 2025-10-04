@@ -60,6 +60,7 @@ export default function Footer({ onNewsletterSignup, onNavigate }: FooterProps) 
       title: "Customer Support",
       links: [
         { label: "Contact Us", href: "contact" },
+        { label: "Track Order", href: "/track-order" },
         { label: "Shipping Info", href: "shipping" },
         { label: "Returns & Exchanges", href: "returns" },
         { label: "Plant Care Support", href: "support" },
