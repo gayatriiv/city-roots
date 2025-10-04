@@ -7,6 +7,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Input } from "@/components/ui/input";
 import { Search, Filter, Grid, List, ShoppingCart, Eye, Heart, Star, Sprout, Flower, Apple } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { useCart } from "../contexts/CartContext";
+import { getSessionId } from "../lib/session";
 
 interface Plant {
   id: string;
@@ -37,7 +39,7 @@ const getPlantImageUrl = (filename: string) => {
 const sampleSeeds: Plant[] = [
   {
     id: "1",
-    name: "Hibiscus Plant",
+    name: "Hibiscus Plant Seeds",
     price: 1299,
     image: getPlantImageUrl("hibiscus-plant.jpeg"),
     category: "Flowering Plants",
@@ -55,7 +57,7 @@ const sampleSeeds: Plant[] = [
   },
   {
     id: "2",
-    name: "Rose Plant",
+    name: "Rose Plant Seeds",
     price: 1599,
     image: getPlantImageUrl("rose plant.jpeg"),
     category: "Flowering Plants",
@@ -73,7 +75,7 @@ const sampleSeeds: Plant[] = [
   },
   {
     id: "3",
-    name: "Marigold Plant",
+    name: "Marigold Plant Seeds",
     price: 599,
     image: getPlantImageUrl("marigold plant.jpeg"),
     category: "Flowering Plants",
@@ -91,7 +93,7 @@ const sampleSeeds: Plant[] = [
   },
   {
     id: "4",
-    name: "Bougainvillea Plant",
+    name: "Bougainvillea Plant Seeds",
     price: 1899,
     image: getPlantImageUrl("bougainvillea-plant.jpeg"),
     category: "Flowering Plants",
@@ -109,7 +111,7 @@ const sampleSeeds: Plant[] = [
   },
   {
     id: "5",
-    name: "Sunflower Plant",
+    name: "Sunflower Plant Seeds",
     price: 799,
     image: getPlantImageUrl("sunflower-plant.jpeg"),
     category: "Flowering Plants",
@@ -127,7 +129,7 @@ const sampleSeeds: Plant[] = [
   },
   {
     id: "6",
-    name: "Jasmine Plant",
+    name: "Jasmine Plant Seeds",
     price: 1199,
     image: getPlantImageUrl("jasmine plant.jpeg"),
     category: "Flowering Plants",
@@ -145,7 +147,7 @@ const sampleSeeds: Plant[] = [
   },
   {
     id: "7",
-    name: "Peace Lily",
+    name: "Peace Lily Seeds",
     price: 899,
     image: getPlantImageUrl("Peace Lily.jpeg"),
     category: "Flowering Plants",
@@ -187,6 +189,9 @@ interface SeedsPageProps {
 }
 
 export default function SeedsPage({ onAddToCart }: SeedsPageProps) {
+  const { addToCart, isInCart } = useCart();
+  const sessionId = getSessionId();
+
   const [selectedCategory, setSelectedCategory] = useState("All Plants");
   const [sortBy, setSortBy] = useState("featured");
   const [searchQuery, setSearchQuery] = useState("");
@@ -195,7 +200,8 @@ export default function SeedsPage({ onAddToCart }: SeedsPageProps) {
   const [, setLocation] = useLocation();
 
   const handlePlantClick = (plantId: string) => {
-    setLocation(`/product/${plantId}`);
+    const plant = sampleSeeds.find(p => p.id === plantId);
+    setSelectedPlant(plant || null);
   };
 
   // Filter and sort plants
@@ -259,6 +265,12 @@ export default function SeedsPage({ onAddToCart }: SeedsPageProps) {
     ));
   };
 
+  // Use this instead:
+  const handleAddToCart = (plant: Plant) => {
+    addToCart(plant);
+    onAddToCart(plant.id); // This line was added
+  };
+
   return (
     <div className="min-h-screen bg-background">
       {/* Header Section */}
@@ -266,9 +278,9 @@ export default function SeedsPage({ onAddToCart }: SeedsPageProps) {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">Seeds</h1>
+              <h1 className="text-3xl font-bold text-gray-900">Flowering Plants</h1>
               <p className="text-gray-600 mt-1">
-                Discover our collection of {filteredAndSortedPlants.length} quality seeds
+                Beautiful flowering plants for your garden
               </p>
             </div>
             
@@ -300,7 +312,7 @@ export default function SeedsPage({ onAddToCart }: SeedsPageProps) {
             {/* Search */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Search Seeds
+                Search Plants
               </label>
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
@@ -444,14 +456,15 @@ export default function SeedsPage({ onAddToCart }: SeedsPageProps) {
                               <span className="truncate">View Details</span>
                             </Button>
                             
-                            <Button 
+                            <Button
                               size="sm"
                               className="flex-1 text-xs min-w-0"
-                              onClick={() => onAddToCart(plant.id)}
+                              onClick={() => handleAddToCart(plant)}
                               disabled={!plant.inStock}
+                              variant={isInCart(plant.id) ? "secondary" : "default"}
                             >
                               <ShoppingCart className="h-3 w-3 mr-1" />
-                              <span className="truncate">Add to Cart</span>
+                              <span className="truncate">{isInCart(plant.id) ? 'Added' : 'Add to Cart'}</span>
                             </Button>
                           </div>
                         </div>
@@ -523,12 +536,10 @@ export default function SeedsPage({ onAddToCart }: SeedsPageProps) {
                               View Details
                             </Button>
                             
-                            <Button 
+                            <Button
                               size="sm"
-                              onClick={() => onAddToCart(plant.id)}
-                              disabled={!plant.inStock}
+                              onClick={() => handleAddToCart(plant)}
                             >
-                              <ShoppingCart className="h-4 w-4 mr-2" />
                               Add to Cart
                             </Button>
                           </div>
@@ -653,13 +664,14 @@ export default function SeedsPage({ onAddToCart }: SeedsPageProps) {
                 <Button 
                   className="flex-1"
                   onClick={() => {
-                    onAddToCart(selectedPlant.id);
+                    handleAddToCart(selectedPlant);
                     setSelectedPlant(null);
                   }}
-                  disabled={!selectedPlant.inStock}
+                  disabled={!selectedPlant.inStock || isInCart(selectedPlant.id)}
+                  variant={isInCart(selectedPlant.id) ? "secondary" : "default"}
                 >
                   <ShoppingCart className="h-4 w-4 mr-2" />
-                  Add to Cart
+                  {isInCart(selectedPlant.id) ? "Added" : "Add to Cart"}
                 </Button>
                 <Button variant="outline">
                   <Heart className="h-4 w-4 mr-2" />
