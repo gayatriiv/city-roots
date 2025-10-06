@@ -9,6 +9,7 @@ import { Search, Filter, Grid, List, ShoppingCart, Eye, Heart, Star, Sprout, Flo
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useCart } from "../contexts/CartContext";
 import { getSessionId } from "../lib/session";
+import Header from "../components/Header";
 
 interface Plant {
   id: string;
@@ -41,7 +42,7 @@ const sampleSeeds: Plant[] = [
     id: "1",
     name: "Hibiscus Plant Seeds",
     price: 1299,
-    image: getPlantImageUrl("hibiscus-plant.jpeg"),
+    image: '/images/hibiscus seeds.jpg',
     category: "Flowering Plants",
     subcategory: "Outdoor Plants",
     description: "Beautiful tropical flowering plant with large, colorful blooms. Perfect for gardens and outdoor spaces.",
@@ -59,7 +60,7 @@ const sampleSeeds: Plant[] = [
     id: "2",
     name: "Rose Plant Seeds",
     price: 1599,
-    image: getPlantImageUrl("rose plant.jpeg"),
+    image: '/images/rose seeds.jpg',
     category: "Flowering Plants",
     subcategory: "Outdoor Plants",
     description: "Classic red roses that bloom beautifully in your garden. Perfect for gifting and romantic occasions.",
@@ -77,7 +78,7 @@ const sampleSeeds: Plant[] = [
     id: "3",
     name: "Marigold Plant Seeds",
     price: 599,
-    image: getPlantImageUrl("marigold plant.jpeg"),
+    image: '/images/marigold seeds.jpg',
     category: "Flowering Plants",
     subcategory: "Outdoor Plants",
     description: "Bright orange and yellow marigold flowers. Great for borders, pest control, and adding color to your garden.",
@@ -95,7 +96,7 @@ const sampleSeeds: Plant[] = [
     id: "4",
     name: "Bougainvillea Plant Seeds",
     price: 1899,
-    image: getPlantImageUrl("bougainvillea-plant.jpeg"),
+    image: '/images/bougainvillea seeds.jpg',
     category: "Flowering Plants",
     subcategory: "Outdoor Plants",
     description: "Vibrant climbing plant with colorful bracts. Perfect for trellises, walls, and creating stunning garden displays.",
@@ -113,7 +114,7 @@ const sampleSeeds: Plant[] = [
     id: "5",
     name: "Sunflower Plant Seeds",
     price: 799,
-    image: getPlantImageUrl("sunflower-plant.jpeg"),
+    image: '/images/sunflower seeds.jpg',
     category: "Flowering Plants",
     subcategory: "Outdoor Plants",
     description: "Tall, cheerful sunflowers that follow the sun. Perfect for creating a dramatic garden focal point.",
@@ -131,7 +132,7 @@ const sampleSeeds: Plant[] = [
     id: "6",
     name: "Jasmine Plant Seeds",
     price: 1199,
-    image: getPlantImageUrl("jasmine plant.jpeg"),
+    image: '/images/jasmine seeds.jpg',
     category: "Flowering Plants",
     subcategory: "Outdoor Plants",
     description: "Fragrant white flowers that bloom at night. Perfect for trellises and garden borders.",
@@ -149,7 +150,7 @@ const sampleSeeds: Plant[] = [
     id: "7",
     name: "Peace Lily Seeds",
     price: 899,
-    image: getPlantImageUrl("Peace Lily.jpeg"),
+    image: '/images/peace lily seeds.jpg',
     category: "Flowering Plants",
     subcategory: "Indoor Plants",
     description: "Elegant white blooms and glossy green leaves. Known for its air-purifying qualities and easy care.",
@@ -162,6 +163,42 @@ const sampleSeeds: Plant[] = [
     reviews: 89,
     inStock: true,
     tags: ["Air Purifying", "Indoor", "White Flowers", "Low Light"]
+  },
+  {
+    id: "8",
+    name: "Lotus Flower Seeds",
+    price: 1499,
+    image: '/images/lotus seeds.jpg',
+    category: "Flowering Plants",
+    subcategory: "Aquatic Plants",
+    description: "Sacred lotus seeds for water gardens. Produces stunning pink flowers that bloom in morning sunlight.",
+    careInstructions: "Plant in pond soil under 6-24 inches of water. Provide full sun and warm temperatures.",
+    lightRequirements: "Full sun (6+ hours)",
+    wateringSchedule: "Maintain water level",
+    soilType: "Aquatic soil or heavy clay",
+    size: "Large (spreads 3-6 feet)",
+    rating: 4.9,
+    reviews: 67,
+    inStock: true,
+    tags: ["Aquatic", "Sacred", "Pink Flowers", "Water Garden"]
+  },
+  {
+    id: "9",
+    name: "Lavender Seeds",
+    price: 899,
+    image: '/images/lavender seeds.jpg',
+    category: "Flowering Plants",
+    subcategory: "Herb Plants",
+    description: "Fragrant lavender seeds for your herb garden. Perfect for borders, aromatherapy, and attracting pollinators.",
+    careInstructions: "Plant in well-draining soil. Water sparingly once established. Trim after flowering.",
+    lightRequirements: "Full sun",
+    wateringSchedule: "Once per week",
+    soilType: "Sandy, well-draining soil",
+    size: "Medium (30-40cm)",
+    rating: 4.7,
+    reviews: 93,
+    inStock: true,
+    tags: ["Fragrant", "Herb", "Drought Tolerant", "Pollinator Friendly"]
   }
 ];
 
@@ -184,12 +221,8 @@ const categoryIcons = {
   "Flowering Plants": Flower
 };
 
-interface SeedsPageProps {
-  onAddToCart: (productId: string) => void;
-}
-
-export default function SeedsPage({ onAddToCart }: SeedsPageProps) {
-  const { addToCart, isInCart } = useCart();
+export default function SeedsPage() {
+  const { addToCart, isInCart, getTotalItems } = useCart();
   const sessionId = getSessionId();
 
   const [selectedCategory, setSelectedCategory] = useState("All Plants");
@@ -197,6 +230,7 @@ export default function SeedsPage({ onAddToCart }: SeedsPageProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [selectedPlant, setSelectedPlant] = useState<Plant | null>(null);
+  const [isCartOpen, setIsCartOpen] = useState(false);
   const [, setLocation] = useLocation();
 
   const handlePlantClick = (plantId: string) => {
@@ -265,14 +299,19 @@ export default function SeedsPage({ onAddToCart }: SeedsPageProps) {
     ));
   };
 
-  // Use this instead:
   const handleAddToCart = (plant: Plant) => {
     addToCart(plant);
-    onAddToCart(plant.id); // This line was added
   };
 
   return (
     <div className="min-h-screen bg-background">
+      {/* Add Header component here */}
+      <Header 
+        cartItems={getTotalItems()}
+        onCartClick={() => setIsCartOpen(true)}
+        onSearchChange={setSearchQuery}
+      />
+
       {/* Header Section */}
       <div className="bg-white border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -461,7 +500,6 @@ export default function SeedsPage({ onAddToCart }: SeedsPageProps) {
                               className="flex-1 text-xs min-w-0"
                               onClick={() => handleAddToCart(plant)}
                               disabled={!plant.inStock}
-                              variant={isInCart(plant.id) ? "secondary" : "default"}
                             >
                               <ShoppingCart className="h-3 w-3 mr-1" />
                               <span className="truncate">{isInCart(plant.id) ? 'Added' : 'Add to Cart'}</span>
@@ -520,7 +558,9 @@ export default function SeedsPage({ onAddToCart }: SeedsPageProps) {
                               </span>
                               {plant.originalPrice && (
                                 <span className="text-sm text-gray-500 line-through">
-                                  {formatPrice(plant.originalPrice)}
+                                  {selectedPlant && typeof selectedPlant.originalPrice === 'number'
+                                    ? formatPrice(selectedPlant.originalPrice)
+                                    : null}
                                 </span>
                               )}
                             </div>
