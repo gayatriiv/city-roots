@@ -6,6 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Input } from "@/components/ui/input";
 import { Search, Filter, Grid, List, Clock, User, BookOpen, Star, Leaf, Wrench, Sprout } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { useLocation } from "wouter";
 
 interface Guide {
   id: string;
@@ -29,7 +30,7 @@ const sampleGuides: Guide[] = [
     id: "1",
     title: "Starting Your First Garden: A Complete Beginner's Guide",
     description: "Everything you need to know to start your gardening journey, from choosing the right location to planting your first seeds.",
-    content: "This comprehensive guide covers all the basics of starting a garden. We'll walk you through choosing the right location, preparing your soil, selecting plants, and maintaining your garden throughout the seasons. Perfect for complete beginners who want to start their gardening adventure.",
+    content: "Introduction\nSetting goals for your first garden and understanding your space.\n\n1) Site selection\n- Sun hours: track sunlight for a week.\n- Wind and drainage checks.\n- Access to water.\n\n2) Soil prep\n- Quick jar test for texture.\n- Add 3–5 cm compost; avoid over-tilling.\n\n3) What to plant\n- Easy starters: lettuce, basil, marigold, cherry tomato.\n- Planting calendar for your zone.\n\n4) Planting basics\n- Spacing, depth, and watering-in.\n- Mulch to retain moisture and block weeds.\n\n5) Care routine\n- Weekly checklist: water, weed, inspect pests, harvest.\n\n6) Common mistakes\n- Overwatering, crowding, skipping mulch.\n\nConclusion\nStart small, observe, iterate. Your first harvest is your best teacher.",
     image: "/images/beginners guide.png",
     difficulty: "Beginner",
     readTime: "8 min read",
@@ -44,7 +45,7 @@ const sampleGuides: Guide[] = [
     id: "2",
     title: "Master the Art of Starting Seeds Indoors",
     description: "Learn professional techniques for starting seeds indoors to get a head start on the growing season.",
-    content: "Starting seeds indoors is a great way to get a jump on the growing season. This guide covers everything from choosing the right containers and soil to proper lighting and watering techniques. You'll learn how to create the perfect environment for your seedlings to thrive.",
+    content: "Checklist\n- Seed-starting mix vs. garden soil.\n- Clean trays or cell packs with drainage.\n- Bottom heat (20–24°C) improves germination.\n\nSteps\n1) Moisten mix until it clumps when squeezed.\n2) Fill cells and firm lightly.\n3) Sow at 1–2× seed thickness; mist.\n4) Cover to maintain humidity; vent daily.\n5) Provide strong light: 14–16 h/day under LEDs 5–8 cm above leaves.\n6) Bottom water when surface lightens.\n7) Air movement to prevent damping-off.\n8) Pot up at 2–3 true leaves; feed at 1/4 strength.\n\nHardening off\n- 7–10 days of gradual outdoor exposure before transplant.",
     image: "/images/gardening-guide.png",
     difficulty: "Intermediate",
     readTime: "12 min read",
@@ -59,7 +60,7 @@ const sampleGuides: Guide[] = [
     id: "3",
     title: "Essential Tools Every Gardener Should Own",
     description: "Discover the must-have tools that will make your gardening tasks easier and more efficient.",
-    content: "Having the right tools can make all the difference in your gardening success. This guide covers the essential tools every gardener should have, from basic hand tools to specialized equipment. Learn about tool maintenance and how to choose quality tools that will last for years.",
+    content: "Core kit\n- Hand trowel, transplanter, pruning shears (bypass), hand fork, hori-hori, gloves.\n- Watering can with rose + hose nozzle with shower pattern.\n\nUpgrades\n- Stirrup hoe for fast weeding.\n- Loppers + folding saw for woody stems.\n- Wheelbarrow or garden cart.\n\nMaintenance\n- Clean and dry after use.\n- Sharpen blades every few weeks; oil pivots.\n- Store out of sun and rain.\n\nBuying tips\n- Choose forged steel, replaceable parts, and comfortable grips.\n- Prioritize tools you’ll use weekly over niche gadgets.",
     image: "/images/seeds indoor.png",
     difficulty: "Beginner",
     readTime: "6 min read",
@@ -157,6 +158,7 @@ interface GuidesPageProps {
 }
 
 export default function GuidesPage({ onGuideClick }: GuidesPageProps) {
+  const [, setLocation] = useLocation();
   const [selectedCategory, setSelectedCategory] = useState("All Guides");
   const [selectedDifficulty, setSelectedDifficulty] = useState("All Levels");
   const [sortBy, setSortBy] = useState("featured");
@@ -270,8 +272,8 @@ export default function GuidesPage({ onGuideClick }: GuidesPageProps) {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex flex-col lg:flex-row gap-8">
-          {/* Sidebar Filters */}
-          <div className="lg:w-64 space-y-6">
+          {/* Sidebar hidden to match simplified grid layout */}
+          <div className="hidden">
             {/* Search */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -360,15 +362,15 @@ export default function GuidesPage({ onGuideClick }: GuidesPageProps) {
           <div className="flex-1">
             <div className={`${
               viewMode === "grid" 
-                ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" 
+                ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-stretch" 
                 : "space-y-4"
             }`}>
               {filteredAndSortedGuides.map((guide) => (
-                <Card key={guide.id} className="group hover:shadow-lg transition-shadow cursor-pointer">
-                  <CardContent className="p-0">
+                <Card key={guide.id} className="group hover:shadow-lg transition-shadow cursor-pointer h-full">
+                  <CardContent className="p-0 h-full">
                     {viewMode === "grid" ? (
                       // Grid View
-                      <div onClick={() => setSelectedGuide(guide)}>
+                      <div onClick={() => setSelectedGuide(guide)} className="flex flex-col h-full">
                         <div className="relative aspect-video overflow-hidden rounded-t-lg">
                           <img
                             src={guide.image}
@@ -385,16 +387,16 @@ export default function GuidesPage({ onGuideClick }: GuidesPageProps) {
                           </Badge>
                         </div>
                         
-                        <div className="p-4">
-                          <h3 className="font-semibold text-lg text-gray-900 group-hover:text-primary transition-colors mb-2 line-clamp-2">
+                        <div className="p-4 flex flex-col h-full">
+                          <h3 className="font-semibold text-lg text-gray-900 group-hover:text-primary transition-colors mb-1 line-clamp-2">
                             {guide.title}
                           </h3>
                           
-                          <p className="text-sm text-gray-600 mb-3 line-clamp-2">
+                          <p className="text-sm text-gray-600 mb-2 line-clamp-2">
                             {guide.description}
                           </p>
                           
-                          <div className="flex items-center justify-between mb-3">
+                          <div className="flex items-center justify-between mb-2">
                             <div className="flex items-center gap-2 text-sm text-gray-500">
                               <Clock className="h-4 w-4" />
                               <span>{guide.readTime}</span>
@@ -405,7 +407,7 @@ export default function GuidesPage({ onGuideClick }: GuidesPageProps) {
                             </div>
                           </div>
                           
-                          <div className="flex items-center gap-2 mb-3">
+                          <div className="flex items-center gap-2 mb-1">
                             <div className="flex items-center">
                               {renderStars(guide.rating)}
                             </div>
@@ -414,7 +416,7 @@ export default function GuidesPage({ onGuideClick }: GuidesPageProps) {
                             </span>
                           </div>
                           
-                          <div className="flex flex-wrap gap-1 mb-4">
+                          <div className="flex flex-wrap gap-1 mb-2">
                             {guide.tags.slice(0, 3).map((tag) => (
                               <Badge key={tag} variant="outline" className="text-xs">
                                 {tag}
@@ -423,9 +425,10 @@ export default function GuidesPage({ onGuideClick }: GuidesPageProps) {
                           </div>
                           
                           <Button 
-                            className="w-full"
+                            className="w-full flex items-center justify-center mt-auto"
                             onClick={(e) => {
                               e.stopPropagation();
+                              setSelectedGuide(guide);
                               onGuideClick?.(guide.id);
                             }}
                           >
@@ -453,7 +456,7 @@ export default function GuidesPage({ onGuideClick }: GuidesPageProps) {
                           </Badge>
                         </div>
                         
-                        <div className="flex-1 p-4">
+                        <div className="flex-1 p-4 flex flex-col">
                           <h3 className="font-semibold text-lg text-gray-900 mb-2">
                             {guide.title}
                           </h3>
@@ -491,8 +494,10 @@ export default function GuidesPage({ onGuideClick }: GuidesPageProps) {
                           
                           <Button 
                             size="sm"
+                            className="flex items-center justify-center mt-auto"
                             onClick={(e) => {
                               e.stopPropagation();
+                              setSelectedGuide(guide);
                               onGuideClick?.(guide.id);
                             }}
                           >
@@ -598,10 +603,11 @@ export default function GuidesPage({ onGuideClick }: GuidesPageProps) {
               {/* Actions */}
               <div className="flex gap-3 pt-4 border-t">
                 <Button 
-                  className="flex-1"
+                  className="flex-1 flex items-center justify-center"
                   onClick={() => {
                     onGuideClick?.(selectedGuide.id);
                     setSelectedGuide(null);
+                    setLocation(`/guide/${selectedGuide.id}`);
                   }}
                 >
                   <BookOpen className="h-4 w-4 mr-2" />

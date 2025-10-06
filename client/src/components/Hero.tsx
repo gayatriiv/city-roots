@@ -40,10 +40,16 @@ export default function Hero({ onShopNow, onLearnMore }: HeroProps) {
           <span className="block text-green-300">Nature's Beauty</span>
         </h1>
 
-        <p className="text-lg sm:text-xl text-white/90 mb-6 sm:mb-8 max-w-2xl mx-auto leading-relaxed font-medium px-4">
+        <p className="text-lg sm:text-xl text-white/90 mb-3 sm:mb-4 max-w-2xl mx-auto leading-relaxed font-medium px-4">
           Fresh plants, quality tools, and helpful guides 
           for your urban gardening adventure
         </p>
+        {/* Offers strip - dynamic subset */}
+        <div className="flex flex-wrap gap-2 justify-center mb-6">
+          <span className="text-xs px-2 py-1 rounded bg-emerald-600 text-white">10% off first purchase</span>
+          <span className="text-xs px-2 py-1 rounded bg-amber-600 text-white animate-pulse">Autumn Day Sale</span>
+          <span className="text-xs px-2 py-1 rounded bg-white/10 border border-white/30 text-white">Free gift on ₹999+</span>
+        </div>
 
         <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 mb-8 sm:mb-12 px-4">
           <Button

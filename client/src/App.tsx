@@ -17,6 +17,8 @@ import AboutPage from "@/pages/AboutPage";
 import ToolsPage from "@/pages/ToolsPage";
 import SeedsPage from "@/pages/SeedsPage";
 import GuidesPage from "@/pages/GuidesPage";
+import GuideDetailPage from "@/pages/GuideDetailPage";
+import GiftingSetsPage from "@/pages/GiftingSetsPage";
 import Header from "@/components/Header";
 import Hero from "@/components/Hero";
 import CategoriesSection from "@/components/CategoriesSection";
@@ -225,6 +227,15 @@ function SeedsPageWrapper() {
   );
 }
 
+function GiftingSetsPageWrapper() {
+  return (
+    <div className="min-h-screen bg-background">
+      <GiftingSetsPage />
+      <ScrollToTop />
+    </div>
+  );
+}
+
 function AboutPageWrapper() {
   return (
     <div className="min-h-screen bg-background">
@@ -399,7 +410,9 @@ function Router() {
       <Route path="/about" component={AboutPageWrapper} />
       <Route path="/tools" component={ToolsPageWrapper} />
       <Route path="/seeds" component={SeedsPageWrapper} />
+      <Route path="/gifting-sets" component={GiftingSetsPageWrapper} />
       <Route path="/guides" component={GuidesPageWrapper} />
+      <Route path="/guide/:id" component={GuideDetailPage} />
       <Route component={NotFound} />
     </Switch>
   );

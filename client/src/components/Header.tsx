@@ -34,7 +34,8 @@ export default function Header({ cartItems = 0, onCartClick, onSearchChange }: H
       'Plants': 'plants',
       'Tools': 'tools', 
       'Seeds': 'seeds',
-      'Guides': 'guides'
+      'Guides': 'guides',
+      'Gifting Sets': 'gifting-sets'
     };
     
     const baseRoute = categoryMap[category];
@@ -56,11 +57,15 @@ export default function Header({ cartItems = 0, onCartClick, onSearchChange }: H
     },
     {
       name: "Seeds",
-      items: ["Vegetable Seeds", "Flower Seeds", "Herb Seeds", "Fruit Seeds", "Starter Kits"]
+      items: []
+    },
+    {
+      name: "Gifting Sets",
+      items: []
     },
     {
       name: "Guides",
-      items: ["Beginner Guides", "Advanced Techniques", "Plant Care", "Seasonal Tips", "Problem Solving"]
+      items: []
     }
   ];
 
@@ -70,35 +75,31 @@ export default function Header({ cartItems = 0, onCartClick, onSearchChange }: H
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link href="/" className="flex items-center space-x-2">
-            <Leaf className="h-8 w-8 text-primary" data-testid="logo-icon" />
-            <h1 className="text-xl font-serif font-bold text-foreground" data-testid="logo-text">
-              City Roots
-            </h1>
+            <img src="/images/new-logo.png" alt="City Roots" className="h-10 sm:h-12 w-auto" />
           </Link>
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-2" data-testid="desktop-nav">
-            {mainCategories.map((category) => (
+            {mainCategories.map((category) => {
+              const slug = category.name.toLowerCase().replace(/\s+/g, '-');
+              const isActive = location === `/${slug}`;
+              return (
               <DropdownMenu key={category.name}>
                 <DropdownMenuTrigger asChild>
                   <Button
-                    variant={location === `/${category.name.toLowerCase()}` ? "default" : "ghost"}
-                    className={`text-sm transition-colors px-3 py-2 ${
-                      location === `/${category.name.toLowerCase()}` 
-                        ? "text-primary-foreground" // White text when selected
-                        : "text-muted-foreground hover:text-foreground"
-                    }`}
+                    variant={isActive ? "default" : "ghost"}
+                    className={`text-sm transition-colors px-3 py-2 ${isActive ? "text-primary-foreground" : "text-muted-foreground hover:text-foreground"}`}
                     data-testid={`nav-${category.name.toLowerCase()}`}
                   >
                     {category.name}
-                    <ChevronDown className="ml-1 h-3 w-3" />
+                    {category.items.length > 0 && <ChevronDown className="ml-1 h-3 w-3" />}
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="start" className="w-48">
                   {/* Add "All" category link */}
                   <DropdownMenuItem asChild>
                     <Link 
-                      href={`/${category.name.toLowerCase()}`} 
+                      href={`/${slug}`} 
                       className="block w-full"
                       data-testid={`nav-all-${category.name.toLowerCase()}`}
                     >
@@ -116,13 +117,14 @@ export default function Header({ cartItems = 0, onCartClick, onSearchChange }: H
                   ))}
                 </DropdownMenuContent>
               </DropdownMenu>
-            ))}
+              );
+            })}
           </nav>
 
           {/* Search and Actions */}
           <div className="flex items-center space-x-3">
-            {/* Search */}
-            <div className="hidden sm:flex items-center relative">
+          {/* Search */}
+            <div className="hidden sm:flex items-center relative ml-3 md:ml-4">
               <Search className="absolute left-3 h-4 w-4 text-muted-foreground" />
               <Input
                 placeholder="Search plants, tools..."
@@ -131,6 +133,13 @@ export default function Header({ cartItems = 0, onCartClick, onSearchChange }: H
                 className="pl-9 w-64"
                 data-testid="search-input"
               />
+            {/* First purchase + dynamic sale hints */}
+            <span className="ml-3 hidden lg:inline text-xs text-emerald-700 bg-emerald-50 border border-emerald-200 rounded px-2 py-1 mr-2">
+              New here? Get 10% OFF on your first order
+            </span>
+            <span className="hidden xl:inline text-xs text-white bg-amber-600 rounded px-2 py-1 animate-pulse">
+              Autumn Day Sale
+            </span>
             </div>
 
             {/* Cart */}
@@ -193,14 +202,16 @@ export default function Header({ cartItems = 0, onCartClick, onSearchChange }: H
             
             {/* Mobile Navigation */}
             <nav className="space-y-3">
-              {mainCategories.map((category) => (
+              {mainCategories.map((category) => {
+                const slug = category.name.toLowerCase().replace(/\s+/g, '-');
+                return (
                 <div key={category.name} className="space-y-1">
                   <h4 className="font-medium text-sm text-foreground px-2 py-1" data-testid={`mobile-nav-${category.name.toLowerCase()}`}>
                     {category.name}
                   </h4>
                   <div className="space-y-1 pl-4">
                     <Link
-                      href={`/${category.name.toLowerCase()}`}
+                      href={`/${slug}`}
                       className="block w-full text-left py-2 px-2 text-sm text-muted-foreground hover:text-foreground hover:bg-accent rounded-md transition-colors font-medium"
                       onClick={() => setIsMobileMenuOpen(false)}
                     >
@@ -221,7 +232,8 @@ export default function Header({ cartItems = 0, onCartClick, onSearchChange }: H
                     ))}
                   </div>
                 </div>
-              ))}
+              );
+              })}
               
               {/* Additional Mobile Links */}
               <div className="pt-4 border-t border-border">

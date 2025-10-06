@@ -1,6 +1,4 @@
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { ArrowRight } from "lucide-react";
+import { Card } from "@/components/ui/card";
 import floweringPlantsImage from "@assets/generated_images/Flowering_plants_collection_5d058eb7.png";
 import gardeningToolsImage from "@assets/generated_images/Gardening_tools_collection_9c82fa3c.png";
 import seedsImage from "@assets/generated_images/Seeds_and_seedlings_9e473d23.png";
@@ -50,7 +48,7 @@ export default function CategoriesSection({ onCategoryClick }: CategoriesSection
       id: 'gift-sets',
       name: 'Gifting Sets',
       description: 'Perfect starter kits for gardening enthusiasts',
-      image: gardeningToolsImage,
+      image: '/images/gift-set.jpeg',
       productCount: 8, // Mock data for gift sets
       featured: true
     }
@@ -71,8 +69,7 @@ export default function CategoriesSection({ onCategoryClick }: CategoriesSection
         window.location.href = '/seeds';
         break;
       case 'gift-sets':
-        // For now, navigate to plants page for gift sets
-        window.location.href = '/plants';
+        window.location.href = '/gifting-sets';
         break;
       default:
         onCategoryClick?.(categoryId);
@@ -131,21 +128,7 @@ export default function CategoriesSection({ onCategoryClick }: CategoriesSection
         </div>
 
 
-        {/* View All Button */}
-        <div className="text-center">
-          <Button
-            variant="outline"
-            size="lg"
-            onClick={() => {
-              console.log('View all categories clicked'); //todo: remove mock functionality
-              onCategoryClick?.('all');
-            }}
-            data-testid="view-all-categories"
-          >
-            View All Categories
-            <ArrowRight className="ml-2 h-4 w-4" />
-          </Button>
-        </div>
+        {/* View All Button removed per request */}
       </div>
     </section>
   );

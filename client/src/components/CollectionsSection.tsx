@@ -1,4 +1,5 @@
 import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 import SimpleCounter from "@/components/SimpleCounter";
@@ -69,6 +70,10 @@ export default function CollectionsSection({ onCollectionClick }: CollectionsSec
 
   const handleCollectionClick = (collectionId: string) => {
     console.log(`Navigate to collection: ${collectionId}`);
+    if (collectionId === 'gift-set') {
+      window.location.href = '/gifting-sets';
+      return;
+    }
     onCollectionClick?.(collectionId);
   };
 
@@ -83,6 +88,12 @@ export default function CollectionsSection({ onCollectionClick }: CollectionsSec
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
             Curated collections of plants, tools, and accessories for every gardening need
           </p>
+          {/* Offer badges (dynamic subset) */}
+          <div className="mt-4 flex flex-wrap justify-center gap-2">
+            <Badge className="bg-emerald-600 text-white">New users: 10% off first purchase</Badge>
+            <Badge className="bg-amber-600 text-white animate-pulse">Autumn Day Sale</Badge>
+            <Badge variant="outline">Free mini plant/seed pack on ₹999+</Badge>
+          </div>
         </div>
 
         {/* Collections Grid */}

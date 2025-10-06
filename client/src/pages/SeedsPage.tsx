@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
-import { Search, Filter, Grid, List, ShoppingCart, Eye, Heart, Star, Sprout, Flower, Apple } from "lucide-react";
+import { Search, Filter, Grid, List, ShoppingCart, Eye, Heart, Star } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useCart } from "../contexts/CartContext";
 import { getSessionId } from "../lib/session";
@@ -36,14 +36,14 @@ const getPlantImageUrl = (filename: string) => {
   return `/images/${filename}`;
 };
 
-// Flowering plants data with INR prices
+// Seeds data with INR prices
 const sampleSeeds: Plant[] = [
   {
     id: "1",
     name: "Hibiscus Plant Seeds",
     price: 1299,
     image: '/images/hibiscus seeds.jpg',
-    category: "Flowering Plants",
+    category: "Seeds",
     subcategory: "Outdoor Plants",
     description: "Beautiful tropical flowering plant with large, colorful blooms. Perfect for gardens and outdoor spaces.",
     careInstructions: "Plant in well-draining soil. Water regularly during blooming season. Provide full sun for best flowering.",
@@ -61,7 +61,7 @@ const sampleSeeds: Plant[] = [
     name: "Rose Plant Seeds",
     price: 1599,
     image: '/images/rose seeds.jpg',
-    category: "Flowering Plants",
+    category: "Seeds",
     subcategory: "Outdoor Plants",
     description: "Classic red roses that bloom beautifully in your garden. Perfect for gifting and romantic occasions.",
     careInstructions: "Plant in well-draining soil. Water deeply once a week. Provide 6+ hours of direct sunlight.",
@@ -79,7 +79,7 @@ const sampleSeeds: Plant[] = [
     name: "Marigold Plant Seeds",
     price: 599,
     image: '/images/marigold seeds.jpg',
-    category: "Flowering Plants",
+    category: "Seeds",
     subcategory: "Outdoor Plants",
     description: "Bright orange and yellow marigold flowers. Great for borders, pest control, and adding color to your garden.",
     careInstructions: "Plant in well-draining soil. Water regularly. Deadhead spent flowers to encourage more blooms.",
@@ -97,7 +97,7 @@ const sampleSeeds: Plant[] = [
     name: "Bougainvillea Plant Seeds",
     price: 1899,
     image: '/images/bougainvillea seeds.jpg',
-    category: "Flowering Plants",
+    category: "Seeds",
     subcategory: "Outdoor Plants",
     description: "Vibrant climbing plant with colorful bracts. Perfect for trellises, walls, and creating stunning garden displays.",
     careInstructions: "Plant in well-draining soil. Water regularly during growing season. Prune after flowering to maintain shape.",
@@ -115,7 +115,7 @@ const sampleSeeds: Plant[] = [
     name: "Sunflower Plant Seeds",
     price: 799,
     image: '/images/sunflower seeds.jpg',
-    category: "Flowering Plants",
+    category: "Seeds",
     subcategory: "Outdoor Plants",
     description: "Tall, cheerful sunflowers that follow the sun. Perfect for creating a dramatic garden focal point.",
     careInstructions: "Plant in full sun. Water deeply and regularly. Stake tall varieties to prevent toppling.",
@@ -133,7 +133,7 @@ const sampleSeeds: Plant[] = [
     name: "Jasmine Plant Seeds",
     price: 1199,
     image: '/images/jasmine seeds.jpg',
-    category: "Flowering Plants",
+    category: "Seeds",
     subcategory: "Outdoor Plants",
     description: "Fragrant white flowers that bloom at night. Perfect for trellises and garden borders.",
     careInstructions: "Plant in well-draining soil. Water regularly during blooming season. Prune after flowering.",
@@ -151,7 +151,7 @@ const sampleSeeds: Plant[] = [
     name: "Peace Lily Seeds",
     price: 899,
     image: '/images/peace lily seeds.jpg',
-    category: "Flowering Plants",
+    category: "Seeds",
     subcategory: "Indoor Plants",
     description: "Elegant white blooms and glossy green leaves. Known for its air-purifying qualities and easy care.",
     careInstructions: "Keep soil moist but not soggy. Place in low to bright indirect light. Blooms year-round.",
@@ -169,7 +169,7 @@ const sampleSeeds: Plant[] = [
     name: "Lotus Flower Seeds",
     price: 1499,
     image: '/images/lotus seeds.jpg',
-    category: "Flowering Plants",
+    category: "Seeds",
     subcategory: "Aquatic Plants",
     description: "Sacred lotus seeds for water gardens. Produces stunning pink flowers that bloom in morning sunlight.",
     careInstructions: "Plant in pond soil under 6-24 inches of water. Provide full sun and warm temperatures.",
@@ -187,7 +187,7 @@ const sampleSeeds: Plant[] = [
     name: "Lavender Seeds",
     price: 899,
     image: '/images/lavender seeds.jpg',
-    category: "Flowering Plants",
+    category: "Seeds",
     subcategory: "Herb Plants",
     description: "Fragrant lavender seeds for your herb garden. Perfect for borders, aromatherapy, and attracting pollinators.",
     careInstructions: "Plant in well-draining soil. Water sparingly once established. Trim after flowering.",
@@ -202,11 +202,6 @@ const sampleSeeds: Plant[] = [
   }
 ];
 
-const categories = [
-  "All Plants",
-  "Flowering Plants"
-];
-
 const sortOptions = [
   { value: "featured", label: "Featured" },
   { value: "price-low", label: "Price: Low to High" },
@@ -216,16 +211,10 @@ const sortOptions = [
   { value: "newest", label: "Newest First" }
 ];
 
-const categoryIcons = {
-  "All Plants": Filter,
-  "Flowering Plants": Flower
-};
-
 export default function SeedsPage() {
   const { addToCart, isInCart, getTotalItems } = useCart();
   const sessionId = getSessionId();
 
-  const [selectedCategory, setSelectedCategory] = useState("All Plants");
   const [sortBy, setSortBy] = useState("featured");
   const [searchQuery, setSearchQuery] = useState("");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
@@ -238,14 +227,9 @@ export default function SeedsPage() {
     setSelectedPlant(plant || null);
   };
 
-  // Filter and sort plants
+  // Filter and sort seeds
   const filteredAndSortedPlants = useMemo(() => {
     let filtered = sampleSeeds;
-
-    // Filter by category
-    if (selectedCategory !== "All Plants") {
-      filtered = filtered.filter(plant => plant.category === selectedCategory);
-    }
 
     // Filter by search query
     if (searchQuery) {
@@ -278,7 +262,7 @@ export default function SeedsPage() {
     }
 
     return filtered;
-  }, [selectedCategory, sortBy, searchQuery]);
+  }, [sortBy, searchQuery]);
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('en-IN', {
@@ -317,10 +301,8 @@ export default function SeedsPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">Flowering Plants</h1>
-              <p className="text-gray-600 mt-1">
-                Beautiful flowering plants for your garden
-              </p>
+              <h1 className="text-3xl font-bold text-gray-900">Seeds</h1>
+              <p className="text-gray-600 mt-1">High-quality seeds for your garden</p>
             </div>
             
             {/* View Mode Toggle */}
@@ -346,47 +328,21 @@ export default function SeedsPage() {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex flex-col lg:flex-row gap-8">
-          {/* Sidebar Filters */}
-          <div className="lg:w-64 space-y-6">
+          {/* Sidebar hidden to simplify layout */}
+          <div className="hidden">
             {/* Search */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Search Plants
+                Search Seeds
               </label>
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                 <Input
-                  placeholder="Search by name, description..."
+                  placeholder="Search seeds by name, description..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="pl-9"
                 />
-              </div>
-            </div>
-
-            {/* Category Filter */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Categories
-              </label>
-              <div className="space-y-2">
-                {categories.map((category) => {
-                  const IconComponent = categoryIcons[category as keyof typeof categoryIcons];
-                  return (
-                    <button
-                      key={category}
-                      onClick={() => setSelectedCategory(category)}
-                      className={`flex items-center w-full text-left px-3 py-2 text-sm rounded-md transition-colors ${
-                        selectedCategory === category
-                          ? "bg-primary text-primary-foreground"
-                          : "text-gray-700 hover:bg-gray-100"
-                      }`}
-                    >
-                      <IconComponent className="h-4 w-4 mr-2" />
-                      {category}
-                    </button>
-                  );
-                })}
               </div>
             </div>
 
@@ -598,7 +554,7 @@ export default function SeedsPage() {
                   <Filter className="h-12 w-12 mx-auto" />
                 </div>
                 <h3 className="text-lg font-medium text-gray-900 mb-2">
-                  No plants found
+                  No seeds found
                 </h3>
                 <p className="text-gray-500">
                   Try adjusting your search or filter criteria
