@@ -9,6 +9,7 @@ import { Search, Filter, Grid, List, ShoppingCart, Eye, Heart, Star, Sprout, Flo
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useCart } from "../contexts/CartContext";
 import { getSessionId } from "../lib/session";
+import Header from "../components/Header";
 
 interface Plant {
   id: string;
@@ -220,12 +221,8 @@ const categoryIcons = {
   "Flowering Plants": Flower
 };
 
-interface SeedsPageProps {
-  onAddToCart: (productId: string) => void;
-}
-
-export default function SeedsPage({ onAddToCart }: SeedsPageProps) {
-  const { addToCart, isInCart } = useCart();
+export default function SeedsPage() {
+  const { addToCart, isInCart, getTotalItems } = useCart();
   const sessionId = getSessionId();
 
   const [selectedCategory, setSelectedCategory] = useState("All Plants");
@@ -233,6 +230,7 @@ export default function SeedsPage({ onAddToCart }: SeedsPageProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [selectedPlant, setSelectedPlant] = useState<Plant | null>(null);
+  const [isCartOpen, setIsCartOpen] = useState(false);
   const [, setLocation] = useLocation();
 
   const handlePlantClick = (plantId: string) => {
@@ -301,14 +299,19 @@ export default function SeedsPage({ onAddToCart }: SeedsPageProps) {
     ));
   };
 
-  // Use this instead:
   const handleAddToCart = (plant: Plant) => {
     addToCart(plant);
-    onAddToCart(plant.id); // This line was added
   };
 
   return (
     <div className="min-h-screen bg-background">
+      {/* Add Header component here */}
+      <Header 
+        cartItems={getTotalItems()}
+        onCartClick={() => setIsCartOpen(true)}
+        onSearchChange={setSearchQuery}
+      />
+
       {/* Header Section */}
       <div className="bg-white border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -555,7 +558,9 @@ export default function SeedsPage({ onAddToCart }: SeedsPageProps) {
                               </span>
                               {plant.originalPrice && (
                                 <span className="text-sm text-gray-500 line-through">
-                                  {formatPrice(plant.originalPrice)}
+                                  {selectedPlant && typeof selectedPlant.originalPrice === 'number'
+                                    ? formatPrice(selectedPlant.originalPrice)
+                                    : null}
                                 </span>
                               )}
                             </div>
