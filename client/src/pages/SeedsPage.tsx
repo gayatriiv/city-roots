@@ -211,6 +211,11 @@ const sortOptions = [
   { value: "newest", label: "Newest First" }
 ];
 
+const categoryIcons = {
+  "All Plants": Filter,
+  "Flowering Plants": Flower
+};
+
 export default function SeedsPage() {
   const { addToCart, isInCart, getTotalItems } = useCart();
   const sessionId = getSessionId();
@@ -289,14 +294,12 @@ export default function SeedsPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Add Header component here */}
       <Header 
         cartItems={getTotalItems()}
         onCartClick={() => setIsCartOpen(true)}
         onSearchChange={setSearchQuery}
       />
 
-      {/* Header Section */}
       <div className="bg-white border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
