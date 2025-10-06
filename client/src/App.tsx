@@ -217,31 +217,9 @@ function ToolsPageWrapper() {
 }
 
 function SeedsPageWrapper() {
-  const sessionId = getSessionId();
-  
-  const addToCartMutation = useMutation({
-    mutationFn: ({ productId }: { productId: string }) => 
-      addToCart(sessionId, productId, 1),
-    onSuccess: () => {
-      console.log('Added to cart successfully');
-    },
-    onError: (error) => {
-      console.error('Failed to add to cart:', error);
-    },
-  });
-
-  const handleAddToCart = (productId: string) => {
-    addToCartMutation.mutate({ productId });
-  };
-
   return (
     <div className="min-h-screen bg-background">
-      <Header 
-        cartItems={0}
-        onCartClick={() => console.log('Cart clicked')}
-        onSearchChange={(query) => console.log('Search:', query)}
-      />
-      <SeedsPage onAddToCart={handleAddToCart} />
+      <SeedsPage />
       <ScrollToTop />
     </div>
   );
