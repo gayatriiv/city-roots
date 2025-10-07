@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { useState } from "react";
+import { useLocation } from "wouter";
 import { useScroll } from "@/hooks/useScroll";
 
 interface FooterProps {
@@ -14,6 +15,7 @@ export default function Footer({ onNewsletterSignup, onNavigate }: FooterProps) 
   const [email, setEmail] = useState("");
   const [isSubscribing, setIsSubscribing] = useState(false);
   const { scrollToTop } = useScroll();
+  const [, setLocation] = useLocation();
 
   const handleNewsletterSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -30,58 +32,41 @@ export default function Footer({ onNewsletterSignup, onNavigate }: FooterProps) 
     }, 1000);
   };
 
-  const handleNavigation = (section: string) => {
-    console.log(`Navigate to: ${section}`); //todo: remove mock functionality
-    onNavigate?.(section);
+  const handleNavigation = (path: string) => {
+    // Only navigate to real, existing routes in the app
+    setLocation(path);
+    onNavigate?.(path);
   };
 
   const footerSections = {
     shop: {
       title: "Shop",
       links: [
-        { label: "Flowering Plants", href: "flowering-plants" },
-        { label: "Decorative Plants", href: "decorative-plants" },
-        { label: "Fruit Plants", href: "fruit-plants" },
-        { label: "Gardening Tools", href: "tools" },
-        { label: "Seeds & Seedlings", href: "seeds" },
-        { label: "Gift Kits", href: "gifts" }
+        { label: "Plants", href: "/plants" },
+        { label: "Gardening Tools", href: "/tools" },
+        { label: "Seeds", href: "/seeds" },
+        { label: "Gifting Sets", href: "/gifting-sets" }
       ]
     },
     learn: {
       title: "Learn & Grow",
       links: [
-        { label: "Beginner Guides", href: "guides/beginner" },
-        { label: "Advanced Techniques", href: "guides/advanced" },
-        { label: "Plant Care Tips", href: "guides/care" },
-        { label: "Seasonal Gardening", href: "guides/seasonal" },
-        { label: "Problem Solving", href: "guides/problems" },
-        { label: "Video Tutorials", href: "guides/videos" }
+        { label: "Guides", href: "/guides" }
       ]
     },
     support: {
       title: "Customer Support",
       links: [
-        { label: "Contact Us", href: "contact" },
-        { label: "Track Order", href: "/track-order" },
-        { label: "Shipping Info", href: "shipping" },
-        { label: "Returns & Exchanges", href: "returns" },
-        { label: "Plant Care Support", href: "support" },
-        { label: "FAQ", href: "faq" },
-        { label: "Track Your Order", href: "tracking" }
+        { label: "Track Order", href: "/track-order" }
       ]
     },
     company: {
       title: "About City Roots",
       links: [
-        { label: "Our Story", href: "about" },
-        { label: "Sustainability", href: "sustainability" },
-        { label: "Expert Team", href: "team" },
-        { label: "Careers", href: "careers" },
-        { label: "Press", href: "press" },
-        { label: "Partnerships", href: "partners" }
+        { label: "Our Story", href: "/about" }
       ]
     }
-  };
+  } as const;
 
   return (
     <footer className="bg-muted/30 pt-16 pb-8" data-testid="footer">
@@ -132,18 +117,17 @@ export default function Footer({ onNewsletterSignup, onNavigate }: FooterProps) 
             {/* Social Links */}
             <div className="flex space-x-3" data-testid="social-links">
               {[
-                { icon: Facebook, label: "Facebook", href: "facebook" },
-                { icon: Instagram, label: "Instagram", href: "instagram" },
-                { icon: Twitter, label: "Twitter", href: "twitter" },
-                { icon: Youtube, label: "YouTube", href: "youtube" }
-              ].map(({ icon: Icon, label, href }) => (
+                { icon: Facebook, label: "Facebook" },
+                { icon: Instagram, label: "Instagram" },
+                { icon: Twitter, label: "Twitter" },
+                { icon: Youtube, label: "YouTube" }
+              ].map(({ icon: Icon, label }) => (
                 <Button
                   key={label}
                   variant="ghost"
                   size="icon"
                   className="h-8 w-8 text-muted-foreground hover:text-primary"
-                  onClick={() => handleNavigation(`social/${href}`)}
-                  data-testid={`social-${href}`}
+                  aria-label={label}
                 >
                   <Icon className="h-4 w-4" />
                 </Button>
@@ -189,7 +173,7 @@ export default function Footer({ onNewsletterSignup, onNavigate }: FooterProps) 
             <Mail className="h-4 w-4 text-primary flex-shrink-0" />
             <div>
               <p className="text-sm font-medium text-foreground">Email us</p>
-              <p className="text-sm text-muted-foreground">help@earthlygardens.com</p>
+              <p className="text-sm text-muted-foreground">help@cityroots.com</p>
             </div>
           </div>
           <div className="flex items-center space-x-3">
@@ -206,36 +190,10 @@ export default function Footer({ onNewsletterSignup, onNavigate }: FooterProps) 
         {/* Bottom Footer */}
         <div className="flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0" data-testid="footer-bottom">
           <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
-            <span>© 2024 City Roots. All rights reserved.</span>
-            <button 
-              onClick={() => handleNavigation('privacy')}
-              className="hover:text-primary transition-colors"
-              data-testid="privacy-link"
-            >
-              Privacy Policy
-            </button>
-            <button 
-              onClick={() => handleNavigation('terms')}
-              className="hover:text-primary transition-colors"
-              data-testid="terms-link"
-            >
-              Terms of Service
-            </button>
-            <button 
-              onClick={() => handleNavigation('cookies')}
-              className="hover:text-primary transition-colors"
-              data-testid="cookies-link"
-            >
-              Cookie Policy
-            </button>
+            <span>© 2025 City Roots. All rights reserved.</span>
           </div>
           
           <div className="flex items-center space-x-4">
-            <div className="flex items-center space-x-2 text-sm text-muted-foreground">
-              <Leaf className="h-3 w-3 text-primary" />
-              <span>Growing sustainably since 2020</span>
-            </div>
-            
             <Button
               variant="outline"
               size="sm"

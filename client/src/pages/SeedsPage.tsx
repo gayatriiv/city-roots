@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
-import { Search, Filter, Grid, List, ShoppingCart, Eye, Heart, Star } from "lucide-react";
+import { Search, Filter, Grid, List, ShoppingCart, Eye, Heart, Star, Flower } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useCart } from "../contexts/CartContext";
 import { getSessionId } from "../lib/session";
@@ -448,7 +448,7 @@ export default function SeedsPage() {
                               variant="outline" 
                               size="sm"
                               className="flex-1 text-xs min-w-0"
-                              onClick={() => handlePlantClick(plant.id)}
+                              onClick={() => (window.location.href = `/seed/${plant.id}`)}
                             >
                               <Eye className="h-3 w-3 mr-1" />
                               <span className="truncate">View Details</span>
@@ -515,11 +515,9 @@ export default function SeedsPage() {
                               <span className="text-xl font-bold text-primary">
                                 {formatPrice(plant.price)}
                               </span>
-                              {plant.originalPrice && (
+                              {typeof plant.originalPrice === 'number' && (
                                 <span className="text-sm text-gray-500 line-through">
-                                  {selectedPlant && typeof selectedPlant.originalPrice === 'number'
-                                    ? formatPrice(selectedPlant.originalPrice)
-                                    : null}
+                                  {formatPrice(plant.originalPrice)}
                                 </span>
                               )}
                             </div>
@@ -529,7 +527,7 @@ export default function SeedsPage() {
                             <Button 
                               variant="outline" 
                               size="sm"
-                              onClick={() => handlePlantClick(plant.id)}
+                              onClick={() => (window.location.href = `/seed/${plant.id}`)}
                             >
                               <Eye className="h-4 w-4 mr-2" />
                               View Details

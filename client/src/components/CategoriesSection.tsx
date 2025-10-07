@@ -3,6 +3,7 @@ import floweringPlantsImage from "@assets/generated_images/Flowering_plants_coll
 import gardeningToolsImage from "@assets/generated_images/Gardening_tools_collection_9c82fa3c.png";
 import seedsImage from "@assets/generated_images/Seeds_and_seedlings_9e473d23.png";
 import SimpleCounter from "@/components/SimpleCounter";
+import { useLocation } from "wouter";
 
 interface Category {
   id: string;
@@ -18,6 +19,7 @@ interface CategoriesSectionProps {
 }
 
 export default function CategoriesSection({ onCategoryClick }: CategoriesSectionProps) {
+  const [, setLocation] = useLocation();
   // Main categories in 2x2 grid layout
   const categories: Category[] = [
     {
@@ -55,21 +57,18 @@ export default function CategoriesSection({ onCategoryClick }: CategoriesSection
   ];
 
   const handleCategoryClick = (categoryId: string) => {
-    console.log(`Navigate to category: ${categoryId}`);
-    
-    // Navigate to appropriate page based on category
     switch (categoryId) {
       case 'all-plants':
-        window.location.href = '/plants';
+        setLocation('/plants');
         break;
       case 'tools':
-        window.location.href = '/tools';
+        setLocation('/tools');
         break;
       case 'seeds':
-        window.location.href = '/seeds';
+        setLocation('/seeds');
         break;
       case 'gift-sets':
-        window.location.href = '/gifting-sets';
+        setLocation('/gifting-sets');
         break;
       default:
         onCategoryClick?.(categoryId);

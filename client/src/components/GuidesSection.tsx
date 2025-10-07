@@ -2,6 +2,7 @@ import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Clock, User, ArrowRight, BookOpen, Leaf } from "lucide-react";
+import { useLocation } from "wouter";
 
 interface Guide {
   id: string;
@@ -21,6 +22,7 @@ interface GuidesSectionProps {
 }
 
 export default function GuidesSection({ onGuideClick, onViewAllGuides }: GuidesSectionProps) {
+  const [, setLocation] = useLocation();
   // Static guides data with actual images
   const guides: Guide[] = [
     {
@@ -59,7 +61,8 @@ export default function GuidesSection({ onGuideClick, onViewAllGuides }: GuidesS
   ];
 
   const handleGuideClick = (guideId: string) => {
-    console.log(`Open guide: ${guideId}`); //todo: remove mock functionality
+    // Route to guides index; deep linking not implemented
+    setLocation('/guides');
     onGuideClick?.(guideId);
   };
 
@@ -211,7 +214,7 @@ export default function GuidesSection({ onGuideClick, onViewAllGuides }: GuidesS
           </p>
           <Button
             onClick={() => {
-              console.log('View all guides clicked'); //todo: remove mock functionality
+              setLocation('/guides');
               onViewAllGuides?.();
             }}
             data-testid="view-all-guides"

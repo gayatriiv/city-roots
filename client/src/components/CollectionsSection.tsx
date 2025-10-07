@@ -3,6 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 import SimpleCounter from "@/components/SimpleCounter";
+import { useLocation } from "wouter";
 
 interface Collection {
   id: string;
@@ -19,6 +20,7 @@ interface CollectionsSectionProps {
 }
 
 export default function CollectionsSection({ onCollectionClick }: CollectionsSectionProps) {
+  const [, setLocation] = useLocation();
   // Collections with proper image paths
   const collections: Collection[] = [
     {
@@ -69,9 +71,8 @@ export default function CollectionsSection({ onCollectionClick }: CollectionsSec
   ];
 
   const handleCollectionClick = (collectionId: string) => {
-    console.log(`Navigate to collection: ${collectionId}`);
     if (collectionId === 'gift-set') {
-      window.location.href = '/gifting-sets';
+      setLocation('/gifting-sets');
       return;
     }
     onCollectionClick?.(collectionId);
@@ -166,10 +167,7 @@ export default function CollectionsSection({ onCollectionClick }: CollectionsSec
           <Button
             variant="outline"
             size="lg"
-            onClick={() => {
-              console.log('View all collections clicked');
-              onCollectionClick?.('all-collections');
-            }}
+            onClick={() => setLocation('/plants')}
             data-testid="view-all-collections"
           >
             View All Collections

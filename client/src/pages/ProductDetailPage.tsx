@@ -1,12 +1,16 @@
 import { useState } from "react";
 import { useLocation, useRoute } from "wouter";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowLeft, Star, ShoppingCart, Heart, Share2, CheckCircle, Truck, Shield, RotateCcw } from "lucide-react";
+import { ArrowLeft, Star, ShoppingCart, Heart, Share2, CheckCircle, Truck, Shield, RotateCcw, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
 import { useCart } from "@/contexts/CartContext";
 import ScrollToTop from "@/components/ui/ScrollToTop";
 import { useScroll } from "@/hooks/useScroll";
@@ -46,6 +50,9 @@ export default function ProductDetailPage({ productId, onAddToCart }: ProductDet
   const { addToCart, isInCart } = useCart();
   const { scrollToTop } = useScroll();
   const [selectedImage, setSelectedImage] = useState(0);
+  const [showReviewForm, setShowReviewForm] = useState(false);
+  const [reviews, setReviews] = useState<{ id: string; userName: string; rating: number; comment: string; date: string }[]>([]);
+  const [newReview, setNewReview] = useState({ userName: "", rating: 5, comment: "" });
 
   // Check if this is a tool or plant based on the URL path
   const isTool = window.location.pathname.startsWith('/tool/');
@@ -158,6 +165,14 @@ export default function ProductDetailPage({ productId, onAddToCart }: ProductDet
       addToCart(product);
       onAddToCart(product.id);
     }
+  };
+
+  const submitReview = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newReview.userName || !newReview.comment) return;
+    setReviews(prev => [{ id: Date.now().toString(), userName: newReview.userName, rating: newReview.rating, comment: newReview.comment, date: new Date().toISOString().split('T')[0] }, ...prev]);
+    setNewReview({ userName: "", rating: 5, comment: "" });
+    setShowReviewForm(false);
   };
 
   if (isLoading) {
@@ -427,13 +442,65 @@ export default function ProductDetailPage({ productId, onAddToCart }: ProductDet
           
           <TabsContent value="reviews" className="mt-6">
             <Card>
-              <CardHeader>
+              <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle>Customer Reviews</CardTitle>
+                <Dialog open={showReviewForm} onOpenChange={setShowReviewForm}>
+                  <DialogTrigger asChild>
+                    <Button variant="outline" size="sm">
+                      <Plus className="h-4 w-4 mr-2" />
+                      Write Review
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="max-w-md">
+                    <DialogHeader>
+                      <DialogTitle>Write a Review</DialogTitle>
+                    </DialogHeader>
+                    <form onSubmit={submitReview} className="space-y-4">
+                      <div>
+                        <Label htmlFor="reviewName">Your Name</Label>
+                        <Input id="reviewName" value={newReview.userName} onChange={(e) => setNewReview(prev => ({ ...prev, userName: e.target.value }))} placeholder="Enter your name" required />
+                      </div>
+                      <div>
+                        <Label>Rating</Label>
+                        <div className="flex items-center gap-1">
+                          {[1,2,3,4,5].map((n) => (
+                            <button key={n} type="button" onClick={() => setNewReview(prev => ({ ...prev, rating: n }))}>
+                              <Star className={`h-5 w-5 ${n <= newReview.rating ? 'text-yellow-400 fill-current' : 'text-gray-300'}`} />
+                            </button>
+                          ))}
+                          <span className="ml-2 text-sm text-muted-foreground">{newReview.rating} / 5</span>
+                        </div>
+                      </div>
+                      <div>
+                        <Label htmlFor="reviewComment">Your Review</Label>
+                        <Textarea id="reviewComment" value={newReview.comment} onChange={(e) => setNewReview(prev => ({ ...prev, comment: e.target.value }))} rows={4} placeholder="Share your experience..." required />
+                      </div>
+                      <Button type="submit">Submit Review</Button>
+                    </form>
+                  </DialogContent>
+                </Dialog>
               </CardHeader>
               <CardContent>
-                <div className="text-center py-8">
-                  <p className="text-muted-foreground">Reviews coming soon!</p>
-                </div>
+                {reviews.length === 0 ? (
+                  <div className="text-center py-8 text-muted-foreground">No reviews yet. Be the first!</div>
+                ) : (
+                  <div className="space-y-4">
+                    {reviews.map(r => (
+                      <div key={r.id} className="border rounded-md p-4">
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="font-medium">{r.userName}</span>
+                          <span className="text-xs text-muted-foreground">{r.date}</span>
+                        </div>
+                        <div className="flex items-center gap-1 mb-2">
+                          {[1,2,3,4,5].map((n) => (
+                            <Star key={n} className={`h-3 w-3 ${n <= r.rating ? 'text-yellow-400 fill-current' : 'text-gray-300'}`} />
+                          ))}
+                        </div>
+                        <p className="text-sm text-foreground">{r.comment}</p>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>

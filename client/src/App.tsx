@@ -19,6 +19,8 @@ import SeedsPage from "@/pages/SeedsPage";
 import GuidesPage from "@/pages/GuidesPage";
 import GuideDetailPage from "@/pages/GuideDetailPage";
 import GiftingSetsPage from "@/pages/GiftingSetsPage";
+import GiftDetailPage from "@/pages/GiftDetailPage";
+import SeedDetailPage from "@/pages/SeedDetailPage";
 import Header from "@/components/Header";
 import Hero from "@/components/Hero";
 import CategoriesSection from "@/components/CategoriesSection";
@@ -413,6 +415,8 @@ function Router() {
       <Route path="/gifting-sets" component={GiftingSetsPageWrapper} />
       <Route path="/guides" component={GuidesPageWrapper} />
       <Route path="/guide/:id" component={GuideDetailPage} />
+      <Route path="/gift/:id" component={GiftDetailPage} />
+      <Route path="/seed/:id" component={SeedDetailPage} />
       <Route component={NotFound} />
     </Switch>
   );

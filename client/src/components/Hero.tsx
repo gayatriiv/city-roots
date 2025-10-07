@@ -55,10 +55,7 @@ export default function Hero({ onShopNow, onLearnMore }: HeroProps) {
           <Button
             size="lg"
             className="bg-primary text-primary-foreground hover:bg-primary/90 text-base sm:text-lg px-6 sm:px-8 py-3 w-full sm:w-auto"
-            onClick={() => {
-              console.log('Shop Now clicked'); //todo: remove mock functionality
-              onShopNow?.();
-            }}
+            onClick={() => onShopNow?.()}
             data-testid="hero-shop-now"
           >
             Shop Now
@@ -69,10 +66,7 @@ export default function Hero({ onShopNow, onLearnMore }: HeroProps) {
             variant="outline"
             size="lg"
             className="bg-white/10 border-white/20 text-white hover:bg-white/20 backdrop-blur-sm text-base sm:text-lg px-6 sm:px-8 py-3 w-full sm:w-auto"
-            onClick={() => {
-              console.log('Learn More clicked'); //todo: remove mock functionality
-              onLearnMore?.();
-            }}
+            onClick={() => onLearnMore?.()}
             data-testid="hero-learn-more"
           >
             <Leaf className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />

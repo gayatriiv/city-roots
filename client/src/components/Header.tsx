@@ -26,7 +26,6 @@ export default function Header({ cartItems = 0, onCartClick, onSearchChange }: H
   const handleSearchChange = (value: string) => {
     setSearchQuery(value);
     onSearchChange?.(value);
-    console.log('Search query:', value); //todo: remove mock functionality
   };
 
   const handleCategoryClick = (category: string, item: string) => {
@@ -148,8 +147,8 @@ export default function Header({ cartItems = 0, onCartClick, onSearchChange }: H
               size="icon"
               className="relative"
               onClick={() => {
-                console.log('Cart clicked'); //todo: remove mock functionality
                 onCartClick?.();
+                setLocation('/cart');
               }}
               data-testid="cart-button"
             >
