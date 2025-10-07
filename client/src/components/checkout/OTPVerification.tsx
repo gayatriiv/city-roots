@@ -8,6 +8,9 @@ import { Loader2, Phone, Shield } from "lucide-react";
 import { CustomerData } from "@/pages/CheckoutPage";
 import ScrollToTop from "@/components/ui/ScrollToTop";
 import { useScroll } from "@/hooks/useScroll";
+import { auth } from "@/lib/firebase";
+import { RecaptchaVerifier } from "firebase/auth";
+import { ConfirmationResult, linkWithPhoneNumber, signInWithPhoneNumber } from "firebase/auth";
 
 interface OTPVerificationProps {
   onVerified: (data: CustomerData) => void;
@@ -24,8 +27,23 @@ export default function OTPVerification({ onVerified }: OTPVerificationProps) {
   const [resendTimer, setResendTimer] = useState(0);
   const { scrollToTop } = useScroll();
 
-  // Mock OTP - in real app, this would come from server
-  const [mockOTP] = useState('123456');
+  // Firebase confirmation for OTP
+  const [confirmation, setConfirmation] = useState<ConfirmationResult | null>(null);
+
+  const getRecaptcha = () => {
+    if ((window as any).recaptchaVerifier) return (window as any).recaptchaVerifier as RecaptchaVerifier;
+    const verifier = new RecaptchaVerifier(auth, "checkout-send-otp", { size: "invisible" });
+    (window as any).recaptchaVerifier = verifier;
+    return verifier;
+  };
+
+  const sendOtp = async (toPhone: string) => {
+    const appVerifier = getRecaptcha();
+    if (auth.currentUser) {
+      return await linkWithPhoneNumber(auth.currentUser, `+91${toPhone}`, appVerifier);
+    }
+    return await signInWithPhoneNumber(auth, `+91${toPhone}`, appVerifier);
+  };
 
   const handlePhoneSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -41,35 +59,16 @@ export default function OTPVerification({ onVerified }: OTPVerificationProps) {
     }
 
     try {
-      const response = await fetch('/api/customers/verify-phone', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ phone }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to send OTP');
-      }
-
-      const data = await response.json();
-      console.log('OTP sent:', data.otp); // For demo purposes
-      
+      const conf = await sendOtp(phone);
+      setConfirmation(conf);
       setStep('otp');
       setResendTimer(60);
-      
-      // Start countdown timer
       const timer = setInterval(() => {
         setResendTimer(prev => {
-          if (prev <= 1) {
-            clearInterval(timer);
-            return 0;
-          }
+          if (prev <= 1) { clearInterval(timer); return 0; }
           return prev - 1;
         });
       }, 1000);
-      
     } catch (err) {
       setError('Failed to send OTP. Please try again.');
     } finally {
@@ -83,34 +82,15 @@ export default function OTPVerification({ onVerified }: OTPVerificationProps) {
     setError('');
 
     try {
-      const response = await fetch('/api/customers/verify-otp', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ 
-          phone, 
-          otp, 
-          name: name || undefined, 
-          email: email || undefined 
-        }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'OTP verification failed');
-      }
-
-      const data = await response.json();
-      
-      // Proceed with verification
+      if (!confirmation) throw new Error('No OTP session');
+      const cred = await confirmation.confirm(otp);
+      const user = cred.user;
       const customerData: CustomerData = {
-        phone: data.customer.phone,
-        name: data.customer.name,
-        email: data.customer.email,
-        isVerified: data.customer.isVerified
+        phone: phone,
+        name: name || user.displayName || '',
+        email: email || user.email || '',
+        isVerified: true,
       };
-
       onVerified(customerData);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Verification failed. Please try again.');
@@ -124,17 +104,12 @@ export default function OTPVerification({ onVerified }: OTPVerificationProps) {
     setError('');
     
     try {
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await sendOtp(phone);
       setResendTimer(60);
       setOtp('');
-      
-      // Start countdown timer
       const timer = setInterval(() => {
         setResendTimer(prev => {
-          if (prev <= 1) {
-            clearInterval(timer);
-            return 0;
-          }
+          if (prev <= 1) { clearInterval(timer); return 0; }
           return prev - 1;
         });
       }, 1000);
@@ -306,9 +281,7 @@ export default function OTPVerification({ onVerified }: OTPVerificationProps) {
             maxLength={6}
             required
           />
-          <p className="text-xs text-gray-500 mt-1">
-            Demo OTP: <strong>{mockOTP}</strong>
-          </p>
+          {/* Real OTP via Firebase - no demo code shown */}
         </div>
 
         <Button type="submit" className="w-full" disabled={loading || otp.length !== 6}>

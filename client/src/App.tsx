@@ -4,6 +4,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { CartProvider, useCart } from "@/contexts/CartContext";
+import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import NotFound from "@/pages/not-found";
@@ -44,6 +45,7 @@ function Home() {
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [, setLocation] = useLocation();
   const sessionId = getSessionId();
+  const { requireAuth } = useAuth();
 
   // Fetch cart items
   const { data: cartData = [], refetch: refetchCart } = useQuery({
@@ -99,7 +101,9 @@ function Home() {
     },
   });
 
-  const handleAddToCart = (productId: string) => {
+  const handleAddToCart = async (productId: string) => {
+    const ok = await requireAuth();
+    if (!ok) return;
     addToCartMutation.mutate({ productId });
   };
 
@@ -116,9 +120,12 @@ function Home() {
   };
 
   const handleCheckout = () => {
-    console.log('Checkout completed');
-    clearCartMutation.mutate();
-    setIsCartOpen(false);
+    requireAuth().then((ok) => {
+      if (!ok) return;
+      console.log('Checkout completed');
+      clearCartMutation.mutate();
+      setIsCartOpen(false);
+    });
   };
 
   const totalItems = cartItems.reduce((sum, item) => sum + item.quantity, 0);
@@ -174,6 +181,7 @@ function PlantsPageWrapper() {
   const sessionId = getSessionId();
   const { getTotalItems } = useCart();
   const [, setLocation] = useLocation();
+  const { requireAuth } = useAuth();
   
   const addToCartMutation = useMutation({
     mutationFn: ({ productId }: { productId: string }) => 
@@ -186,7 +194,9 @@ function PlantsPageWrapper() {
     },
   });
 
-  const handleAddToCart = (productId: string) => {
+  const handleAddToCart = async (productId: string) => {
+    const ok = await requireAuth();
+    if (!ok) return;
     addToCartMutation.mutate({ productId });
   };
 
@@ -426,10 +436,12 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        <CartProvider>
-          <Toaster />
-          <Router />
-        </CartProvider>
+        <AuthProvider>
+          <CartProvider>
+            <Toaster />
+            <Router />
+          </CartProvider>
+        </AuthProvider>
       </TooltipProvider>
     </QueryClientProvider>
   );

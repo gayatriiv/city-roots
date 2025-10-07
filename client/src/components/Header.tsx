@@ -132,13 +132,6 @@ export default function Header({ cartItems = 0, onCartClick, onSearchChange }: H
                 className="pl-9 w-64"
                 data-testid="search-input"
               />
-            {/* First purchase + dynamic sale hints */}
-            <span className="ml-3 hidden lg:inline text-xs text-emerald-700 bg-emerald-50 border border-emerald-200 rounded px-2 py-1 mr-2">
-              New here? Get 10% OFF on your first order
-            </span>
-            <span className="hidden xl:inline text-xs text-white bg-amber-600 rounded px-2 py-1 animate-pulse">
-              Autumn Day Sale
-            </span>
             </div>
 
             {/* Cart */}
