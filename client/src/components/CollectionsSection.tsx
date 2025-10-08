@@ -19,8 +19,9 @@ interface CollectionsSectionProps {
   onCollectionClick?: (collectionId: string) => void;
 }
 
-export default function CollectionsSection({ onCollectionClick }: CollectionsSectionProps) {
+export default function CollectionsSection() {
   const [, setLocation] = useLocation();
+
   // Collections with proper image paths
   const collections: Collection[] = [
     {
@@ -71,15 +72,13 @@ export default function CollectionsSection({ onCollectionClick }: CollectionsSec
   ];
 
   const handleCollectionClick = (collectionId: string) => {
-    if (collectionId === 'gift-set') {
-      setLocation('/gifting-sets');
+      setLocation('/collections');
       return;
-    }
-    onCollectionClick?.(collectionId);
+    // If you want to do something else on collection click, add it here.
   };
 
   return (
-    <section id="collections" className="py-16 bg-background scroll-snap-start" data-testid="collections-section">
+    <section id="collections" className="py-16 bg-background scroll-snap-start">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <div className="text-center mb-12">
@@ -167,7 +166,7 @@ export default function CollectionsSection({ onCollectionClick }: CollectionsSec
           <Button
             variant="outline"
             size="lg"
-            onClick={() => setLocation('/plants')}
+            onClick={() => setLocation('/collections')}  // Updated path
             data-testid="view-all-collections"
           >
             View All Collections

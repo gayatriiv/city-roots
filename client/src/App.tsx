@@ -22,7 +22,6 @@ import ToolsPage from "@/pages/ToolsPage";
 import SeedsPage from "@/pages/SeedsPage";
 import GuidesPage from "@/pages/GuidesPage";
 import GuideDetailPage from "@/pages/GuideDetailPage";
-import GiftingSetsPage from "@/pages/GiftingSetsPage";
 import GiftDetailPage from "@/pages/GiftDetailPage";
 import SeedDetailPage from "@/pages/SeedDetailPage";
 import Header from "@/components/Header";
@@ -30,10 +29,11 @@ import Hero from "@/components/Hero";
 import CategoriesSection from "@/components/CategoriesSection";
 import CollectionsSection from "@/components/CollectionsSection";
 import GuidesSection from "@/components/GuidesSection";
-import Footer from "@/components/Footer";
+import Footer from "./components/Footer";
 import CartDrawer from "@/components/CartDrawer";
 import ScrollToTop from "@/components/ui/ScrollToTop";
 import { fetchCartItems, addToCart, updateCartItemQuantity, removeFromCart, clearCart, getSessionId, getImageUrl } from "@/lib/api";
+import CollectionsPage from "./pages/CollectionsPage";
 
 interface CartItem {
   id: string;
@@ -150,9 +150,7 @@ function Home() {
           onCategoryClick={(categoryId) => console.log('Category:', categoryId)} //todo: remove mock functionality
         />
         
-        <CollectionsSection
-          onCollectionClick={(collectionId) => console.log('Collection:', collectionId)} //todo: remove mock functionality
-        />
+        <CollectionsSection />
         
         <GuidesSection
           onGuideClick={(guideId) => console.log('Guide:', guideId)} //todo: remove mock functionality
@@ -212,22 +210,14 @@ function PlantsPageWrapper() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background flex flex-col">
       <Header 
         cartItems={getTotalItems()}
         onCartClick={() => setLocation('/cart')}
         onSearchChange={(query) => console.log('Search:', query)}
       />
-      <PlantsPage onAddToCart={handleAddToCart} />
-      
-      <LoginModal
-        isOpen={showLoginModal}
-        onClose={() => setShowLoginModal(false)}
-        onSuccess={() => handleLoginSuccess(() => {
-          console.log('User logged in successfully');
-        })}
-      />
-      
+      <PlantsPage />
+      <Footer />
       <ScrollToTop />
     </div>
   );
@@ -238,13 +228,14 @@ function ToolsPageWrapper() {
   const [, setLocation] = useLocation();
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background flex flex-col">
       <Header 
         cartItems={getTotalItems()}
         onCartClick={() => setLocation('/cart')}
         onSearchChange={(query) => console.log('Search:', query)}
       />
       <ToolsPage />
+      <Footer />
       <ScrollToTop />
     </div>
   );
@@ -252,21 +243,14 @@ function ToolsPageWrapper() {
 
 function SeedsPageWrapper() {
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background flex flex-col">
       <SeedsPage />
+      <Footer />
       <ScrollToTop />
     </div>
   );
 }
 
-function GiftingSetsPageWrapper() {
-  return (
-    <div className="min-h-screen bg-background">
-      <GiftingSetsPage />
-      <ScrollToTop />
-    </div>
-  );
-}
 
 function AboutPageWrapper() {
   return (
@@ -288,13 +272,14 @@ function GuidesPageWrapper() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background flex flex-col">
       <Header 
         cartItems={0}
         onCartClick={() => console.log('Cart clicked')}
         onSearchChange={(query) => console.log('Search:', query)}
       />
       <GuidesPage onGuideClick={handleGuideClick} />
+      <Footer />
       <ScrollToTop />
     </div>
   );
@@ -454,13 +439,23 @@ function Router() {
       <Route path="/about" component={AboutPageWrapper} />
       <Route path="/tools" component={ToolsPageWrapper} />
       <Route path="/seeds" component={SeedsPageWrapper} />
-      <Route path="/gifting-sets" component={GiftingSetsPageWrapper} />
       <Route path="/guides" component={GuidesPageWrapper} />
       <Route path="/guide/:id" component={GuideDetailPage} />
       <Route path="/gift/:id" component={GiftDetailPage} />
       <Route path="/seed/:id" component={SeedDetailPage} />
+      <Route path="/collections" component={CollectionsPageWrapper} />
       <Route component={NotFound} />
     </Switch>
+  );
+}
+
+function CollectionsPageWrapper() {
+  return (
+    <div className="min-h-screen bg-background flex flex-col">
+      <CollectionsPage />
+      <Footer />
+      <ScrollToTop />
+    </div>
   );
 }
 

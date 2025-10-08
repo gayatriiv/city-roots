@@ -40,7 +40,7 @@ export default function Header({ cartItems = 0, onCartClick, onSearchChange }: H
       'Tools': 'tools', 
       'Seeds': 'seeds',
       'Guides': 'guides',
-      'Gifting Sets': 'gifting-sets'
+      'Collections': 'collections'
     };
     
     const baseRoute = categoryMap[category];
@@ -65,7 +65,7 @@ export default function Header({ cartItems = 0, onCartClick, onSearchChange }: H
       items: []
     },
     {
-      name: "Gifting Sets",
+      name: "Collections",
       items: []
     },
     {
@@ -78,9 +78,16 @@ export default function Header({ cartItems = 0, onCartClick, onSearchChange }: H
     <header className="bg-background border-b border-border sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center h-16">
-          {/* Logo */}
-          <Link href="/" className="flex items-center space-x-2 flex-shrink-0">
-            <img src="/images/new-logo.png" alt="City Roots" className="h-10 sm:h-12 w-auto" />
+          {/* Logo and Site Name */}
+          <Link href="/" className="flex items-center gap-2">
+            <img 
+              src="/images/city-roots logo.png" 
+              alt="City Roots" 
+              className="h-8 w-auto"
+            />
+            <span className="text-xl font-semibold text-primary">
+              City Roots
+            </span>
           </Link>
 
           {/* Desktop Navigation - Centered */}
