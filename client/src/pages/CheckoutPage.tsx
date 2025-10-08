@@ -57,12 +57,12 @@ export default function CheckoutPage({ onAddToCart }: CheckoutPageProps) {
     setLocation('/cart');
   };
 
-  const handleAddressSubmitted = (data: AddressData) => {
+  const handleAddressSubmitted = (data: AddressData & { email?: string }) => {
     // Extract customer data from address form
     const customerData: CustomerData = {
       phone: data.phone,
       name: data.fullName,
-      email: '', // Will be filled in payment form if needed
+      email: data.email || '', // Use email from address form
       isVerified: true // Skip verification
     };
     

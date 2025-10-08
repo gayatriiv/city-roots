@@ -6,7 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Loader2, MapPin, User } from "lucide-react";
+import { Loader2, MapPin, User, Mail } from "lucide-react";
 import { CustomerData, AddressData } from "@/pages/CheckoutPage";
 import ScrollToTop from "@/components/ui/ScrollToTop";
 import { useScroll } from "@/hooks/useScroll";
@@ -36,6 +36,8 @@ export default function AddressForm({ customerData, onSubmit }: AddressFormProps
     country: 'India',
     phone: customerData?.phone || ''
   });
+  
+  const [email, setEmail] = useState(customerData?.email || '');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const { scrollToTop } = useScroll();
@@ -70,7 +72,8 @@ export default function AddressForm({ customerData, onSubmit }: AddressFormProps
     try {
       // Simulate API call to save address
       await new Promise(resolve => setTimeout(resolve, 1000));
-      onSubmit(formData);
+      // Include email in the form data
+      onSubmit({ ...formData, email });
     } catch (err) {
       setError('Failed to save address. Please try again.');
     } finally {
@@ -197,6 +200,24 @@ export default function AddressForm({ customerData, onSubmit }: AddressFormProps
                 required
               />
             </div>
+          </div>
+
+          <div>
+            <Label htmlFor="email">Email Address (Optional)</Label>
+            <div className="relative">
+              <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+              <Input
+                id="email"
+                type="email"
+                placeholder="your.email@example.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+            <p className="text-xs text-gray-500 mt-1">
+              We'll send order updates and invoice to this email
+            </p>
           </div>
 
           <div className="md:col-span-2">
