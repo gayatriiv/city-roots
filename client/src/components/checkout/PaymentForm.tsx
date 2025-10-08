@@ -20,7 +20,7 @@ interface PaymentFormProps {
   customerData: CustomerData;
   addressData: AddressData;
   cartItems: Array<{ product: Product; quantity: number }>;
-  onPaymentSuccess: (orderId: string) => void;
+  onPaymentSuccess: (orderId: string, paymentData?: any) => void;
   onBack: () => void;
 }
 
@@ -190,7 +190,11 @@ export default function PaymentForm({
       
       if (result.success) {
         console.log('Payment successful, redirecting to confirmation');
-        onPaymentSuccess(result.orderId);
+        onPaymentSuccess(result.orderId, {
+          paymentId: paymentResponse.razorpay_payment_id,
+          paymentMethod: 'Razorpay',
+          orderNumber: orderData.order.orderNumber
+        });
       } else {
         console.error('Payment verification failed:', result.error);
         setError(`Payment verification failed: ${result.error || 'Please try again.'}`);

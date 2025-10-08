@@ -43,6 +43,7 @@ export default function CheckoutPage({ onAddToCart }: CheckoutPageProps) {
   const [customerData, setCustomerData] = useState<CustomerData | null>(null);
   const [addressData, setAddressData] = useState<AddressData | null>(null);
   const [orderId, setOrderId] = useState<string | null>(null);
+  const [orderData, setOrderData] = useState<any>(null); // Store order data for invoice
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('en-IN', {
@@ -70,8 +71,25 @@ export default function CheckoutPage({ onAddToCart }: CheckoutPageProps) {
     setCurrentStep('payment');
   };
 
-  const handlePaymentSuccess = (orderId: string) => {
+  const handlePaymentSuccess = (orderId: string, paymentData?: any) => {
     setOrderId(orderId);
+    
+    // Store order data for invoice generation
+    const subtotal = getTotalPrice();
+    const tax = subtotal * 0.18; // 18% GST
+    const shipping = subtotal > 500 ? 0 : 50; // Free shipping above ₹500
+    const total = subtotal + tax + shipping;
+    
+    setOrderData({
+      orderId,
+      cartItems,
+      subtotal,
+      tax,
+      shipping,
+      total,
+      paymentData
+    });
+    
     setCurrentStep('confirmation');
     clearCart(); // Clear cart after successful payment
   };
@@ -218,12 +236,13 @@ export default function CheckoutPage({ onAddToCart }: CheckoutPageProps) {
                   </div>
                 )}
                 
-                {currentStep === 'confirmation' && orderId && (
+                {currentStep === 'confirmation' && orderId && orderData && (
                   <div id="order-confirmation" className="scroll-snap-start">
                     <OrderConfirmation 
                       orderId={orderId}
                       customerData={customerData!}
                       addressData={addressData!}
+                      orderData={orderData}
                       onContinueShopping={() => setLocation('/plants')}
                     />
                   </div>

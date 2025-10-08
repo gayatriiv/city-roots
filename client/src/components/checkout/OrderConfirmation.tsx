@@ -7,11 +7,32 @@ import { CheckCircle, Package, Truck, MapPin, Phone, Mail, Download, Share2 } fr
 import { CustomerData, AddressData } from "@/pages/CheckoutPage";
 import ScrollToTop from "@/components/ui/ScrollToTop";
 import { useScroll } from "@/hooks/useScroll";
+import { generateInvoicePDF, InvoiceData } from "@/utils/pdfGenerator";
 
 interface OrderConfirmationProps {
   orderId: string;
   customerData: CustomerData;
   addressData: AddressData;
+  orderData: {
+    orderId: string;
+    cartItems: Array<{
+      product: {
+        id: string;
+        name: string;
+        price: number;
+      };
+      quantity: number;
+    }>;
+    subtotal: number;
+    tax: number;
+    shipping: number;
+    total: number;
+    paymentData?: {
+      paymentId: string;
+      paymentMethod: string;
+      orderNumber: string;
+    };
+  };
   onContinueShopping: () => void;
 }
 
@@ -19,9 +40,10 @@ export default function OrderConfirmation({
   orderId, 
   customerData, 
   addressData, 
+  orderData,
   onContinueShopping 
 }: OrderConfirmationProps) {
-  const [orderNumber] = useState(`VC${Date.now().toString().slice(-6)}${Math.floor(Math.random() * 1000).toString().padStart(3, '0')}`);
+  const orderNumber = orderData.paymentData?.orderNumber || `VC${Date.now().toString().slice(-6)}${Math.floor(Math.random() * 1000).toString().padStart(3, '0')}`;
   const [estimatedDelivery] = useState(new Date(Date.now() + 3 * 24 * 60 * 60 * 1000)); // 3 days from now
   const [trackingNumber] = useState(`TRK${Date.now().toString().slice(-8)}`);
   const { scrollToTop, scrollToElement } = useScroll();
@@ -36,37 +58,36 @@ export default function OrderConfirmation({
   };
 
   const handleDownloadInvoice = () => {
-    // In a real app, this would generate and download an actual invoice
-    const invoiceContent = `
-VERDANTCART - INVOICE
-Order Number: ${orderNumber}
-Order Date: ${new Date().toLocaleDateString('en-IN')}
-Customer: ${customerData.name}
-Phone: +91 ${customerData.phone}
-Email: ${customerData.email || 'N/A'}
+    const invoiceData: InvoiceData = {
+      orderNumber: orderNumber,
+      orderDate: new Date().toLocaleDateString('en-IN'),
+      customerName: customerData.name,
+      customerPhone: customerData.phone,
+      customerEmail: customerData.email || '',
+      address: {
+        fullName: addressData.fullName,
+        addressLine1: addressData.addressLine1,
+        addressLine2: addressData.addressLine2,
+        city: addressData.city,
+        state: addressData.state,
+        postalCode: addressData.postalCode,
+        country: addressData.country
+      },
+      items: orderData.cartItems.map(item => ({
+        name: item.product.name,
+        quantity: item.quantity,
+        price: item.product.price,
+        total: item.product.price * item.quantity
+      })),
+      subtotal: orderData.subtotal,
+      tax: orderData.tax,
+      shipping: orderData.shipping,
+      total: orderData.total,
+      paymentMethod: orderData.paymentData?.paymentMethod || 'Razorpay',
+      paymentId: orderData.paymentData?.paymentId || 'N/A'
+    };
 
-Delivery Address:
-${addressData.fullName}
-${addressData.addressLine1}
-${addressData.addressLine2 || ''}
-${addressData.city}, ${addressData.state} ${addressData.postalCode}
-${addressData.country}
-
-Estimated Delivery: ${formatDate(estimatedDelivery)}
-Tracking Number: ${trackingNumber}
-
-Thank you for your order!
-    `;
-    
-    const blob = new Blob([invoiceContent], { type: 'text/plain' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `invoice-${orderNumber}.txt`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+    generateInvoicePDF(invoiceData);
   };
 
   const handleShareOrder = () => {
