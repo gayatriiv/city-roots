@@ -11,6 +11,7 @@ import { Label } from "@/components/ui/label";
 import { ArrowLeft, ShoppingCart, Heart, Star, Plus, Sun, Droplets, Leaf } from "lucide-react";
 import { useCart } from "@/contexts/CartContext";
 import { useAuth } from "@/contexts/AuthContext";
+import { useAuthGuard } from "@/hooks/useAuthGuard";
 
 interface Seed {
   id: string;
@@ -51,7 +52,7 @@ export default function SeedDetailPage() {
   const [, params] = useRoute('/seed/:id');
   const [, setLocation] = useLocation();
   const { addToCart, isInCart, getTotalItems } = useCart();
-  const { requireAuth } = useAuth();
+  const { requireAuth } = useAuthGuard();
   const [seed, setSeed] = useState<Seed | null>(null);
   const [showReviewForm, setShowReviewForm] = useState(false);
   const [reviews, setReviews] = useState<{ id: string; userName: string; rating: number; comment: string; date: string }[]>([]);
@@ -76,10 +77,10 @@ export default function SeedDetailPage() {
     );
   }
 
-  const handleAdd = async () => {
-    const ok = await requireAuth();
-    if (!ok) return;
-    addToCart({ id: seed.id, name: seed.name, price: seed.price, image: seed.image, category: seed.category });
+  const handleAdd = () => {
+    requireAuth(() => {
+      addToCart({ id: seed.id, name: seed.name, price: seed.price, image: seed.image, category: seed.category });
+    });
   };
 
   const submitReview = (e: React.FormEvent) => {

@@ -166,7 +166,7 @@ export default function Footer({ onNewsletterSignup, onNavigate }: FooterProps) 
             <Phone className="h-4 w-4 text-primary flex-shrink-0" />
             <div>
               <p className="text-sm font-medium text-foreground">Call us</p>
-              <p className="text-sm text-muted-foreground">(555) 123-GROW</p>
+              <p className="text-sm text-muted-foreground">+91 12345XXXX</p>
             </div>
           </div>
           <div className="flex items-center space-x-3">

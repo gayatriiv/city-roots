@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { useAuth } from './AuthContext';
 
 export interface Product {
   id: string;
@@ -41,6 +42,7 @@ interface CartContextType {
   getTotalPrice: () => number;
   isInCart: (productId: string) => boolean;
   clearCart: () => void;
+  requireAuth: () => boolean;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -59,6 +61,7 @@ interface CartProviderProps {
 
 export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
+  const { user } = useAuth();
 
   // Load cart from localStorage on mount
   useEffect(() => {
@@ -118,6 +121,10 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
     });
   };
 
+  const requireAuth = (): boolean => {
+    return !!user;
+  };
+
   const removeFromCart = (productId: string) => {
     setCartItems(prev => prev.filter(item => {
       const product = item.product || (item as any).plant;
@@ -173,7 +180,8 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
     getTotalItems,
     getTotalPrice,
     isInCart,
-    clearCart
+    clearCart,
+    requireAuth
   };
 
   return (

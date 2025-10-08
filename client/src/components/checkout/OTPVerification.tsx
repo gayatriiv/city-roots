@@ -151,7 +151,7 @@ export default function OTPVerification({ onVerified }: OTPVerificationProps) {
               <Input
                 id="phone"
                 type="tel"
-                placeholder="9876543210"
+                placeholder="1234567890"
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
                 className="rounded-l-none"

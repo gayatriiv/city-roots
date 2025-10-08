@@ -5,6 +5,8 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { CartProvider, useCart } from "@/contexts/CartContext";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
+import LoginModal from "@/components/auth/LoginModal";
+import { useAuthGuard } from "@/hooks/useAuthGuard";
 import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import NotFound from "@/pages/not-found";
@@ -13,6 +15,7 @@ import PlantDetailPage from "@/pages/PlantDetailPage";
 import CartPage from "@/pages/CartPage";
 import CheckoutPage from "@/pages/CheckoutPage";
 import OrderTrackingPage from "@/pages/OrderTrackingPage";
+import AuthCallback from "@/pages/AuthCallback";
 import ProductDetailPage from "@/pages/ProductDetailPage";
 import AboutPage from "@/pages/AboutPage";
 import ToolsPage from "@/pages/ToolsPage";
@@ -45,7 +48,7 @@ function Home() {
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [, setLocation] = useLocation();
   const sessionId = getSessionId();
-  const { requireAuth } = useAuth();
+  const { requireAuth, showLoginModal, setShowLoginModal, handleLoginSuccess } = useAuthGuard();
 
   // Fetch cart items
   const { data: cartData = [], refetch: refetchCart } = useQuery({
@@ -101,10 +104,10 @@ function Home() {
     },
   });
 
-  const handleAddToCart = async (productId: string) => {
-    const ok = await requireAuth();
-    if (!ok) return;
-    addToCartMutation.mutate({ productId });
+  const handleAddToCart = (productId: string) => {
+    requireAuth(() => {
+      addToCartMutation.mutate({ productId });
+    });
   };
 
   const handleUpdateQuantity = (productId: string, quantity: number) => {
@@ -120,8 +123,7 @@ function Home() {
   };
 
   const handleCheckout = () => {
-    requireAuth().then((ok) => {
-      if (!ok) return;
+    requireAuth(() => {
       console.log('Checkout completed');
       clearCartMutation.mutate();
       setIsCartOpen(false);
@@ -171,6 +173,15 @@ function Home() {
         onRemoveItem={handleRemoveItem}
         onCheckout={handleCheckout}
       />
+
+      <LoginModal
+        isOpen={showLoginModal}
+        onClose={() => setShowLoginModal(false)}
+        onSuccess={() => handleLoginSuccess(() => {
+          // After successful login, you can perform any additional actions
+          console.log('User logged in successfully');
+        })}
+      />
       
       <ScrollToTop />
     </div>
@@ -181,7 +192,7 @@ function PlantsPageWrapper() {
   const sessionId = getSessionId();
   const { getTotalItems } = useCart();
   const [, setLocation] = useLocation();
-  const { requireAuth } = useAuth();
+  const { requireAuth, showLoginModal, setShowLoginModal, handleLoginSuccess } = useAuthGuard();
   
   const addToCartMutation = useMutation({
     mutationFn: ({ productId }: { productId: string }) => 
@@ -194,10 +205,10 @@ function PlantsPageWrapper() {
     },
   });
 
-  const handleAddToCart = async (productId: string) => {
-    const ok = await requireAuth();
-    if (!ok) return;
-    addToCartMutation.mutate({ productId });
+  const handleAddToCart = (productId: string) => {
+    requireAuth(() => {
+      addToCartMutation.mutate({ productId });
+    });
   };
 
   return (
@@ -208,6 +219,15 @@ function PlantsPageWrapper() {
         onSearchChange={(query) => console.log('Search:', query)}
       />
       <PlantsPage onAddToCart={handleAddToCart} />
+      
+      <LoginModal
+        isOpen={showLoginModal}
+        onClose={() => setShowLoginModal(false)}
+        onSuccess={() => handleLoginSuccess(() => {
+          console.log('User logged in successfully');
+        })}
+      />
+      
       <ScrollToTop />
     </div>
   );
@@ -371,6 +391,7 @@ function ProductDetailPageWrapper() {
   const [, productParams] = useRoute('/product/:id');
   const [, toolParams] = useRoute('/tool/:id');
   const sessionId = getSessionId();
+  const { requireAuth, showLoginModal, setShowLoginModal, handleLoginSuccess } = useAuthGuard();
   
   // Determine which route matched and get the ID
   const params = productParams || toolParams;
@@ -390,7 +411,9 @@ function ProductDetailPageWrapper() {
   });
 
   const handleAddToCart = (productId: string) => {
-    addToCartMutation.mutate({ productId });
+    requireAuth(() => {
+      addToCartMutation.mutate({ productId });
+    });
   };
 
   if (!params?.id) {
@@ -404,6 +427,14 @@ function ProductDetailPageWrapper() {
   return (
     <div className="min-h-screen bg-background">
       <ProductDetailPage productId={params.id} onAddToCart={handleAddToCart} />
+      
+      <LoginModal
+        isOpen={showLoginModal}
+        onClose={() => setShowLoginModal(false)}
+        onSuccess={() => handleLoginSuccess(() => {
+          console.log('User logged in successfully');
+        })}
+      />
     </div>
   );
 }
@@ -417,6 +448,7 @@ function Router() {
       <Route path="/cart" component={CartPageWrapper} />
       <Route path="/checkout" component={CheckoutPageWrapper} />
       <Route path="/track-order" component={OrderTrackingPage} />
+      <Route path="/auth/callback" component={AuthCallback} />
       <Route path="/tool/:id" component={ProductDetailPageWrapper} />
       <Route path="/product/:id" component={ProductDetailPageWrapper} />
       <Route path="/about" component={AboutPageWrapper} />

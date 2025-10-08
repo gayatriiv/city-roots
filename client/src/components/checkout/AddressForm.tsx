@@ -189,7 +189,7 @@ export default function AddressForm({ customerData, onSubmit }: AddressFormProps
               <Input
                 id="phone"
                 type="tel"
-                placeholder="9876543210"
+                placeholder="1234567890"
                 value={formData.phone}
                 onChange={(e) => handleInputChange('phone', e.target.value.replace(/\D/g, '').slice(0, 10))}
                 className="rounded-l-none"

@@ -8,6 +8,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Search, Grid, List, ShoppingCart, Eye, Heart, Star } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import { useAuthGuard } from "@/hooks/useAuthGuard";
+import LoginModal from "@/components/auth/LoginModal";
 import { useMemo, useState } from "react";
 import SimpleCounter from "@/components/SimpleCounter";
 
@@ -27,7 +29,7 @@ interface GiftBundle {
 
 export default function GiftingSetsPage() {
   const { getTotalItems, addToCart, isInCart } = useCart();
-  const { requireAuth } = useAuth();
+  const { requireAuth, showLoginModal, setShowLoginModal, handleLoginSuccess } = useAuthGuard();
 
   const giftBundles: GiftBundle[] = [
     {
@@ -282,15 +284,15 @@ export default function GiftingSetsPage() {
                       <Button
                         size="sm"
                           className="flex-1 text-xs min-w-0"
-                          onClick={async () => {
-                            const ok = await requireAuth();
-                            if (!ok) return;
-                          addToCart({
-                            id: bundle.id,
-                            name: bundle.name,
-                              price: bundle.price,
-                            image: bundle.image,
-                            category: "Gifting Sets",
+                          onClick={() => {
+                            requireAuth(() => {
+                              addToCart({
+                                id: bundle.id,
+                                name: bundle.name,
+                                price: bundle.price,
+                                image: bundle.image,
+                                category: "Gifting Sets",
+                              });
                             });
                           }}
                           disabled={!bundle.inStock}
@@ -334,7 +336,17 @@ export default function GiftingSetsPage() {
                           <Eye className="h-4 w-4 mr-2" />
                           View Details
                         </Button>
-                        <Button size="sm" onClick={() => addToCart({ id: bundle.id, name: bundle.name, price: bundle.price, image: bundle.image, category: "Gifting Sets" })}>
+                        <Button size="sm" onClick={() => {
+                          requireAuth(() => {
+                            addToCart({ 
+                              id: bundle.id, 
+                              name: bundle.name, 
+                              price: bundle.price, 
+                              image: bundle.image, 
+                              category: "Gifting Sets" 
+                            });
+                          });
+                        }}>
                           Add to Cart
                       </Button>
                       </div>
@@ -384,8 +396,10 @@ export default function GiftingSetsPage() {
                 <Button
                   className="flex-1"
                   onClick={() => {
-                    addToCart({ id: selectedBundle.id, name: selectedBundle.name, price: selectedBundle.price, image: selectedBundle.image, category: "Gifting Sets" });
-                    setSelectedBundle(null);
+                    requireAuth(() => {
+                      addToCart({ id: selectedBundle.id, name: selectedBundle.name, price: selectedBundle.price, image: selectedBundle.image, category: "Gifting Sets" });
+                      setSelectedBundle(null);
+                    });
                   }}
                   disabled={!selectedBundle.inStock || isInCart(selectedBundle.id)}
                   variant={isInCart(selectedBundle.id) ? "secondary" : "default"}
@@ -402,6 +416,14 @@ export default function GiftingSetsPage() {
           </DialogContent>
         </Dialog>
       )}
+      
+      <LoginModal
+        isOpen={showLoginModal}
+        onClose={() => setShowLoginModal(false)}
+        onSuccess={() => handleLoginSuccess(() => {
+          console.log('User logged in successfully from gifting sets page');
+        })}
+      />
     </div>
   );
 }

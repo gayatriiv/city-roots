@@ -9,6 +9,7 @@ import { Search, Filter, Grid, List, ShoppingCart, Eye, Heart, Star, Flower } fr
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useCart } from "../contexts/CartContext";
 import { useAuth } from "../contexts/AuthContext";
+import { useAuthGuard } from "../hooks/useAuthGuard";
 import { getSessionId } from "../lib/session";
 import Header from "../components/Header";
 
@@ -219,7 +220,7 @@ const categoryIcons = {
 
 export default function SeedsPage() {
   const { addToCart, isInCart, getTotalItems } = useCart();
-  const { requireAuth } = useAuth();
+  const { requireAuth } = useAuthGuard();
   const sessionId = getSessionId();
 
   const [sortBy, setSortBy] = useState("featured");
@@ -290,10 +291,10 @@ export default function SeedsPage() {
     ));
   };
 
-  const handleAddToCart = async (plant: Plant) => {
-    const ok = await requireAuth();
-    if (!ok) return;
-    addToCart(plant);
+  const handleAddToCart = (plant: Plant) => {
+    requireAuth(() => {
+      addToCart(plant);
+    });
   };
 
   return (

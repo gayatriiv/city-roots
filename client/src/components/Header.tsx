@@ -1,4 +1,4 @@
-import { ShoppingCart, Search, Menu, Leaf, ChevronDown } from "lucide-react";
+import { ShoppingCart, Search, Menu, Leaf, ChevronDown, User, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -7,10 +7,14 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import { useState } from "react";
 import { useLocation, Link } from "wouter";
 import AnimatedCounter from "@/components/AnimatedCounter";
+import { useAuth } from "@/contexts/AuthContext";
+import { useAuthGuard } from "@/hooks/useAuthGuard";
+import LoginModal from "@/components/auth/LoginModal";
 
 interface HeaderProps {
   cartItems?: number;
@@ -22,6 +26,8 @@ export default function Header({ cartItems = 0, onCartClick, onSearchChange }: H
   const [searchQuery, setSearchQuery] = useState("");
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [location, setLocation] = useLocation();
+  const { user, signOutUser } = useAuth();
+  const { requireAuth, showLoginModal, setShowLoginModal, handleLoginSuccess } = useAuthGuard();
 
   const handleSearchChange = (value: string) => {
     setSearchQuery(value);
@@ -162,6 +168,49 @@ export default function Header({ cartItems = 0, onCartClick, onSearchChange }: H
               )}
             </Button>
 
+            {/* User Profile */}
+            {user ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon" className="relative">
+                    <User className="h-6 w-6" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56">
+                  <div className="flex items-center justify-start gap-2 p-2">
+                    <div className="flex flex-col space-y-1 leading-none">
+                      <p className="font-medium">{user.displayName || user.email}</p>
+                      <p className="w-[200px] truncate text-sm text-muted-foreground">
+                        {user.email}
+                      </p>
+                    </div>
+                  </div>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => setLocation('/cart')}>
+                    <ShoppingCart className="mr-2 h-4 w-4" />
+                    My Cart
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setLocation('/track-order')}>
+                    Track Orders
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={signOutUser}>
+                    <LogOut className="mr-2 h-4 w-4" />
+                    Sign Out
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <Button 
+                variant="ghost" 
+                size="sm"
+                onClick={() => setShowLoginModal(true)}
+                className="text-sm"
+              >
+                Sign In
+              </Button>
+            )}
+
             {/* Mobile Menu Toggle */}
             <Button
               variant="ghost"
@@ -248,6 +297,14 @@ export default function Header({ cartItems = 0, onCartClick, onSearchChange }: H
           </div>
         )}
       </div>
+      
+      <LoginModal
+        isOpen={showLoginModal}
+        onClose={() => setShowLoginModal(false)}
+        onSuccess={() => handleLoginSuccess(() => {
+          console.log('User logged in successfully from header');
+        })}
+      />
     </header>
   );
 }

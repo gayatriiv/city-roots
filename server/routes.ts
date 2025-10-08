@@ -651,6 +651,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const updatedOrder = await storage.updateOrderStatus(order.id, 'paid');
       console.log('Order status updated to paid:', updatedOrder.id);
       
+      // Also update payment status
+      const finalOrder = await storage.updateOrderPayment(order.id, {
+        razorpayPaymentId: razorpay_payment_id,
+        razorpaySignature: razorpay_signature,
+        paymentStatus: 'paid'
+      });
+      console.log('Payment status updated to paid:', finalOrder.id);
+      
       // Create payment record
       await storage.createPayment({
         orderId: updatedOrder.id,
@@ -663,7 +671,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       res.json({
         success: true,
-        orderId: updatedOrder.id,
+        orderId: finalOrder.id,
         message: 'Payment verified successfully'
       });
 

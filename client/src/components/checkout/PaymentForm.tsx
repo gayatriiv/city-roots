@@ -403,8 +403,8 @@ export default function PaymentForm({
           <h4 className="font-medium text-blue-900 mb-2">📞 Need Help?</h4>
           <p className="text-sm text-blue-800">
             If you encounter any payment issues, contact our support team at 
-            <strong> +91 98765 43210</strong> or email us at 
-            <strong> support@verdantcart.com</strong>
+            <strong> +91 12345XXXX</strong> or email us at 
+            <strong> help@cityroots.com</strong>
           </p>
         </div>
 

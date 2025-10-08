@@ -255,14 +255,14 @@ export default function OrderConfirmation({
               <Phone className="h-5 w-5 text-gray-500" />
               <div>
                 <p className="font-medium">Phone Support</p>
-                <p className="text-sm text-gray-600">+91 98765 43210</p>
+                <p className="text-sm text-gray-600">+91 12345XXXX</p>
               </div>
             </div>
             <div className="flex items-center gap-3">
               <Mail className="h-5 w-5 text-gray-500" />
               <div>
                 <p className="font-medium">Email Support</p>
-                <p className="text-sm text-gray-600">support@verdantcart.com</p>
+                <p className="text-sm text-gray-600">help@cityroots.com</p>
               </div>
             </div>
           </div>

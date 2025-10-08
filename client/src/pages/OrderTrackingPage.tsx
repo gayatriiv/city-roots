@@ -269,8 +269,8 @@ export default function OrderTrackingPage() {
                   <p>
                     If you have any questions about your order or need assistance, 
                     please contact our customer support team at{' '}
-                    <strong>+91 98765 43210</strong> or email us at{' '}
-                    <strong>support@verdantcart.com</strong>
+                    <strong>+91 12345XXXX</strong> or email us at{' '}
+                    <strong>help@cityroots.com</strong>
                   </p>
                 </div>
               </CardContent>
