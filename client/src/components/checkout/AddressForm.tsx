@@ -12,7 +12,7 @@ import ScrollToTop from "@/components/ui/ScrollToTop";
 import { useScroll } from "@/hooks/useScroll";
 
 interface AddressFormProps {
-  customerData: CustomerData;
+  customerData?: CustomerData | null;
   onSubmit: (data: AddressData) => void;
 }
 
@@ -27,14 +27,14 @@ const INDIAN_STATES = [
 
 export default function AddressForm({ customerData, onSubmit }: AddressFormProps) {
   const [formData, setFormData] = useState<AddressData>({
-    fullName: customerData.name || '',
+    fullName: customerData?.name || '',
     addressLine1: '',
     addressLine2: '',
     city: '',
     state: '',
     postalCode: '',
     country: 'India',
-    phone: customerData.phone
+    phone: customerData?.phone || ''
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');

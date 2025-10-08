@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -8,6 +8,13 @@ import { Loader2, CreditCard, Shield, CheckCircle, ArrowLeft } from "lucide-reac
 import { CustomerData, AddressData } from "@/pages/CheckoutPage";
 import { useScroll } from "@/hooks/useScroll";
 import { Product } from "@/contexts/CartContext";
+
+// Razorpay types
+declare global {
+  interface Window {
+    Razorpay: any;
+  }
+}
 
 interface PaymentFormProps {
   customerData: CustomerData;
@@ -28,7 +35,21 @@ export default function PaymentForm({
 }: PaymentFormProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [razorpayLoaded, setRazorpayLoaded] = useState(false);
   const { scrollToTop } = useScroll();
+
+  // Load Razorpay script
+  useEffect(() => {
+    const script = document.createElement('script');
+    script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+    script.onload = () => setRazorpayLoaded(true);
+    script.onerror = () => setError('Failed to load payment gateway');
+    document.body.appendChild(script);
+
+    return () => {
+      document.body.removeChild(script);
+    };
+  }, []);
 
   const subtotal = cartItems.reduce((total, item) => total + (item.product.price * item.quantity), 0);
   const tax = subtotal * 0.18;
@@ -50,17 +71,24 @@ export default function PaymentForm({
   };
 
   const handlePayment = async () => {
+    if (!razorpayLoaded || !window.Razorpay) {
+      setError('Payment gateway is not loaded. Please refresh the page.');
+      return;
+    }
+
     setLoading(true);
     setError('');
 
     try {
-      // Create order on server
-      const orderResponse = await fetch('/api/orders', {
+      // Create Razorpay order on server
+      const orderResponse = await fetch('/api/razorpay/create-order', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
+          amount: Math.round(total * 100), // Convert to paise
+          currency: 'INR',
           customerData,
           addressData,
           cartItems,
@@ -72,27 +100,51 @@ export default function PaymentForm({
       });
 
       if (!orderResponse.ok) {
-        throw new Error('Failed to create order');
+        throw new Error('Failed to create payment order');
       }
 
-      const orderData = await orderResponse.json();
-      
-      // For demo purposes, simulate successful payment
-      // In production, this would integrate with Razorpay
-      setTimeout(() => {
-        // Simulate payment processing
-        console.log('Demo payment processing...');
-        
-        // Create mock payment response
-        const mockPaymentResponse = {
-          razorpay_order_id: orderData.order.id,
-          razorpay_payment_id: `pay_${Date.now()}`,
-          razorpay_signature: `mock_signature_${Date.now()}`
-        };
+      const { order, orderData } = await orderResponse.json();
 
-        // Verify payment on server
-        handlePaymentVerification(mockPaymentResponse, orderData);
-      }, 2000);
+      // Razorpay options
+      const options = {
+        key: 'rzp_test_RQwJgLfJAHNwut', // Real Razorpay test key
+        amount: order.amount,
+        currency: order.currency,
+        name: 'City Roots',
+        description: `Order #${orderData.orderNumber}`,
+        order_id: order.id,
+        handler: function (response: any) {
+          // Payment successful
+          handlePaymentVerification(response, orderData);
+        },
+        prefill: {
+          name: customerData.name,
+          email: customerData.email || `${customerData.phone}@example.com`,
+          contact: `+91${customerData.phone}`,
+        },
+        notes: {
+          address: `${addressData.fullName}, ${addressData.addressLine1}, ${addressData.city}, ${addressData.state} ${addressData.postalCode}`,
+          order_number: orderData.orderNumber,
+        },
+        theme: {
+          color: '#059669', // Green theme to match City Roots branding
+        },
+        modal: {
+          ondismiss: function() {
+            setLoading(false);
+          }
+        }
+      };
+
+      // Open Razorpay checkout
+      const razorpay = new window.Razorpay(options);
+      razorpay.on('payment.failed', function (response: any) {
+        console.error('Payment failed:', response.error);
+        setError(`Payment failed: ${response.error.description || 'Unknown error'}`);
+        setLoading(false);
+      });
+      
+      razorpay.open();
 
     } catch (err) {
       console.error('Payment error:', err);
@@ -103,7 +155,14 @@ export default function PaymentForm({
 
   const handlePaymentVerification = async (paymentResponse: any, orderData: any) => {
     try {
-      const verificationResponse = await fetch('/api/orders/verify-payment', {
+        console.log('Payment verification data:', {
+          paymentResponse,
+          orderData,
+          orderNumber: orderData.order.orderNumber,
+          orderId: orderData.order.id
+        });
+
+      const verificationResponse = await fetch('/api/razorpay/verify-payment', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -120,17 +179,21 @@ export default function PaymentForm({
             tax,
             shipping,
             total,
-            orderNumber: orderData.order.orderNumber
+            orderNumber: orderData.order.orderNumber,
+            orderId: orderData.order.id
           }
         }),
       });
 
       const result = await verificationResponse.json();
+      console.log('Payment verification response:', result);
       
       if (result.success) {
+        console.log('Payment successful, redirecting to confirmation');
         onPaymentSuccess(result.orderId);
       } else {
-        setError('Payment verification failed. Please try again.');
+        console.error('Payment verification failed:', result.error);
+        setError(`Payment verification failed: ${result.error || 'Please try again.'}`);
         setLoading(false);
       }
     } catch (err) {
@@ -221,7 +284,7 @@ export default function PaymentForm({
         <CardHeader>
           <CardTitle className="text-lg">Payment Method</CardTitle>
           <CardDescription>
-            Demo mode - Payment simulation for testing
+            Secure payment powered by Razorpay
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -230,21 +293,20 @@ export default function PaymentForm({
               <CreditCard className="h-4 w-4 text-green-600" />
             </div>
             <div className="flex-1">
-              <p className="font-medium">Demo Payment Gateway</p>
-              <p className="text-sm text-green-700">Simulated payment processing</p>
+              <p className="font-medium">Razorpay Payment Gateway</p>
+              <p className="text-sm text-green-700">Secure payment processing</p>
             </div>
-            <Badge className="bg-green-100 text-green-800 border-green-300">Demo Mode</Badge>
+            <Badge className="bg-green-100 text-green-800 border-green-300">Secure</Badge>
           </div>
           
           <div className="flex items-center gap-2 mt-4 text-sm text-green-700">
             <Shield className="h-4 w-4" />
-            <span>This is a demo payment - no real money will be charged</span>
+            <span>Your payment is secured with 256-bit SSL encryption</span>
           </div>
           
           <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
             <p className="text-sm text-blue-800">
-              <strong>Demo Instructions:</strong> Click "Pay Now" to simulate a successful payment. 
-              The payment will be processed automatically after 2 seconds.
+              <strong>Payment Options:</strong> Credit/Debit Cards, UPI, Net Banking, Digital Wallets
             </p>
           </div>
         </CardContent>
@@ -263,11 +325,11 @@ export default function PaymentForm({
         </Button>
         <Button
           onClick={handlePayment}
-          disabled={loading}
+          disabled={loading || !razorpayLoaded}
           className="flex-1"
         >
           {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-          {loading ? 'Processing Payment...' : 'Pay Now (Demo)'}
+          {loading ? 'Processing Payment...' : 'Pay Now'}
         </Button>
       </div>
 
@@ -277,10 +339,10 @@ export default function PaymentForm({
           <div className="flex items-start gap-3">
             <CheckCircle className="h-5 w-5 text-green-600 mt-0.5" />
             <div className="text-sm text-green-800">
-              <p className="font-medium mb-1">Demo Payment System</p>
+              <p className="font-medium mb-1">Secure Payment Gateway</p>
               <p>
-                This is a demonstration payment system. No real money will be charged. 
-                In production, this would integrate with secure payment gateways like Razorpay.
+                Your payment is processed securely through Razorpay. 
+                We never store your payment details on our servers.
               </p>
             </div>
           </div>
@@ -326,10 +388,10 @@ export default function PaymentForm({
         </div>
 
         <div className="bg-yellow-50 border border-yellow-200 p-4 rounded-lg">
-          <h4 className="font-medium text-yellow-900 mb-2">💡 Demo Payment Mode</h4>
+          <h4 className="font-medium text-yellow-900 mb-2">💳 Test Payment Mode</h4>
           <p className="text-sm text-yellow-800">
-            This is a demonstration payment system. No real money will be charged. 
-            Click "Pay Now (Demo)" to simulate a successful payment and proceed to order confirmation.
+            This is a test environment. Use test card numbers for payment testing. 
+            No real money will be charged in test mode.
           </p>
         </div>
 

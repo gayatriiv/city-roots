@@ -71,14 +71,14 @@ export default function Header({ cartItems = 0, onCartClick, onSearchChange }: H
   return (
     <header className="bg-background border-b border-border sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
+        <div className="flex items-center h-16">
           {/* Logo */}
-          <Link href="/" className="flex items-center space-x-2">
+          <Link href="/" className="flex items-center space-x-2 flex-shrink-0">
             <img src="/images/new-logo.png" alt="City Roots" className="h-10 sm:h-12 w-auto" />
           </Link>
 
-          {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center space-x-2" data-testid="desktop-nav">
+          {/* Desktop Navigation - Centered */}
+          <nav className="hidden md:flex items-center justify-center flex-1 space-x-2" data-testid="desktop-nav">
             {mainCategories.map((category) => {
               const slug = category.name.toLowerCase().replace(/\s+/g, '-');
               const isActive = location === `/${slug}`;
@@ -121,7 +121,7 @@ export default function Header({ cartItems = 0, onCartClick, onSearchChange }: H
           </nav>
 
           {/* Search and Actions */}
-          <div className="flex items-center space-x-3">
+          <div className="flex items-center space-x-3 flex-shrink-0">
           {/* Search */}
             <div className="hidden sm:flex items-center relative ml-3 md:ml-4">
               <Search className="absolute left-3 h-4 w-4 text-muted-foreground" />
@@ -145,7 +145,7 @@ export default function Header({ cartItems = 0, onCartClick, onSearchChange }: H
               }}
               data-testid="cart-button"
             >
-              <ShoppingCart className="h-5 w-5" />
+              <ShoppingCart className="h-6 w-6" />
               {cartItems > 0 && (
                 <Badge 
                   className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center text-xs bg-primary text-primary-foreground animate-pulse"

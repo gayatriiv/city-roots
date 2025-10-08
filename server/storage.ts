@@ -84,6 +84,7 @@ export class MemStorage implements IStorage {
   private orders: Map<string, Order>;
   private orderItems: Map<string, OrderItem>;
   private orderTracking: Map<string, OrderTracking>;
+  private payments: Map<string, any>;
 
   constructor() {
     this.users = new Map();
@@ -95,6 +96,7 @@ export class MemStorage implements IStorage {
     this.orders = new Map();
     this.orderItems = new Map();
     this.orderTracking = new Map();
+    this.payments = new Map();
     this.seedData();
   }
 
@@ -555,6 +557,47 @@ export class MemStorage implements IStorage {
     sampleGuides.forEach(guide => {
       this.createGuide(guide);
     });
+  }
+
+  async updateOrderStatus(orderId: string, status: string) {
+    const order = this.orders.get(orderId);
+    if (!order) {
+      throw new Error('Order not found');
+    }
+    
+    const updatedOrder = { ...order, status, updatedAt: new Date() };
+    this.orders.set(orderId, updatedOrder);
+    return updatedOrder;
+  }
+
+  async getOrderByOrderNumber(orderNumber: string) {
+    const orders = Array.from(this.orders.values());
+    return orders.find(order => order.orderNumber === orderNumber);
+  }
+
+  async createPayment(paymentData: {
+    orderId: string;
+    amount: string;
+    currency: string;
+    paymentMethod: string;
+    paymentId: string;
+    status: string;
+  }) {
+    const id = randomUUID();
+    const payment = {
+      id,
+      orderId: paymentData.orderId,
+      amount: paymentData.amount,
+      currency: paymentData.currency,
+      paymentMethod: paymentData.paymentMethod,
+      paymentId: paymentData.paymentId,
+      status: paymentData.status,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+    
+    this.payments.set(id, payment);
+    return payment;
   }
 }
 

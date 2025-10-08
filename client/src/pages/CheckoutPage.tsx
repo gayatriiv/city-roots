@@ -4,16 +4,15 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { ArrowLeft, CheckCircle, CreditCard, MapPin, Phone } from "lucide-react";
+import { ArrowLeft, CheckCircle, CreditCard, MapPin } from "lucide-react";
 import Header from "@/components/Header";
 import { useCart, Product } from "@/contexts/CartContext";
-import OTPVerification from "@/components/checkout/OTPVerification";
 import AddressForm from "@/components/checkout/AddressForm";
 import PaymentForm from "@/components/checkout/PaymentForm";
 import OrderConfirmation from "@/components/checkout/OrderConfirmation";
 import ScrollToTop from "@/components/ui/ScrollToTop";
 
-export type CheckoutStep = 'phone' | 'address' | 'payment' | 'confirmation';
+export type CheckoutStep = 'address' | 'payment' | 'confirmation';
 
 export interface CustomerData {
   phone: string;
@@ -40,7 +39,7 @@ interface CheckoutPageProps {
 export default function CheckoutPage({ onAddToCart }: CheckoutPageProps) {
   const [, setLocation] = useLocation();
   const { cartItems, getTotalItems, getTotalPrice, clearCart } = useCart();
-  const [currentStep, setCurrentStep] = useState<CheckoutStep>('phone');
+  const [currentStep, setCurrentStep] = useState<CheckoutStep>('address');
   const [customerData, setCustomerData] = useState<CustomerData | null>(null);
   const [addressData, setAddressData] = useState<AddressData | null>(null);
   const [orderId, setOrderId] = useState<string | null>(null);
@@ -57,12 +56,16 @@ export default function CheckoutPage({ onAddToCart }: CheckoutPageProps) {
     setLocation('/cart');
   };
 
-  const handlePhoneVerified = (data: CustomerData) => {
-    setCustomerData(data);
-    setCurrentStep('address');
-  };
-
   const handleAddressSubmitted = (data: AddressData) => {
+    // Extract customer data from address form
+    const customerData: CustomerData = {
+      phone: data.phone,
+      name: data.fullName,
+      email: '', // Will be filled in payment form if needed
+      isVerified: true // Skip verification
+    };
+    
+    setCustomerData(customerData);
     setAddressData(data);
     setCurrentStep('payment');
   };
@@ -91,13 +94,12 @@ export default function CheckoutPage({ onAddToCart }: CheckoutPageProps) {
   };
 
   const getStepIndex = (step: CheckoutStep) => {
-    const steps: CheckoutStep[] = ['phone', 'address', 'payment', 'confirmation'];
+    const steps: CheckoutStep[] = ['address', 'payment', 'confirmation'];
     return steps.indexOf(step);
   };
 
   const getStepTitle = (step: CheckoutStep) => {
     switch (step) {
-      case 'phone': return 'Phone Verification';
       case 'address': return 'Delivery Address';
       case 'payment': return 'Payment';
       case 'confirmation': return 'Order Confirmation';
@@ -153,7 +155,7 @@ export default function CheckoutPage({ onAddToCart }: CheckoutPageProps) {
               
               {/* Progress Steps */}
               <div className="hidden sm:flex items-center justify-between mb-8">
-                {(['phone', 'address', 'payment', 'confirmation'] as CheckoutStep[]).map((step, index) => (
+                {(['address', 'payment', 'confirmation'] as CheckoutStep[]).map((step, index) => (
                   <div key={step} className="flex items-center">
                     <div className="flex items-center">
                       {getStepIcon(step, currentStep)}
@@ -161,7 +163,7 @@ export default function CheckoutPage({ onAddToCart }: CheckoutPageProps) {
                         {getStepTitle(step)}
                       </span>
                     </div>
-                    {index < 3 && (
+                    {index < 2 && (
                       <div className="flex-1 h-0.5 bg-gray-300 mx-4" />
                     )}
                   </div>
@@ -171,12 +173,11 @@ export default function CheckoutPage({ onAddToCart }: CheckoutPageProps) {
               {/* Mobile Progress Steps */}
               <div className="sm:hidden mb-6">
                 <div className="flex items-center justify-between">
-                  {(['phone', 'address', 'payment', 'confirmation'] as CheckoutStep[]).map((step, index) => (
+                  {(['address', 'payment', 'confirmation'] as CheckoutStep[]).map((step, index) => (
                     <div key={step} className="flex flex-col items-center">
                       {getStepIcon(step, currentStep)}
                       <span className="text-xs font-medium text-gray-900 mt-1 text-center">
-                        {step === 'phone' ? 'Phone' : 
-                         step === 'address' ? 'Address' : 
+                        {step === 'address' ? 'Address' : 
                          step === 'payment' ? 'Payment' : 'Confirm'}
                       </span>
                     </div>
@@ -189,7 +190,6 @@ export default function CheckoutPage({ onAddToCart }: CheckoutPageProps) {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  {currentStep === 'phone' && <Phone className="h-5 w-5" />}
                   {currentStep === 'address' && <MapPin className="h-5 w-5" />}
                   {currentStep === 'payment' && <CreditCard className="h-5 w-5" />}
                   {currentStep === 'confirmation' && <CheckCircle className="h-5 w-5" />}
@@ -197,16 +197,10 @@ export default function CheckoutPage({ onAddToCart }: CheckoutPageProps) {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                {currentStep === 'phone' && (
-                  <div id="phone-verification" className="scroll-snap-start">
-                    <OTPVerification onVerified={handlePhoneVerified} />
-                  </div>
-                )}
-                
-                {currentStep === 'address' && customerData && (
+                {currentStep === 'address' && (
                   <div id="address-form" className="scroll-snap-start">
                     <AddressForm 
-                      customerData={customerData}
+                      customerData={customerData || { phone: '', name: '', email: '', isVerified: true }}
                       onSubmit={handleAddressSubmitted}
                     />
                   </div>
