@@ -72,10 +72,8 @@ export default function CollectionsSection() {
   ];
 
   const handleCollectionClick = (collectionId: string) => {
-    if (collectionId === 'gift-set') {
-      setLocation('/gifting-sets');
+      setLocation('/collections');
       return;
-    }
     // If you want to do something else on collection click, add it here.
   };
 

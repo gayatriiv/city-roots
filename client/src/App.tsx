@@ -29,7 +29,7 @@ import Hero from "@/components/Hero";
 import CategoriesSection from "@/components/CategoriesSection";
 import CollectionsSection from "@/components/CollectionsSection";
 import GuidesSection from "@/components/GuidesSection";
-import Footer from "@/components/Footer";
+import Footer from "./components/Footer";
 import CartDrawer from "@/components/CartDrawer";
 import ScrollToTop from "@/components/ui/ScrollToTop";
 import { fetchCartItems, addToCart, updateCartItemQuantity, removeFromCart, clearCart, getSessionId, getImageUrl } from "@/lib/api";
@@ -210,22 +210,14 @@ function PlantsPageWrapper() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background flex flex-col">
       <Header 
         cartItems={getTotalItems()}
         onCartClick={() => setLocation('/cart')}
         onSearchChange={(query) => console.log('Search:', query)}
       />
-      <PlantsPage onAddToCart={handleAddToCart} />
-      
-      <LoginModal
-        isOpen={showLoginModal}
-        onClose={() => setShowLoginModal(false)}
-        onSuccess={() => handleLoginSuccess(() => {
-          console.log('User logged in successfully');
-        })}
-      />
-      
+      <PlantsPage />
+      <Footer />
       <ScrollToTop />
     </div>
   );
@@ -236,13 +228,14 @@ function ToolsPageWrapper() {
   const [, setLocation] = useLocation();
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background flex flex-col">
       <Header 
         cartItems={getTotalItems()}
         onCartClick={() => setLocation('/cart')}
         onSearchChange={(query) => console.log('Search:', query)}
       />
       <ToolsPage />
+      <Footer />
       <ScrollToTop />
     </div>
   );
@@ -250,8 +243,9 @@ function ToolsPageWrapper() {
 
 function SeedsPageWrapper() {
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background flex flex-col">
       <SeedsPage />
+      <Footer />
       <ScrollToTop />
     </div>
   );
@@ -278,13 +272,14 @@ function GuidesPageWrapper() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background flex flex-col">
       <Header 
         cartItems={0}
         onCartClick={() => console.log('Cart clicked')}
         onSearchChange={(query) => console.log('Search:', query)}
       />
       <GuidesPage onGuideClick={handleGuideClick} />
+      <Footer />
       <ScrollToTop />
     </div>
   );
@@ -456,8 +451,9 @@ function Router() {
 
 function CollectionsPageWrapper() {
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background flex flex-col">
       <CollectionsPage />
+      <Footer />
       <ScrollToTop />
     </div>
   );
