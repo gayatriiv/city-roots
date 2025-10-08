@@ -19,7 +19,7 @@ function initializeFirebaseAdmin() {
       // Check for Vercel environment variables first
       if (process.env.FIREBASE_PRIVATE_KEY && process.env.FIREBASE_CLIENT_EMAIL) {
         console.log('🔑 Using Vercel environment variables for Firebase');
-        const serviceAccount = {
+        const serviceAccount: any = {
           type: "service_account",
           project_id: "city-roots",
           private_key_id: process.env.FIREBASE_PRIVATE_KEY_ID || "",
