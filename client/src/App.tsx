@@ -22,7 +22,6 @@ import ToolsPage from "@/pages/ToolsPage";
 import SeedsPage from "@/pages/SeedsPage";
 import GuidesPage from "@/pages/GuidesPage";
 import GuideDetailPage from "@/pages/GuideDetailPage";
-import GiftingSetsPage from "@/pages/GiftingSetsPage";
 import GiftDetailPage from "@/pages/GiftDetailPage";
 import SeedDetailPage from "@/pages/SeedDetailPage";
 import Header from "@/components/Header";
@@ -34,6 +33,7 @@ import Footer from "@/components/Footer";
 import CartDrawer from "@/components/CartDrawer";
 import ScrollToTop from "@/components/ui/ScrollToTop";
 import { fetchCartItems, addToCart, updateCartItemQuantity, removeFromCart, clearCart, getSessionId, getImageUrl } from "@/lib/api";
+import CollectionsPage from "./pages/CollectionsPage";
 
 interface CartItem {
   id: string;
@@ -150,9 +150,7 @@ function Home() {
           onCategoryClick={(categoryId) => console.log('Category:', categoryId)} //todo: remove mock functionality
         />
         
-        <CollectionsSection
-          onCollectionClick={(collectionId) => console.log('Collection:', collectionId)} //todo: remove mock functionality
-        />
+        <CollectionsSection />
         
         <GuidesSection
           onGuideClick={(guideId) => console.log('Guide:', guideId)} //todo: remove mock functionality
@@ -259,14 +257,6 @@ function SeedsPageWrapper() {
   );
 }
 
-function GiftingSetsPageWrapper() {
-  return (
-    <div className="min-h-screen bg-background">
-      <GiftingSetsPage />
-      <ScrollToTop />
-    </div>
-  );
-}
 
 function AboutPageWrapper() {
   return (
@@ -454,13 +444,22 @@ function Router() {
       <Route path="/about" component={AboutPageWrapper} />
       <Route path="/tools" component={ToolsPageWrapper} />
       <Route path="/seeds" component={SeedsPageWrapper} />
-      <Route path="/gifting-sets" component={GiftingSetsPageWrapper} />
       <Route path="/guides" component={GuidesPageWrapper} />
       <Route path="/guide/:id" component={GuideDetailPage} />
       <Route path="/gift/:id" component={GiftDetailPage} />
       <Route path="/seed/:id" component={SeedDetailPage} />
+      <Route path="/collections" component={CollectionsPageWrapper} />
       <Route component={NotFound} />
     </Switch>
+  );
+}
+
+function CollectionsPageWrapper() {
+  return (
+    <div className="min-h-screen bg-background">
+      <CollectionsPage />
+      <ScrollToTop />
+    </div>
   );
 }
 
