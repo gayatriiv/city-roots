@@ -1,4 +1,4 @@
-import nodemailer from 'nodemailer';
+import * as nodemailer from 'nodemailer';
 import { emailConfig, EMAIL_PROVIDER, emailSettings } from '../config/emailConfig';
 
 interface OrderItem {
@@ -68,7 +68,7 @@ export const sendOrderConfirmationEmail = async (order: Order, orderData: any) =
     // Generate HTML email template
     const htmlContent = generateOrderConfirmationHTML({
       orderNumber: order.orderNumber,
-      orderDate: order.createdAt.toLocaleDateString('en-IN'),
+      orderDate: order.createdAt ? order.createdAt.toLocaleDateString('en-IN') : new Date().toLocaleDateString('en-IN'),
       customerName: customerData.name,
       customerEmail: customerData.email,
       customerPhone: customerData.phone,
@@ -288,10 +288,10 @@ const generateOrderConfirmationHTML = (data: {
                     <tbody>
                         ${data.items.map(item => `
                             <tr>
-                                <td>${item.product.name}</td>
-                                <td>${item.quantity}</td>
-                                <td>₹${item.product.price.toFixed(2)}</td>
-                                <td>₹${(item.product.price * item.quantity).toFixed(2)}</td>
+                                <td>${item.product?.name || 'Product Name Not Available'}</td>
+                                <td>${item.quantity || 1}</td>
+                                <td>₹${(item.product?.price || 0).toFixed(2)}</td>
+                                <td>₹${((item.product?.price || 0) * (item.quantity || 1)).toFixed(2)}</td>
                             </tr>
                         `).join('')}
                     </tbody>

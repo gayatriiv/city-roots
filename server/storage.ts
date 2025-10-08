@@ -606,4 +606,33 @@ export class MemStorage implements IStorage {
   }
 }
 
-export const storage = new MemStorage();
+import { FirebaseStorage } from "./storage/firebaseStorage.js";
+import { adminDb } from "./config/firebaseAdmin.js";
+
+// Initialize storage - try Firebase first, fallback to in-memory
+let storage: any;
+
+function initializeStorage() {
+  if (adminDb) {
+    try {
+      storage = new FirebaseStorage();
+      console.log('✅ Using Firebase Firestore storage');
+      // Seed data if needed - this will be called when server starts
+      storage.seedData().catch(console.error);
+      return true;
+    } catch (error: any) {
+      console.warn('⚠️ Firebase storage failed, falling back to in-memory storage:', error.message);
+      storage = new MemStorage();
+      return false;
+    }
+  } else {
+    console.log('📦 Using in-memory storage (Firebase not configured)');
+    storage = new MemStorage();
+    return false;
+  }
+}
+
+// Initialize immediately
+initializeStorage();
+
+export { storage };

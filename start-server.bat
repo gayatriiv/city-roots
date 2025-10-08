@@ -1,0 +1,6 @@
+@echo off
+echo Setting Firebase credentials...
+set GOOGLE_APPLICATION_CREDENTIALS=%~dp0city-roots-firebase-adminsdk-fbsvc-4497871cfa.json
+
+echo Starting development server...
+npm run dev

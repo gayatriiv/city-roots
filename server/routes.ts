@@ -1,14 +1,15 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import Razorpay from "razorpay";
-import crypto from "crypto";
+// Razorpay will be imported dynamically
+import * as crypto from "crypto";
 import { insertProductSchema, insertCartItemSchema, insertCustomerSchema, insertAddressSchema, insertOrderSchema, insertOrderItemSchema, insertOrderTrackingSchema } from "@shared/schema";
 import { z } from "zod";
 import { sendOrderConfirmationEmail } from "./services/emailService";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Initialize Razorpay
+  const Razorpay = (await import("razorpay")).default;
   const razorpay = new Razorpay({
     key_id: 'rzp_test_RQwJgLfJAHNwut',
     key_secret: '9acTi4K5w3mr3bWLmTvimF91'
@@ -550,8 +551,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         await storage.createOrderItem({
           orderId: order.id,
           productId: item.product.id,
+          productName: item.product.name || 'Unknown Product',
+          productImage: item.product.image || '/images/default-product.jpg',
+          productPrice: item.product.price.toString(),
           quantity: item.quantity,
-          price: item.product.price.toString()
+          totalPrice: (item.product.price * item.quantity).toString()
         });
       }
 
@@ -620,7 +624,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         
         if (orderData?.orderId) {
           console.log('Trying to find order by ID:', orderData.orderId);
-          order = (storage as any).orders.get(orderData.orderId);
+          order = await storage.getOrderById(orderData.orderId);
           if (order) {
             console.log('Order found by ID:', { id: order.id, orderNumber: order.orderNumber, status: order.status });
           }
@@ -628,17 +632,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         
         if (!order && orderData?.orderNumber) {
           console.log('Trying to find order by order number:', orderData.orderNumber);
-          order = await storage.getOrderByOrderNumber(orderData.orderNumber);
+          order = await storage.getOrderByNumber(orderData.orderNumber);
           if (order) {
             console.log('Order found by order number:', { id: order.id, orderNumber: order.orderNumber, status: order.status });
           }
         }
 
         if (!order) {
-          // Debug: List all available orders
-          const allOrders = Array.from((storage as any).orders.values());
-          console.log('All orders in storage:', allOrders.map(o => ({ id: o.id, orderNumber: o.orderNumber, status: o.status })));
-          
           console.error('Order not found with ID:', orderData?.orderId, 'or order number:', orderData?.orderNumber);
           return res.status(404).json({
             success: false,
@@ -648,17 +648,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       console.log('Order found:', { id: order.id, orderNumber: order.orderNumber, status: order.status });
 
-      // Update order status to paid
-      const updatedOrder = await storage.updateOrderStatus(order.id, 'paid');
-      console.log('Order status updated to paid:', updatedOrder.id);
-      
-      // Also update payment status
-      const finalOrder = await storage.updateOrderPayment(order.id, {
+      // Update order payment status
+      const updatedOrder = await storage.updateOrderPayment(order.id, {
         razorpayPaymentId: razorpay_payment_id,
         razorpaySignature: razorpay_signature,
         paymentStatus: 'paid'
       });
-      console.log('Payment status updated to paid:', finalOrder.id);
+      console.log('Payment status updated to paid:', updatedOrder.id);
 
       // Send order confirmation email
       try {
@@ -696,14 +692,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
             cartItems: orderItems.map(item => ({
               product: {
                 id: item.productId,
-                name: item.productName,
-                price: parseFloat(item.productPrice)
+                name: item.productName || 'Unknown Product',
+                price: parseFloat(item.productPrice) || 0
               },
-              quantity: item.quantity
+              quantity: item.quantity || 1
             }))
           };
           
-          await sendOrderConfirmationEmail(finalOrder, emailData);
+          await sendOrderConfirmationEmail(updatedOrder, emailData);
           console.log('Order confirmation email sent successfully');
         } else {
           console.log('Customer or address data not found, using fallback email');
@@ -726,7 +722,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             cartItems: []
           };
           
-          await sendOrderConfirmationEmail(finalOrder, fallbackEmailData);
+          await sendOrderConfirmationEmail(updatedOrder, fallbackEmailData);
           console.log('Fallback email sent successfully');
         }
       } catch (emailError) {
@@ -746,7 +742,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       res.json({
         success: true,
-        orderId: finalOrder.id,
+        orderId: updatedOrder.id,
         message: 'Payment verified successfully'
       });
 
