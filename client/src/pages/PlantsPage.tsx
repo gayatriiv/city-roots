@@ -543,14 +543,15 @@ interface PlantsPageProps {
   onAddToCart: (productId: string) => void;
 }
 
-export default function PlantsPage({ onAddToCart }: PlantsPageProps) {
+export default function PlantsPage() {
+  const { addToCart, isInCart, getTotalItems } = useCart();
+  const [isCartOpen, setIsCartOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState("All Plants");
   const [sortBy, setSortBy] = useState("featured");
   const [searchQuery, setSearchQuery] = useState("");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [selectedPlant, setSelectedPlant] = useState<Plant | null>(null);
   const [location, setLocation] = useLocation();
-  const { addToCart, isInCart, getTotalItems } = useCart();
 
   console.log('PlantsPage rendered with selectedCategory:', selectedCategory);
 
@@ -576,7 +577,6 @@ export default function PlantsPage({ onAddToCart }: PlantsPageProps) {
   const handleAddToCart = (plant: Plant) => {
     console.log('PlantsPage: Adding plant to cart:', plant.name, plant.id);
     addToCart(plant);
-    onAddToCart(plant.id);
   };
 
   // Filter and sort plants
@@ -656,7 +656,7 @@ export default function PlantsPage({ onAddToCart }: PlantsPageProps) {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="flex flex-col min-h-screen bg-background">
       {/* Header Section */}
       <div className="bg-white border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -1091,7 +1091,7 @@ export default function PlantsPage({ onAddToCart }: PlantsPageProps) {
                 <Button 
                   className="flex-1"
                   onClick={() => {
-                    onAddToCart(selectedPlant.id);
+                    addToCart(selectedPlant);
                     setSelectedPlant(null);
                   }}
                   disabled={!selectedPlant.inStock}

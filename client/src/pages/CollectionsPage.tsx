@@ -1,11 +1,12 @@
-import Header from "@/components/Header";
-import { useCart } from "@/contexts/CartContext";
-import { Card, CardContent } from "@/components/ui/card";
+import { useLocation } from "wouter";
+import { useCart } from "../contexts/CartContext";
+import Header from "../components/Header";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Card, CardContent } from "@/components/ui/card";
 import { Search, Grid, List, ShoppingCart, Eye, Heart, Star } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useAuthGuard } from "@/hooks/useAuthGuard";
@@ -27,8 +28,9 @@ interface GiftBundle {
   tags: string[];
 }
 
-export default function GiftingSetsPage() {
-  const { getTotalItems, addToCart, isInCart } = useCart();
+export default function CollectionsPage() {
+  const { addToCart, isInCart, cartItems } = useCart();
+  const [, setLocation] = useLocation();
   const { requireAuth, showLoginModal, setShowLoginModal, handleLoginSuccess } = useAuthGuard();
 
   const giftBundles: GiftBundle[] = [
@@ -167,38 +169,14 @@ export default function GiftingSetsPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <Header cartItems={getTotalItems()} />
-
-      {/* Page header */}
-      <div className="bg-white border-b">
+      <Header 
+        cartItems={cartItems ? cartItems.length : 0}
+        onCartClick={() => setLocation('/cart')}
+        onSearchChange={(query) => console.log('Search:', query)}
+      />
+      <main>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div>
-          <h1 className="text-3xl font-bold text-gray-900">Gifting Sets</h1>
-          <p className="text-gray-600 mt-1">Curated gift bundles ideal for any gardener.</p>
-            </div>
-            <div className="flex items-center gap-2">
-              <Button
-                variant={viewMode === "grid" ? "default" : "outline"}
-                size="sm"
-                onClick={() => setViewMode("grid")}
-              >
-                <Grid className="h-4 w-4" />
-              </Button>
-              <Button
-                variant={viewMode === "list" ? "default" : "outline"}
-                size="sm"
-                onClick={() => setViewMode("list")}
-              >
-                <List className="h-4 w-4" />
-              </Button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <section className="py-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <h1 className="text-3xl font-bold mb-6">Collections</h1>
           {/* Controls */}
           <div className="flex flex-col sm:flex-row gap-4 mb-6">
             <div className="relative flex-1">
@@ -292,6 +270,11 @@ export default function GiftingSetsPage() {
                                 price: bundle.price,
                                 image: bundle.image,
                                 category: "Gifting Sets",
+                                description: bundle.description,
+                                rating: bundle.rating,
+                                reviews: bundle.reviews,
+                                inStock: bundle.inStock,
+                                tags: bundle.tags,
                               });
                             });
                           }}
@@ -338,12 +321,17 @@ export default function GiftingSetsPage() {
                         </Button>
                         <Button size="sm" onClick={() => {
                           requireAuth(() => {
-                            addToCart({ 
-                              id: bundle.id, 
-                              name: bundle.name, 
-                              price: bundle.price, 
-                              image: bundle.image, 
-                              category: "Gifting Sets" 
+                            addToCart({
+                              id: bundle.id,
+                              name: bundle.name,
+                              price: bundle.price,
+                              image: bundle.image,
+                              category: "Gifting Sets",
+                              description: bundle.description,
+                              rating: bundle.rating,
+                              reviews: bundle.reviews,
+                              inStock: bundle.inStock,
+                              tags: bundle.tags,
                             });
                           });
                         }}>
@@ -358,72 +346,7 @@ export default function GiftingSetsPage() {
             ))}
           </div>
         </div>
-      </section>
-
-      {/* Details Modal */}
-      {selectedBundle && (
-        <Dialog open={!!selectedBundle} onOpenChange={() => setSelectedBundle(null)}>
-          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle className="text-2xl">{selectedBundle.name}</DialogTitle>
-            </DialogHeader>
-            <div className="space-y-6">
-              <div className="relative aspect-square overflow-hidden rounded-lg">
-                <img src={selectedBundle.image} alt={selectedBundle.name} className="w-full h-full object-cover" />
-                {selectedBundle.originalPrice && (
-                  <Badge className="absolute top-2 left-2 bg-red-500">
-                    {Math.round((1 - selectedBundle.price / selectedBundle.originalPrice) * 100)}% OFF
-                  </Badge>
-                )}
-              </div>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <span className="text-3xl font-bold text-primary">{formatPrice(selectedBundle.price)}</span>
-                  {selectedBundle.originalPrice && (
-                    <span className="text-lg text-gray-500 line-through">{formatPrice(selectedBundle.originalPrice)}</span>
-                  )}
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="flex items-center">{renderStars(selectedBundle.rating)}</div>
-                  <span className="text-sm text-gray-500">({selectedBundle.reviews} reviews)</span>
-                </div>
-              </div>
-              <div>
-                <h4 className="font-semibold text-lg mb-2">Description</h4>
-                <p className="text-gray-600">{selectedBundle.description}</p>
-              </div>
-              <div className="flex gap-3 pt-4 border-t">
-                <Button
-                  className="flex-1"
-                  onClick={() => {
-                    requireAuth(() => {
-                      addToCart({ id: selectedBundle.id, name: selectedBundle.name, price: selectedBundle.price, image: selectedBundle.image, category: "Gifting Sets" });
-                      setSelectedBundle(null);
-                    });
-                  }}
-                  disabled={!selectedBundle.inStock || isInCart(selectedBundle.id)}
-                  variant={isInCart(selectedBundle.id) ? "secondary" : "default"}
-                >
-                  <ShoppingCart className="h-4 w-4 mr-2" />
-                  {isInCart(selectedBundle.id) ? "Added" : "Add to Cart"}
-                </Button>
-                <Button variant="outline">
-                  <Heart className="h-4 w-4 mr-2" />
-                  Add to Wishlist
-                </Button>
-              </div>
-            </div>
-          </DialogContent>
-        </Dialog>
-      )}
-      
-      <LoginModal
-        isOpen={showLoginModal}
-        onClose={() => setShowLoginModal(false)}
-        onSuccess={() => handleLoginSuccess(() => {
-          console.log('User logged in successfully from gifting sets page');
-        })}
-      />
+      </main>
     </div>
   );
 }
