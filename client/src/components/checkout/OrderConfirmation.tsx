@@ -139,6 +139,14 @@ export default function OrderConfirmation({
         <Button
           variant="outline"
           size="sm"
+          onClick={() => scrollToElement('order-items')}
+          className="text-xs"
+        >
+          Order Items
+        </Button>
+        <Button
+          variant="outline"
+          size="sm"
           onClick={() => scrollToElement('delivery-info')}
           className="text-xs"
         >
@@ -197,6 +205,77 @@ export default function OrderConfirmation({
                 <p className="font-medium text-gray-600">Shipped</p>
                 <p className="text-sm text-gray-500">Your order will be shipped soon</p>
               </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Order Items */}
+      <Card id="order-items" className="scroll-snap-start">
+        <CardHeader>
+          <CardTitle className="text-lg flex items-center gap-2">
+            <Package className="h-5 w-5 text-green-600" />
+            Order Items
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="border-b">
+                  <th className="text-left py-3 px-4 font-medium text-gray-900">Product</th>
+                  <th className="text-center py-3 px-4 font-medium text-gray-900">Quantity</th>
+                  <th className="text-right py-3 px-4 font-medium text-gray-900">Price</th>
+                  <th className="text-right py-3 px-4 font-medium text-gray-900">Total</th>
+                </tr>
+              </thead>
+              <tbody>
+                {orderData.cartItems.map((item, index) => (
+                  <tr key={item.product.id} className={index < orderData.cartItems.length - 1 ? "border-b" : ""}>
+                    <td className="py-3 px-4">
+                      <div className="font-medium text-gray-900">{item.product.name || 'Unknown Product'}</div>
+                    </td>
+                    <td className="py-3 px-4 text-center">
+                      <span className="bg-gray-100 text-gray-800 px-2 py-1 rounded-full text-sm font-medium">
+                        {item.quantity || 1}
+                      </span>
+                    </td>
+                    <td className="py-3 px-4 text-right">
+                      <span className="text-gray-900">
+                        {item.product.price ? `₹${Number(item.product.price).toFixed(2)}` : '₹0.00'}
+                      </span>
+                    </td>
+                    <td className="py-3 px-4 text-right">
+                      <span className="font-semibold text-gray-900">
+                        {item.product.price && item.quantity ? `₹${(Number(item.product.price) * item.quantity).toFixed(2)}` : '₹0.00'}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          
+          <Separator className="my-4" />
+          
+          {/* Order Summary */}
+          <div className="space-y-2">
+            <div className="flex justify-between text-sm">
+              <span>Subtotal</span>
+              <span>₹{orderData.subtotal ? Number(orderData.subtotal).toFixed(2) : '0.00'}</span>
+            </div>
+            <div className="flex justify-between text-sm">
+              <span>Tax (18%)</span>
+              <span>₹{orderData.tax ? Number(orderData.tax).toFixed(2) : '0.00'}</span>
+            </div>
+            <div className="flex justify-between text-sm">
+              <span>Shipping</span>
+              <span className="text-green-600">Free</span>
+            </div>
+            <Separator />
+            <div className="flex justify-between text-lg font-semibold">
+              <span>Total</span>
+              <span>₹{orderData.total ? Number(orderData.total).toFixed(2) : '0.00'}</span>
             </div>
           </div>
         </CardContent>
