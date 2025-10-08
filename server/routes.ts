@@ -5,6 +5,7 @@ import Razorpay from "razorpay";
 import crypto from "crypto";
 import { insertProductSchema, insertCartItemSchema, insertCustomerSchema, insertAddressSchema, insertOrderSchema, insertOrderItemSchema, insertOrderTrackingSchema } from "@shared/schema";
 import { z } from "zod";
+import { sendOrderConfirmationEmail } from "./services/emailService";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Initialize Razorpay
@@ -658,6 +659,80 @@ export async function registerRoutes(app: Express): Promise<Server> {
         paymentStatus: 'paid'
       });
       console.log('Payment status updated to paid:', finalOrder.id);
+
+      // Send order confirmation email
+      try {
+        // Get customer and address data for email
+        const customer = await storage.getCustomer(order.customerId);
+        const address = await storage.getAddress(order.shippingAddressId);
+        const orderItems = await storage.getOrderItems(order.id);
+        
+        // Debug logging
+        console.log('Customer data:', customer);
+        console.log('Address data:', address);
+        console.log('Order items:', orderItems);
+        
+        if (customer && address) {
+          // Use customer email or fallback to your email for testing
+          const emailToUse = customer.email || 'gayatriv1717@gmail.com';
+          console.log('Using email:', emailToUse);
+          
+          const emailData = {
+            ...orderData,
+            customerData: {
+              name: customer.name,
+              email: emailToUse,
+              phone: customer.phone
+            },
+            addressData: {
+              fullName: address.fullName,
+              addressLine1: address.addressLine1,
+              addressLine2: address.addressLine2,
+              city: address.city,
+              state: address.state,
+              postalCode: address.postalCode,
+              country: address.country
+            },
+            cartItems: orderItems.map(item => ({
+              product: {
+                id: item.productId,
+                name: item.productName,
+                price: parseFloat(item.productPrice)
+              },
+              quantity: item.quantity
+            }))
+          };
+          
+          await sendOrderConfirmationEmail(finalOrder, emailData);
+          console.log('Order confirmation email sent successfully');
+        } else {
+          console.log('Customer or address data not found, using fallback email');
+          // Fallback: send email to your address with basic order info
+          const fallbackEmailData = {
+            ...orderData,
+            customerData: {
+              name: 'Customer',
+              email: 'gayatriv1717@gmail.com',
+              phone: 'N/A'
+            },
+            addressData: {
+              fullName: 'Customer',
+              addressLine1: 'Address not available',
+              city: 'City',
+              state: 'State',
+              postalCode: '000000',
+              country: 'India'
+            },
+            cartItems: []
+          };
+          
+          await sendOrderConfirmationEmail(finalOrder, fallbackEmailData);
+          console.log('Fallback email sent successfully');
+        }
+      } catch (emailError) {
+        console.error('Failed to send order confirmation email:', emailError);
+        // Don't fail the payment verification if email fails
+      }
       
       // Create payment record
       await storage.createPayment({

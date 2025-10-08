@@ -58,6 +58,7 @@ export interface IStorage {
 
   // Address methods
   createAddress(address: InsertAddress): Promise<Address>;
+  getAddress(id: string): Promise<Address | undefined>;
 
   // Order methods
   createOrder(order: InsertOrder): Promise<Order>;
@@ -343,6 +344,10 @@ export class MemStorage implements IStorage {
     };
     this.addresses.set(id, address);
     return address;
+  }
+
+  async getAddress(id: string): Promise<Address | undefined> {
+    return this.addresses.get(id);
   }
 
   // Order methods

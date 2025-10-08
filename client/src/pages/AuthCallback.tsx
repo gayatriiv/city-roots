@@ -26,9 +26,9 @@ export default function AuthCallback() {
         
         setStatus('success');
         
-        // Redirect to cart after successful verification
+        // Redirect to home page after successful verification
         setTimeout(() => {
-          setLocation('/cart');
+          setLocation('/');
         }, 2000);
 
       } catch (err: any) {
@@ -67,7 +67,7 @@ export default function AuthCallback() {
             </div>
             <h2 className="text-xl font-semibold text-gray-900 mb-2">Email Verified!</h2>
             <p className="text-gray-600 mb-4">Your email has been successfully verified.</p>
-            <p className="text-sm text-gray-500">Redirecting to cart...</p>
+            <p className="text-sm text-gray-500">Redirecting to home...</p>
           </div>
         </div>
       </div>
