@@ -65,6 +65,7 @@ export default function OrderTrackingPage() {
   };
 
   const getStatusIcon = (status: string) => {
+    if (!status) return <Clock className="h-5 w-5 text-gray-600" />;
     switch (status.toLowerCase()) {
       case 'order_placed':
         return <Package className="h-5 w-5 text-blue-600" />;
@@ -82,6 +83,7 @@ export default function OrderTrackingPage() {
   };
 
   const getStatusColor = (status: string) => {
+    if (!status) return 'bg-gray-100 text-gray-800';
     switch (status.toLowerCase()) {
       case 'order_placed':
         return 'bg-blue-100 text-blue-800';
@@ -197,13 +199,13 @@ export default function OrderTrackingPage() {
                   <div>
                     <p className="text-sm text-gray-600">Order Status</p>
                     <Badge className={getStatusColor(trackingData.order.status)}>
-                      {trackingData.order.status.replace('_', ' ').toUpperCase()}
+                      {trackingData.order.status ? trackingData.order.status.replace('_', ' ').toUpperCase() : 'UNKNOWN'}
                     </Badge>
                   </div>
                   <div>
                     <p className="text-sm text-gray-600">Payment Status</p>
                     <Badge className={trackingData.order.paymentStatus === 'paid' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}>
-                      {trackingData.order.paymentStatus.toUpperCase()}
+                      {trackingData.order.paymentStatus ? trackingData.order.paymentStatus.toUpperCase() : 'UNKNOWN'}
                     </Badge>
                   </div>
                   <div className="md:col-span-2">
@@ -241,7 +243,7 @@ export default function OrderTrackingPage() {
                             {entry.message}
                           </h4>
                           <Badge className={getStatusColor(entry.status)}>
-                            {entry.status.replace('_', ' ').toUpperCase()}
+                            {entry.status ? entry.status.replace('_', ' ').toUpperCase() : 'UNKNOWN'}
                           </Badge>
                         </div>
                         

@@ -11,8 +11,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Initialize Razorpay
   const Razorpay = (await import("razorpay")).default;
   const razorpay = new Razorpay({
-    key_id: 'rzp_test_RQwJgLfJAHNwut',
-    key_secret: '9acTi4K5w3mr3bWLmTvimF91'
+    key_id: process.env.RAZORPAY_KEY_ID || 'rzp_test_RQwJgLfJAHNwut',
+    key_secret: process.env.RAZORPAY_KEY_SECRET || ''
   });
 
   // Product routes
@@ -309,6 +309,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
           email: customerData.email || '',
           isVerified: true
         });
+      } else {
+        // Update existing customer's email if provided
+        if (customerData.email && customerData.email !== customer.email) {
+          customer = await storage.verifyCustomer(customerData.phone, {
+            name: customerData.name,
+            email: customerData.email
+          });
+        }
       }
 
       // Create address
@@ -669,8 +677,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         console.log('Order items:', orderItems);
         
         if (customer && address) {
-          // Use customer email or fallback to your email for testing
-          const emailToUse = customer.email || 'gayatriv1717@gmail.com';
+          // Use customer email or fallback to order data email
+          const emailToUse = customer.email || orderData.customerData?.email || 'gayatriv1717@gmail.com';
           console.log('Using email:', emailToUse);
           
           const emailData = {

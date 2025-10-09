@@ -1,12 +1,16 @@
+import { config } from 'dotenv';
+
+// Load environment variables
+config();
+
 // Email configuration
 export const emailConfig = {
   // Option 1: Gmail (requires app password)
   gmail: {
     service: 'gmail',
     auth: {
-      user: process.env.EMAIL_USER || 'gayatriv1717@gmail.com', // Replace with your Gmail
-      pass: process.env.EMAIL_PASS || 'zrsr txmg ppxr uton'
-      // Replace with your 16-char app password
+      user: process.env.EMAIL_USER || '', // Set EMAIL_USER in environment
+      pass: process.env.EMAIL_PASS || '' // Set EMAIL_PASS in environment
     }
   },
 
@@ -38,8 +42,8 @@ export const EMAIL_PROVIDER = process.env.EMAIL_PROVIDER || 'gmail';
 
 // Email settings
 export const emailSettings = {
-  from: `"City Roots" <noreply@cityroots.com>`,
-  replyTo: 'help@cityroots.com',
-  supportEmail: 'help@cityroots.com',
+  from: `"City Roots" <${process.env.EMAIL_USER || 'noreply@cityroots.com'}>`,
+  replyTo: process.env.EMAIL_USER || 'help@cityroots.com',
+  supportEmail: process.env.EMAIL_USER || 'help@cityroots.com',
   supportPhone: '+91 12345XXXX'
 };

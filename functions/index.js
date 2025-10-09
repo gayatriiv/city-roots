@@ -9,8 +9,8 @@ admin.initializeApp();
 const emailConfig = {
   service: 'gmail',
   auth: {
-    user: 'your-email@gmail.com', // Replace with your email
-    pass: 'your-app-password'     // Replace with your app password
+    user: process.env.EMAIL_USER || '', // Set EMAIL_USER in environment
+    pass: process.env.EMAIL_PASS || ''  // Set EMAIL_PASS in environment
   }
 };
 

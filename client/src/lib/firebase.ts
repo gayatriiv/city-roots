@@ -8,13 +8,13 @@ import { getAuth, RecaptchaVerifier } from "firebase/auth";
 // Your web app's Firebase configuration
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
-  apiKey: "AIzaSyCEGrY5w8nh8vSqcIVFlBucJZBsw_m3_IA",
-  authDomain: "city-roots.firebaseapp.com",
-  projectId: "city-roots",
-  storageBucket: "city-roots.firebasestorage.app",
-  messagingSenderId: "11763980395",
-  appId: "1:11763980395:web:5d3770f1d9eb20c517b92e",
-  measurementId: "G-SSS7TGZZ4B"
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY || "AIzaSyCEGrY5w8nh8vSqcIVFlBucJZBsw_m3_IA",
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || "city-roots.firebaseapp.com",
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || "city-roots",
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || "city-roots.firebasestorage.app",
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || "11763980395",
+  appId: import.meta.env.VITE_FIREBASE_APP_ID || "1:11763980395:web:5d3770f1d9eb20c517b92e",
+  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID || "G-SSS7TGZZ4B"
 };
 
 // Initialize Firebase

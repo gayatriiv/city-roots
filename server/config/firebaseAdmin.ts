@@ -39,7 +39,7 @@ function initializeFirebaseAdmin() {
       } else {
         // Try to use service account key file (for local development)
         const serviceAccountPath = process.env.GOOGLE_APPLICATION_CREDENTIALS;
-        const defaultKeyPath = path.join(process.cwd(), 'city-roots-firebase-adminsdk-fbsvc-4497871cfa.json');
+        const defaultKeyPath = path.join(process.cwd(), 'city-roots-firebase-adminsdk-fbsvc-6c6d0c555e.json');
         
         if (serviceAccountPath) {
           console.log('🔑 Using service account key file:', serviceAccountPath);
