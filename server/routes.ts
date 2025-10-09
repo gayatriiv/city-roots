@@ -689,7 +689,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               postalCode: address.postalCode,
               country: address.country
             },
-            cartItems: orderItems.map(item => ({
+            cartItems: orderItems.map((item: any) => ({
               product: {
                 id: item.productId,
                 name: item.productName || 'Unknown Product',
@@ -760,7 +760,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const allOrders = Array.from((storage as any).orders.values());
       res.json({
-        orders: allOrders.map(o => ({ 
+        orders: allOrders.map((o: any) => ({ 
           id: o.id, 
           orderNumber: o.orderNumber, 
           status: o.status,

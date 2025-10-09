@@ -105,7 +105,12 @@ export class FirebaseStorage implements IStorage {
 
   async createProduct(insertProduct: InsertProduct): Promise<Product> {
     const id = randomUUID();
-    const product: Product = { ...insertProduct, id };
+    const product: Product = { 
+      ...insertProduct, 
+      id,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
     await this.db!.collection('products').doc(id).set(this.cleanDataForFirestore(product));
     return product;
   }
@@ -255,7 +260,12 @@ export class FirebaseStorage implements IStorage {
 
   async createGuide(insertGuide: InsertGuide): Promise<Guide> {
     const id = randomUUID();
-    const guide: Guide = { ...insertGuide, id };
+    const guide: Guide = { 
+      ...insertGuide, 
+      id,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
     await this.db!.collection('guides').doc(id).set(this.cleanDataForFirestore(guide));
     return guide;
   }
@@ -287,7 +297,14 @@ export class FirebaseStorage implements IStorage {
 
   async createCustomer(insertCustomer: InsertCustomer): Promise<Customer> {
     const id = randomUUID();
-    const customer: Customer = { ...insertCustomer, id };
+    const customer: Customer = { 
+      ...insertCustomer, 
+      id,
+      email: insertCustomer.email ?? null,
+      isVerified: false,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
     await this.db!.collection('customers').doc(id).set(this.cleanDataForFirestore(customer));
     return customer;
   }
@@ -298,8 +315,7 @@ export class FirebaseStorage implements IStorage {
       customer = await this.createCustomer({
         phone,
         name: data.name || '',
-        email: data.email || '',
-        isVerified: true
+        email: data.email || null
       });
     } else {
       customer = await this.updateCustomer(customer.id, {
@@ -332,7 +348,16 @@ export class FirebaseStorage implements IStorage {
 
   async createAddress(insertAddress: InsertAddress): Promise<Address> {
     const id = randomUUID();
-    const address: Address = { ...insertAddress, id };
+    const address: Address = { 
+      ...insertAddress, 
+      id,
+      type: insertAddress.type ?? 'home',
+      addressLine2: insertAddress.addressLine2 ?? null,
+      country: insertAddress.country ?? 'India',
+      isDefault: false,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
     await this.db!.collection('addresses').doc(id).set(this.cleanDataForFirestore(address));
     return address;
   }
@@ -363,7 +388,22 @@ export class FirebaseStorage implements IStorage {
 
   async createOrder(insertOrder: InsertOrder): Promise<Order> {
     const id = randomUUID();
-    const order: Order = { ...insertOrder, id };
+    const orderNumber = `ORD-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
+    const order: Order = { 
+      ...insertOrder, 
+      id,
+      orderNumber,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      status: insertOrder.status ?? 'pending',
+      paymentStatus: insertOrder.paymentStatus ?? 'pending',
+      paymentMethod: insertOrder.paymentMethod ?? 'razorpay',
+      razorpayOrderId: insertOrder.razorpayOrderId ?? null,
+      razorpayPaymentId: insertOrder.razorpayPaymentId ?? null,
+      razorpaySignature: insertOrder.razorpaySignature ?? null,
+      shipping: insertOrder.shipping ?? null,
+      notes: insertOrder.notes ?? null
+    };
     await this.db!.collection('orders').doc(id).set(this.cleanDataForFirestore(order));
     return order;
   }
@@ -401,7 +441,11 @@ export class FirebaseStorage implements IStorage {
   // Order Item methods
   async createOrderItem(insertOrderItem: InsertOrderItem): Promise<OrderItem> {
     const id = randomUUID();
-    const orderItem: OrderItem = { ...insertOrderItem, id };
+    const orderItem: OrderItem = { 
+      ...insertOrderItem, 
+      id,
+      createdAt: new Date()
+    };
     await this.db!.collection('order_items').doc(id).set(this.cleanDataForFirestore(orderItem));
     return orderItem;
   }
@@ -418,7 +462,12 @@ export class FirebaseStorage implements IStorage {
   // Order Tracking methods
   async createOrderTracking(insertOrderTracking: InsertOrderTracking): Promise<OrderTracking> {
     const id = randomUUID();
-    const orderTracking: OrderTracking = { ...insertOrderTracking, id };
+    const orderTracking: OrderTracking = { 
+      ...insertOrderTracking, 
+      id,
+      location: insertOrderTracking.location ?? null,
+      timestamp: new Date()
+    };
     await this.db!.collection('order_tracking').doc(id).set(this.cleanDataForFirestore(orderTracking));
     return orderTracking;
   }
@@ -492,7 +541,7 @@ export class FirebaseStorage implements IStorage {
         {
           name: "Herb Garden Starter Kit",
           description: "Everything you need to start your own herb garden. Includes basil, mint, rosemary, and thyme seeds with growing guide.",
-          price: 499,
+          price: "499",
           image: "/images/herb-kit.jpg",
           category: "seeds",
           featured: true,
@@ -502,7 +551,7 @@ export class FirebaseStorage implements IStorage {
         {
           name: "Luxury Plant Pot Set",
           description: "Beautiful ceramic plant pots in various sizes. Perfect for indoor plants with drainage holes and saucers included.",
-          price: 799,
+          price: "799",
           image: "/images/plant-pots.jpg",
           category: "tools",
           featured: false,
@@ -529,7 +578,8 @@ export class FirebaseStorage implements IStorage {
           category: "Seed Starting",
           difficulty: "Intermediate",
           image: "/images/seed.jpg",
-          featured: true
+          featured: true,
+          readTime: "5 min"
         },
         {
           title: "Plant Care Basics",
@@ -539,7 +589,8 @@ export class FirebaseStorage implements IStorage {
           category: "Plant Care",
           difficulty: "Beginner",
           image: "/images/care.jpg",
-          featured: false
+          featured: false,
+          readTime: "3 min"
         },
         {
           title: "Seasonal Gardening",
@@ -549,7 +600,8 @@ export class FirebaseStorage implements IStorage {
           category: "Planning",
           difficulty: "Advanced",
           image: "/images/seasonal.jpg",
-          featured: true
+          featured: true,
+          readTime: "7 min"
         }
       ];
 

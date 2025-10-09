@@ -307,6 +307,7 @@ export class MemStorage implements IStorage {
     const customer: Customer = {
       ...insertCustomer,
       id,
+      email: insertCustomer.email ?? null,
       isVerified: insertCustomer.isVerified ?? false,
       createdAt: new Date(),
       updatedAt: new Date(),
@@ -338,6 +339,9 @@ export class MemStorage implements IStorage {
     const address: Address = {
       ...insertAddress,
       id,
+      type: insertAddress.type ?? 'home',
+      addressLine2: insertAddress.addressLine2 ?? null,
+      country: insertAddress.country ?? 'India',
       isDefault: insertAddress.isDefault ?? false,
       createdAt: new Date(),
       updatedAt: new Date(),
@@ -353,9 +357,13 @@ export class MemStorage implements IStorage {
   // Order methods
   async createOrder(insertOrder: InsertOrder): Promise<Order> {
     const id = randomUUID();
+    const orderNumber = `ORD-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
     const order: Order = {
       ...insertOrder,
       id,
+      orderNumber,
+      createdAt: new Date(),
+      updatedAt: new Date(),
       status: insertOrder.status ?? 'pending',
       paymentStatus: insertOrder.paymentStatus ?? 'pending',
       paymentMethod: insertOrder.paymentMethod ?? 'razorpay',
@@ -364,8 +372,6 @@ export class MemStorage implements IStorage {
       razorpaySignature: insertOrder.razorpaySignature ?? null,
       shipping: insertOrder.shipping ?? null,
       notes: insertOrder.notes ?? null,
-      createdAt: new Date(),
-      updatedAt: new Date(),
     };
     this.orders.set(id, order);
     return order;
@@ -418,7 +424,8 @@ export class MemStorage implements IStorage {
     const tracking: OrderTracking = {
       ...insertOrderTracking,
       id,
-      timestamp: insertOrderTracking.timestamp ?? new Date(),
+      location: insertOrderTracking.location ?? null,
+      timestamp: new Date(),
     };
     this.orderTracking.set(id, tracking);
     return tracking;
