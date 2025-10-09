@@ -1,8 +1,9 @@
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Leaf, Sparkles } from "lucide-react";
-import heroImage from "@assets/generated_images/Indoor_living_space_with_plants_70e292ac.png";
 import SimpleCounter from "@/components/SimpleCounter";
 import { useCart } from "@/contexts/CartContext";
+
+const heroImage = "/images/Indoor_living_space_with_plants_70e292ac.png";
 
 interface HeroProps {
   onShopNow?: () => void;

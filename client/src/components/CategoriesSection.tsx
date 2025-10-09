@@ -1,7 +1,4 @@
 import { Card } from "@/components/ui/card";
-import floweringPlantsImage from "@assets/generated_images/Flowering_plants_collection_5d058eb7.png";
-import gardeningToolsImage from "@assets/generated_images/Gardening_tools_collection_9c82fa3c.png";
-import seedsImage from "@assets/generated_images/Seeds_and_seedlings_9e473d23.png";
 import SimpleCounter from "@/components/SimpleCounter";
 import { useLocation } from "wouter";
 
@@ -23,34 +20,34 @@ export default function CategoriesSection({ onCategoryClick }: CategoriesSection
   // Main categories in 2x2 grid layout
   const categories: Category[] = [
     {
-      id: 'all-plants',
-      name: 'All Plants',
-      description: 'Complete collection of indoor and outdoor plants',
-      image: floweringPlantsImage,
+      id: "all-plants",
+      name: "All Plants",
+      description: "Complete collection of indoor and outdoor plants",
+      image: "/images/all-plants.jpg",
       productCount: 26, // Total plants in our catalog
       featured: true
     },
     {
-      id: 'tools',
-      name: 'Tools',
-      description: 'Essential gardening tools and equipment',
-      image: gardeningToolsImage,
+      id: "tools",
+      name: "Tools",
+      description: "Essential gardening tools and equipment",
+      image: "/images/tools.jpg",
       productCount: 12, // Mock data for tools
       featured: true
     },
     {
-      id: 'seeds',
-      name: 'Seeds',
-      description: 'High-quality seeds and seedlings',
-      image: seedsImage,
+      id: "seeds",
+      name: "Seeds",
+      description: "High-quality seeds and seedlings",
+      image: "/images/seeds.jpg",
       productCount: 15, // Mock data for seeds
       featured: true
     },
     {
-      id: 'gift-sets',
-      name: 'Gifting Sets',
-      description: 'Perfect starter kits for gardening enthusiasts',
-      image: '/images/gift-set.jpeg',
+      id: "gift-sets",
+      name: "Gifting Sets",
+      description: "Perfect starter kits for gardening enthusiasts",
+      image: "/images/gift-set.jpeg",
       productCount: 8, // Mock data for gift sets
       featured: true
     }
