@@ -55,14 +55,46 @@ function initializeFirebaseAdmin() {
           });
         } else {
           console.log('🔑 Using default credentials');
-          adminApp = initializeApp(firebaseAdminConfig);
+          // For local development, try to use environment variables if available
+          if (process.env.FIREBASE_PRIVATE_KEY && process.env.FIREBASE_CLIENT_EMAIL) {
+            console.log('🔑 Found Firebase credentials in environment variables');
+            const serviceAccount: any = {
+              type: "service_account",
+              project_id: "city-roots",
+              private_key_id: process.env.FIREBASE_PRIVATE_KEY_ID || "",
+              private_key: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n'),
+              client_email: process.env.FIREBASE_CLIENT_EMAIL,
+              client_id: process.env.FIREBASE_CLIENT_ID || "",
+              auth_uri: "https://accounts.google.com/o/oauth2/auth",
+              token_uri: "https://oauth2.googleapis.com/token",
+              auth_provider_x509_cert_url: "https://www.googleapis.com/oauth2/v1/certs",
+              client_x509_cert_url: `https://www.googleapis.com/robot/v1/metadata/x509/${encodeURIComponent(process.env.FIREBASE_CLIENT_EMAIL)}`
+            };
+            
+            adminApp = initializeApp({
+              credential: cert(serviceAccount),
+              projectId: "city-roots"
+            });
+          } else {
+            // Do NOT initialize the Admin SDK without explicit credentials.
+            // Initializing with only projectId causes Firestore to attempt to
+            // use Application Default Credentials which fail in many local
+            // environments and lead to confusing errors like:
+            // "Could not load the default credentials".
+            console.log('No Firebase credentials found in environment or default key path. Skipping initialization.');
+            adminApp = null;
+          }
         }
       }
     } else {
       adminApp = getApps()[0];
     }
-    adminDb = getFirestore(adminApp);
-    console.log('✅ Firebase Admin initialized successfully');
+    if (adminApp) {
+      adminDb = getFirestore(adminApp);
+      console.log('✅ Firebase Admin initialized successfully');
+    } else {
+      adminDb = null;
+    }
     return true;
   } catch (error: any) {
     console.warn('⚠️ Firebase Admin initialization failed:', error.message);

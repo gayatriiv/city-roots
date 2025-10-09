@@ -33,8 +33,8 @@ export default function PaymentForm({
   onPaymentSuccess, 
   onBack 
 }: PaymentFormProps) {
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
   const [razorpayLoaded, setRazorpayLoaded] = useState(false);
   const { scrollToTop } = useScroll();
 

@@ -1,0 +1,41 @@
+name: CI / Deploy to Vercel
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Use Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build (vercel-build)
+        run: npm run vercel-build --if-present
+
+      - name: Install Vercel CLI
+        run: npm install -g vercel
+
+      - name: Deploy to Vercel
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: |
+          # Ensure project is linked (skip if already linked in Vercel)
+          vercel project list --token "$VERCEL_TOKEN" > /dev/null || true
+          # Use --prod on pushes to main; PRs will create preview deployments automatically
+          if [ "${{ github.event_name }}" = "push" ] && [ "${{ github.ref }}" = "refs/heads/main" ]; then
+            vercel --token "$VERCEL_TOKEN" --prod --confirm
+          else
+            vercel --token "$VERCEL_TOKEN" --confirm
+          fi

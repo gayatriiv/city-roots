@@ -171,15 +171,28 @@ npm run db:push     # Push schema changes to database
 
 ## 🚀 Deployment
 
-The application is configured for deployment on platforms like:
-- **Vercel** (recommended for full-stack)
+### Vercel Deployment (Recommended)
+
+The application is fully configured for Vercel deployment:
+
+1. **Quick Deploy**: Use the deployment script:
+   ```bash
+   ./deploy-to-vercel.sh
+   ```
+
+2. **Manual Deploy**: Follow the complete guide in [VERCEL_DEPLOYMENT_COMPLETE_GUIDE.md](./VERCEL_DEPLOYMENT_COMPLETE_GUIDE.md)
+
+3. **Environment Variables**: Set up Firebase credentials as documented in [VERCEL_ENVIRONMENT_VARIABLES.md](./VERCEL_ENVIRONMENT_VARIABLES.md)
+
+### Other Platforms
 - **Netlify** (frontend) + **Railway** (backend)
 - **Heroku**
 - **Docker** containers
 
 ### Build Configuration
-- Frontend builds to `dist/` directory
+- Frontend builds to `dist/public` directory
 - Backend compiles with esbuild for optimal performance
+- Vercel configuration in `vercel.json`
 - Environment variables configured via platform settings
 
 ## 🔮 Future Enhancements
