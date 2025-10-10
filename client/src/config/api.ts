@@ -1,1 +1,1 @@
-export const API_URL = 'https://city-roots-mo3d.onrender.com';
+export const API_URL = 'https://city-roots-12.onrender.com';
