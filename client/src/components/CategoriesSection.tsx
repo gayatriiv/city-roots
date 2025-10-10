@@ -23,7 +23,7 @@ export default function CategoriesSection({ onCategoryClick }: CategoriesSection
       id: "all-plants",
       name: "All Plants",
       description: "Complete collection of indoor and outdoor plants",
-      image: "/images/all-plants.jpg",
+      image: "/images/Indoor_living_space_with_plants_70e292ac.png",
       productCount: 26, // Total plants in our catalog
       featured: true
     },
@@ -31,7 +31,7 @@ export default function CategoriesSection({ onCategoryClick }: CategoriesSection
       id: "tools",
       name: "Tools",
       description: "Essential gardening tools and equipment",
-      image: "/images/tools.jpg",
+      image: "/images/gardening toolkit.jpg",
       productCount: 12, // Mock data for tools
       featured: true
     },
@@ -39,7 +39,7 @@ export default function CategoriesSection({ onCategoryClick }: CategoriesSection
       id: "seeds",
       name: "Seeds",
       description: "High-quality seeds and seedlings",
-      image: "/images/seeds.jpg",
+      image: "/images/seed.jpg",
       productCount: 15, // Mock data for seeds
       featured: true
     },
