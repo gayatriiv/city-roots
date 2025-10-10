@@ -8,6 +8,7 @@ import { Loader2, CreditCard, Shield, CheckCircle, ArrowLeft } from "lucide-reac
 import { CustomerData, AddressData } from "@/pages/CheckoutPage";
 import { useScroll } from "@/hooks/useScroll";
 import { Product } from "@/contexts/CartContext";
+import { API_URL } from "@/config/api";
 
 // Razorpay types
 declare global {
@@ -81,7 +82,7 @@ export default function PaymentForm({
 
     try {
       // Create Razorpay order on server
-      const orderResponse = await fetch('/api/razorpay/create-order', {
+      const orderResponse = await fetch(`${API_URL}/api/payment/create-order`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -162,7 +163,7 @@ export default function PaymentForm({
           orderId: orderData.order.id
         });
 
-      const verificationResponse = await fetch('/api/razorpay/verify-payment', {
+      const verificationResponse = await fetch(`${API_URL}/api/payment/verify`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
