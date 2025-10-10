@@ -104,7 +104,14 @@ export default function PaymentForm({
         throw new Error('Failed to create payment order');
       }
 
-      const { order, orderData } = await orderResponse.json();
+      const { order } = await orderResponse.json();
+      const orderData = {
+        orderNumber: order.orderNumber,
+        order: {
+          id: order.id,
+          orderNumber: order.orderNumber
+        }
+      };
 
       // Razorpay options
       const options = {
