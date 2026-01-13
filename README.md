@@ -1,4 +1,4 @@
-# VerdantCart
+# cityroots
 
 A modern e-commerce platform for gardening enthusiasts, offering plants, tools, seeds, and educational content to help users create their perfect garden.
 
